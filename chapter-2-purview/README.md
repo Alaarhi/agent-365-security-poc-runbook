@@ -343,6 +343,65 @@ For Copilot audit records, look for:
 | Test works in standalone bot but not in M365 Copilot | Different orchestration surface | Run DLP grounding tests through Microsoft 365 Copilot / Copilot Chat. |
 | Exchange email sends successfully | Email body did not contain detectable sensitive info or policy is not active | Confirm sensitive info types and retest after policy propagation. |
 | Advanced Hunting has no agent rows | Agent not registered/published or ingestion delay | Confirm Agent 365 registration and exercise the agent again. |
+| SDK-onboarded agent bypasses DLP #1 | Custom-engine agent does not run through Microsoft 365 Copilot orchestration | See Section 2.19 - Purview DLP for SDK-onboarded agents. |
+
+## 2.19 Purview DLP for SDK-onboarded agents (Agent 365 SDK / custom-engine)
+
+### 2.19.1 What applies out of the box
+
+Custom-engine Agent 365 agents (agents built with the Agent 365 SDK, LangChain, Semantic Kernel, OpenAI Agents SDK, AgentFramework, etc., and onboarded via [`microsoft/agent365-skills`](https://github.com/microsoft/agent365-skills)) do NOT run through the Microsoft 365 Copilot orchestrator. That has direct consequences for which controls in this runbook apply automatically:
+
+| Control from this runbook | Applies to SDK-onboarded agent? | Why |
+|---|---|---|
+| Sensitivity labels on SharePoint content (2.5, 2.6) | Yes | Labels persist on the file. Permission trimming and label-based access still evaluate against the calling user. |
+| DLP #1 - Copilot / Copilot Chat grounding block (2.7) | **No, not automatically** | The policy is scoped to Microsoft 365 Copilot / Copilot Chat locations. Custom-engine agents run outside that orchestration surface. |
+| DLP #2 - Exchange email block (2.8) | Yes | Enforced at Exchange transport. Any tool that sends mail through the user's Exchange mailbox is covered. |
+| Communication Compliance (2.11) | Partially | Requires the agent source to be listed in the Comm Compliance policy (e.g. Copilot Studio, Azure Foundry). Custom-engine SDK agents may need to be added explicitly, or covered via the audit path. |
+| Insider Risk Management default agent policy (2.12) | Yes | Applies once the agent is registered in Agent 365. |
+| Purview Audit / Advanced Hunting visibility | Yes, if observability is instrumented | Requires the Agent 365 observability instrumentation (see [`instrument-observability`](https://github.com/microsoft/agent365-skills/tree/main/plugins/agent365/skills/instrument-observability)). |
+
+### 2.19.2 What extra config is needed
+
+To get equivalent grounding/prompt DLP on a custom-engine SDK agent, add the **Purview DLP guard** in the agent code path. The `agent365-skills` repository provides a ready-made skill for this:
+
+- Skill: [`purview-dlp-integration`](https://github.com/microsoft/agent365-skills/tree/main/plugins/agent365/skills/purview-dlp-integration)
+- What it does: adds a checkpoint between the message handler and the LLM. Every incoming prompt is submitted to Microsoft Purview via the Microsoft Graph `processContent` API. If Purview blocks, the LLM is never called and the agent returns a policy-blocked response. Optionally, responses are also submitted for audit.
+- Runs as: the agent's own Microsoft 365 identity, so Purview evaluates the request like a real user.
+- Supported languages: Node.js, Python, .NET (Agent 365 SDK).
+
+### 2.19.3 Configuration checklist for SDK agents
+
+Add these steps on top of the standard Purview setup in this chapter:
+
+1. **Purview DLP for AI apps is enabled in the tenant.** Confirm Purview DLP policies can target AI apps (used by `processContent`).
+2. **AI-apps DLP policy exists.** Use the PowerShell script bundled with the `purview-dlp-integration` skill, or create a policy in Purview that targets AI apps and enforces the desired sensitive info types / labels.
+3. **Agent identity has the required Graph permissions.** The agent's Microsoft 365 identity (Agentic User for AI Teammates, or service principal for non-AI Teammate registrations) needs delegated or application permission to call `processContent`.
+4. **Guard is wired in the agent code.** Run the skill from your agent project:
+   ```
+   gh copilot suggest "Add Purview DLP to this agent"
+   ```
+   or manually add the guard file to your Agent 365 project per the skill's README.
+5. **Fail-closed behavior confirmed.** Verify that if the `processContent` call errors, the agent withholds the reply rather than passing the prompt through.
+6. **Observability is instrumented.** Ensure the agent uses the [`instrument-observability`](https://github.com/microsoft/agent365-skills/tree/main/plugins/agent365/skills/instrument-observability) skill so DLP decisions and agent activity flow into Defender Advanced Hunting (`AgentsInfo` / `CloudAppEvents`) and Purview Audit.
+7. **Registration is complete.** Confirm the agent has been onboarded via `a365 setup all` (Blueprint + Entra permissions) so it appears in the Agent 365 registry - this is what pulls Comm Compliance and Insider Risk Management coverage into scope.
+
+### 2.19.4 Test for SDK-onboarded agents
+
+Run the same Confidential grounding prompt from **2.14** and the exfiltration prompt from **2.15** against the SDK agent. Additionally:
+
+1. Send a message containing test sensitive info (for example a Visa sandbox card number: `4111 1111 1111 1111`).
+2. Confirm the agent returns a policy-blocked response and does NOT call the LLM.
+3. In Purview Audit and DLP Alerts, confirm a `processContent` audit entry and a DLP match are recorded against the agent identity.
+4. In Advanced Hunting, confirm the agent activity is visible in `AgentsInfo` and related tables.
+
+### 2.19.5 Common failure modes specific to SDK agents
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Prompt passes through to LLM although it contains sensitive data | Guard not wired, or `processContent` policy does not cover the SIT / label | Verify guard is present in the message handler; confirm the AI-apps DLP policy is enabled and targets the required sensitive info types. |
+| `processContent` returns 401/403 | Agent identity missing Graph permissions | Grant the required delegated or application permission to the agent's identity. |
+| Purview Audit shows no `processContent` events | Guard is misconfigured to fail-open, or auth is against a shared account | Confirm the guard runs as the agent's Microsoft 365 identity and fails closed. |
+| Agent not visible in Advanced Hunting | Observability not instrumented, or Agent 365 registration incomplete | Run `instrument-observability` and confirm `a365 setup all` completed. |
 
 ---
 

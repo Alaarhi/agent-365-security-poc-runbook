@@ -55,16 +55,18 @@ Recommended content categories:
 | Public or broadly shareable operational documents | General | Used as the positive control for allowed grounding. |
 | Financial identifiers in invoice or ledger content | Confidential | Used to prove Exchange DLP blocks outbound email exfiltration. |
 
-Sample files to label (if using the sample structure):
+Sample files to label (if using the sample structure). Ready-to-use sample files with fictional test data are provided in [`samples/`](samples/):
 
 | File | Label | Test purpose |
 |---|---|---|
-| `Sample_Confidential_Customer_Roster.docx` | Confidential | Sensitive customer data / direct PII prompt |
-| `Sample_Confidential_Vendor_Invoice.docx` | Confidential | Financial details for email exfiltration test |
-| `Sample_Confidential_Payments_Ledger.xlsx` | Confidential | Structured financial data for grounding block |
-| `Sample_Confidential_Employee_Expenses.xlsx` | Confidential | Sub-agent / employee expense sensitive content test |
-| `Sample_General_Public_Guide.docx` | General | Allowed grounding positive control |
-| `Sample_General_Checklist.docx` | General | Allowed grounding positive control |
+| [`Sample_Confidential_Customer_Roster.docx`](samples/Sample_Confidential_Customer_Roster.docx) | Confidential | Sensitive customer data / direct PII prompt |
+| [`Sample_Confidential_Vendor_Invoice.docx`](samples/Sample_Confidential_Vendor_Invoice.docx) | Confidential | Financial details for email exfiltration test |
+| [`Sample_Confidential_Payments_Ledger.xlsx`](samples/Sample_Confidential_Payments_Ledger.xlsx) | Confidential | Structured financial data for grounding block |
+| [`Sample_Confidential_Employee_Expenses.xlsx`](samples/Sample_Confidential_Employee_Expenses.xlsx) | Confidential | Sub-agent / employee expense sensitive content test |
+| [`Sample_General_Public_Guide.docx`](samples/Sample_General_Public_Guide.docx) | General | Allowed grounding positive control |
+| [`Sample_General_Checklist.docx`](samples/Sample_General_Checklist.docx) | General | Allowed grounding positive control |
+
+All sample files use publicly documented test values (Visa/MC/Amex/Discover sandbox card numbers and Federal Reserve public test routing numbers). No real PII.
 
 ## 0.6 Important propagation windows
 
