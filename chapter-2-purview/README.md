@@ -383,23 +383,20 @@ Add the guard from [`purview-dlp-integration`](https://github.com/microsoft/agen
 gh copilot suggest "Add Purview DLP to this agent"
 ```
 
-The skill drops in a small guard file (Node.js, Python, or .NET) and wires it into your message handler. The result is: every incoming prompt goes to Microsoft Graph `processContent` first. If it's blocked, your LLM is never called.
+The skill drops in a language-specific guard (`purview.ts`, `purview.py`, or `purview.cs`) and wires two gates into your message handler: an **input gate** before the LLM (blocks), and an optional **output gate** after the LLM (audits). If the input gate blocks, the LLM is never called. Set `PURVIEW_DLP_ENABLED=true` in your agent env.
 
-**2. Your agent is signed in as its own M365 identity**
+**2. The guard has permission to call `processContent`**
 
-The guard calls Purview as your agent, not as an admin. That means:
-- Your agent must be onboarded via `a365 setup all` so it has an M365 identity (Agentic User for AI Teammates, service principal for non-AI Teammate agents).
-- The guard file must authenticate with that identity - the skill scaffolds this for you.
+The guard calls Microsoft Graph `processContent` using your agent's own token, not an admin's. What you grant depends on your auth mode:
+
+- **Delegated (OBO)** — the default for AI Teammate agents. Grant the `Content.Process.User` delegated scope. The skill ships `Grant-DelegatedGraphScope.ps1`.
+- **S2S (Node.js S2S variant)** — the guard uses your existing FMI client-secret settings. Grant the `Content.Process.All` app role via the skill's `Grant-ContentProcessAppRole.ps1`.
 
 **3. A Purview DLP policy exists that targets AI apps**
 
-An admin (not the developer) creates a Purview DLP policy that:
-- Targets **AI apps / Microsoft 365 Copilot** as the location.
-- Uses the sensitive info types you want to block (e.g. Credit Card Number, ABA Routing Number, or your Confidential label).
+An admin creates a Purview DLP policy scoped to **AI apps** with the sensitive info types you want to block (e.g. Credit Card Number, ABA Routing Number, or your Confidential label). The skill ships a PowerShell script that creates a starter policy. If your tenant already has one, you're done.
 
-The skill ships a PowerShell script that creates this policy in one shot. If your tenant already has one, you're done.
-
-That's it. After those three steps, send a prompt containing a test credit card number (`4111 1111 1111 1111`) and confirm the agent replies with "blocked by policy" and never calls the LLM.
+That's it. Test with `4111 1111 1111 1111` in a prompt — the agent should reply "blocked by policy" and the LLM should never be called.
 
 ### 2.19.4 Test for SDK-onboarded agents
 
