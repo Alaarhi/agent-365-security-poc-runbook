@@ -369,21 +369,37 @@ To get equivalent grounding/prompt DLP on a custom-engine SDK agent, add the **P
 - Runs as: the agent's own Microsoft 365 identity, so Purview evaluates the request like a real user.
 - Supported languages: Node.js, Python, .NET (Agent 365 SDK).
 
-### 2.19.3 Configuration checklist for SDK agents
+### 2.19.3 What a developer needs to do
 
-Add these steps on top of the standard Purview setup in this chapter:
+Goal: get Purview to see the user's prompt before your LLM does, and block it if it matches your DLP policy.
 
-1. **Purview DLP for AI apps is enabled in the tenant.** Confirm Purview DLP policies can target AI apps (used by `processContent`).
-2. **AI-apps DLP policy exists.** Use the PowerShell script bundled with the `purview-dlp-integration` skill, or create a policy in Purview that targets AI apps and enforces the desired sensitive info types / labels.
-3. **Agent identity has the required Graph permissions.** The agent's Microsoft 365 identity (Agentic User for AI Teammates, or service principal for non-AI Teammate registrations) needs delegated or application permission to call `processContent`.
-4. **Guard is wired in the agent code.** Run the skill from your agent project:
-   ```
-   gh copilot suggest "Add Purview DLP to this agent"
-   ```
-   or manually add the guard file to your Agent 365 project per the skill's README.
-5. **Fail-closed behavior confirmed.** Verify that if the `processContent` call errors, the agent withholds the reply rather than passing the prompt through.
-6. **Observability is instrumented.** Ensure the agent uses the [`instrument-observability`](https://github.com/microsoft/agent365-skills/tree/main/plugins/agent365/skills/instrument-observability) skill so DLP decisions and agent activity flow into Defender Advanced Hunting (`AgentsInfo` / `CloudAppEvents`) and Purview Audit.
-7. **Registration is complete.** Confirm the agent has been onboarded via `a365 setup all` (Blueprint + Entra permissions) so it appears in the Agent 365 registry - this is what pulls Comm Compliance and Insider Risk Management coverage into scope.
+Three things must be true:
+
+**1. Your agent code calls Purview before the LLM**
+
+Add the guard from [`purview-dlp-integration`](https://github.com/microsoft/agent365-skills/tree/main/plugins/agent365/skills/purview-dlp-integration). In your agent project, run:
+
+```
+gh copilot suggest "Add Purview DLP to this agent"
+```
+
+The skill drops in a small guard file (Node.js, Python, or .NET) and wires it into your message handler. The result is: every incoming prompt goes to Microsoft Graph `processContent` first. If it's blocked, your LLM is never called.
+
+**2. Your agent is signed in as its own M365 identity**
+
+The guard calls Purview as your agent, not as an admin. That means:
+- Your agent must be onboarded via `a365 setup all` so it has an M365 identity (Agentic User for AI Teammates, service principal for non-AI Teammate agents).
+- The guard file must authenticate with that identity - the skill scaffolds this for you.
+
+**3. A Purview DLP policy exists that targets AI apps**
+
+An admin (not the developer) creates a Purview DLP policy that:
+- Targets **AI apps / Microsoft 365 Copilot** as the location.
+- Uses the sensitive info types you want to block (e.g. Credit Card Number, ABA Routing Number, or your Confidential label).
+
+The skill ships a PowerShell script that creates this policy in one shot. If your tenant already has one, you're done.
+
+That's it. After those three steps, send a prompt containing a test credit card number (`4111 1111 1111 1111`) and confirm the agent replies with "blocked by policy" and never calls the LLM.
 
 ### 2.19.4 Test for SDK-onboarded agents
 
