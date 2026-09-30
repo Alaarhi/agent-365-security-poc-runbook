@@ -1,4 +1,20 @@
-# Chapter 2 - Purview setup, tests, and result checks
+# Chapter UC4 - Sensitive Data Protection (Purview)
+
+**Pillar:** Secure
+**What it proves:** your existing Purview labels and DLP still hold when the reader is an agent. Confidential content is withheld from the answer, outbound financial data is blocked, and the match is logged against the agent identity.
+
+## Roles - least privilege
+
+| Task | Role | Notes |
+|---|---|---|
+| Create and publish sensitivity labels | **Information Protection Administrator** | Required to create, edit, and publish labels. |
+| Create DLP policies (Copilot Chat and Exchange) | **Compliance Administrator** or **Purview Workload Content Admin** | Required to create and modify DLP policies. |
+| Enable audit and view Copilot interaction records | **Compliance Administrator** (enable) + **Audit Reader** (view) | Split by design - enabling audit is a config action; searching audit is read-only. |
+| Configure Communication Compliance (optional) | **Communication Compliance Administrator** | Required only if the Comm Compliance policy is in scope. |
+| Configure Insider Risk Management (optional) | **Insider Risk Management Administrator** | Required only if IRM policy tuning is in scope. |
+| Read-only / validation | **Audit Reader** + **Compliance Reader** + **Global Reader** | Sufficient to view labels, DLP policy configuration, DLP alerts, and audit search results. Use for reviewers. |
+
+Grant the read-only roles first. Only give Compliance/Information-Protection Admin to the person who actually creates or edits policies.
 
 ## 2.1 Objective
 
@@ -418,4 +434,4 @@ Run the same Confidential grounding prompt from **2.14** and the exfiltration pr
 
 ---
 
-Previous: [Chapter 1 - Defender](../chapter-1-defender/README.md)
+Previous: [UC3 - Least-Privilege Access](../chapter-uc3-least-privilege/README.md) · Next: [UC5 - Threat Detection & Protection](../chapter-uc5-threat-detection/README.md)

@@ -1,4 +1,19 @@
-# Chapter 1 - Defender setup, tests, and result checks
+# Chapter UC5 - Threat Detection & Protection (Defender)
+
+**Pillar:** Secure
+**What it proves:** your SOC sees agents as first-class actors. A simulated risky action alerts the SOC, and the owner contains it within minutes.
+
+## Roles - least privilege
+
+| Task | Role | Notes |
+|---|---|---|
+| Enable preview features, Security for AI agents, and Copilot Studio real-time protection | **Security Administrator** | Required to change Defender settings. Assign Active for the PoC window. |
+| Configure the Copilot Studio / Power Platform integration | **Power Platform Administrator** or environment admin | Required in addition to Security Admin for the Copilot Studio real-time-protection setup. |
+| Connect the Microsoft 365 app connector | **Application Administrator** or **Cloud Application Administrator** | Required only if the app connector needs to be re-consented. |
+| Create custom detection rules from KQL | **Security Operator** or **Security Administrator** | Required to create/edit custom detections. |
+| Read-only / validation - hunting, alerts, inventory | **Security Reader** | Sufficient to run KQL, read alerts, and see AI agent inventory. Use this for reviewers, auditors, and SOC analysts on read-only rotations. |
+
+Grant Security Reader first. Only escalate to Security Administrator or Security Operator when a change is actually being made.
 
 ## 1.1 Objective
 
@@ -196,4 +211,4 @@ AgentsInfo
 
 ---
 
-Previous: [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md) · Next: [Chapter 2 - Purview](../chapter-2-purview/README.md)
+Previous: [UC4 - Sensitive Data Protection](../chapter-uc4-sensitive-data-protection/README.md) · Next: [UC6 - Lifecycle & Audit](../chapter-uc6-lifecycle-audit/README.md)
