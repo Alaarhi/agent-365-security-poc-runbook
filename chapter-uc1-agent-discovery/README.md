@@ -101,6 +101,91 @@ Performed by anyone with **AI Reader**.
 | Connected platform not syncing | Registry sync not configured or credentials expired | Reconfigure Registry sync per platform documentation. |
 | SDK agent missing | `a365 setup all` not completed for that project | Rerun `a365 setup all` and confirm Blueprint is registered. |
 
+## Optional - programmatic discovery with Microsoft Graph
+
+The UI in the Microsoft 365 admin center is the fastest path for a visual review, but Microsoft Graph exposes the same inventory programmatically. Use this when the customer needs scheduled exports, external reporting, CMDB sync, or automated reconciliation against a source of truth.
+
+### What you can retrieve
+
+| Signal | Where to get it in Graph |
+|---|---|
+| List of agents in the tenant (Copilot Studio / M365 Copilot declarative, Foundry, SharePoint, SDK) with display name, owner, publishing state | `/copilot/admin/agents` and related Copilot admin endpoints (beta) |
+| Agent identity in the directory (Entra Agent ID service principal) | `/servicePrincipals` filtered to the agent subtype |
+| Owners and sponsors of an agent | `/servicePrincipals/{id}/owners`, `/applications/{id}/owners` |
+| Custom security attributes on an agent identity | `/servicePrincipals/{id}?$select=customSecurityAttributes` |
+| Conditional Access policies that target agent identities | `/identity/conditionalAccess/policies` |
+| Sign-in activity for an agent (allow/deny, including CA decisions) | `/auditLogs/signIns` filtered by `appId`, service-principal filters |
+| Audit of lifecycle actions on an agent (create, update, block, delete) | `/auditLogs/directoryAudits` and Microsoft Purview Audit APIs |
+| Copilot interaction records (for UC4/UC6 cross-check) | Microsoft Purview Audit via Microsoft 365 Management Activity API, or Graph audit APIs where available |
+
+### Minimum required Graph permissions (least-privilege)
+
+| Scope | Why |
+|---|---|
+| `Application.Read.All` (delegated or app) | Read agent applications and service principals. |
+| `Directory.Read.All` (delegated) | Read owners, sponsors, and directory metadata. |
+| `CustomSecAttributeAssignment.Read.All` (delegated) | Read custom security attribute values on agent identities (requires Attribute Assignment Reader). |
+| `Policy.Read.All` (delegated) | Read Conditional Access policies that target agent identities. |
+| `AuditLog.Read.All` (delegated or app) | Read directory audit and sign-in logs. |
+| `AgentApplication.Read.All` / Copilot admin scopes (preview) | Read Copilot/agent inventory via the Copilot admin endpoints. Scope names and surface are preview; confirm against current docs before relying on them in production. |
+
+Prefer delegated permissions scoped to a read-only account. Only grant application permissions for an unattended service that needs to run outside a user context.
+
+### Example - list agent service principals
+
+```http
+GET https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalType eq 'Application'&$select=id,displayName,appId,servicePrincipalType,tags
+Authorization: Bearer <token>
+```
+
+To focus on agent identities only, filter further by display name convention (for example names ending in `-AgentIdentity`) or by a known custom security attribute set:
+
+```http
+GET https://graph.microsoft.com/beta/servicePrincipals?$count=true&$filter=customSecurityAttributes/AgentGovernance/Project eq 'Agent365PoC'&$select=id,displayName,appId,owners
+ConsistencyLevel: eventual
+Authorization: Bearer <token>
+```
+
+### Example - get sign-in activity for one agent
+
+```http
+GET https://graph.microsoft.com/v1.0/auditLogs/signIns?$filter=appId eq '<agent-app-id>'&$top=50
+Authorization: Bearer <token>
+```
+
+Returns the service-principal sign-ins for the agent, including Conditional Access decisions. Used in [UC3](../chapter-uc3-least-privilege/README.md) and [UC6](../chapter-uc6-lifecycle-audit/README.md).
+
+### Example - read custom security attributes on an agent
+
+```http
+GET https://graph.microsoft.com/v1.0/servicePrincipals/{id}?$select=id,displayName,customSecurityAttributes
+Authorization: Bearer <token>
+```
+
+### Documentation
+
+| Topic | Documentation |
+|---|---|
+| Microsoft Graph overview | [Microsoft Graph REST API overview](https://learn.microsoft.com/graph/overview) |
+| Service principals in Graph | [servicePrincipal resource type](https://learn.microsoft.com/graph/api/resources/serviceprincipal) |
+| List service principals | [List servicePrincipals](https://learn.microsoft.com/graph/api/serviceprincipal-list) |
+| Custom security attributes via Graph | [Manage custom security attributes using Microsoft Graph](https://learn.microsoft.com/graph/api/resources/custom-security-attributes-overview) |
+| Audit logs | [auditLogRoot: directoryAudits](https://learn.microsoft.com/graph/api/directoryaudit-list) |
+| Sign-in logs | [auditLogRoot: signIns](https://learn.microsoft.com/graph/api/signin-list) |
+| Conditional Access policies | [conditionalAccessPolicy resource type](https://learn.microsoft.com/graph/api/resources/conditionalaccesspolicy) |
+| Microsoft 365 Copilot admin APIs | [Microsoft 365 Copilot developer documentation](https://learn.microsoft.com/microsoft-365-copilot/extensibility/) and [Copilot API reference (preview)](https://learn.microsoft.com/graph/api/resources/copilot-admin-overview) |
+| Entra Agent ID (reference) | [Microsoft Entra Agent ID](https://learn.microsoft.com/entra/agent-id/overview) |
+| PowerShell with Graph | [Microsoft Graph PowerShell SDK](https://learn.microsoft.com/powershell/microsoftgraph/overview) |
+
+### When to use Graph vs the portal
+
+| Need | Use |
+|---|---|
+| One-off review during the PoC | Portal (<https://admin.cloud.microsoft>) |
+| Scheduled export / CMDB reconciliation | Graph via PowerShell SDK or a lightweight job |
+| Cross-tenant / multi-environment reporting | Graph with application permissions, scoped read-only |
+| Evidence pack for an auditor | Portal export plus Graph `/auditLogs/*` extracts |
+
 ---
 
 Previous: [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md) · Next: [UC2 - Identity & Ownership](../chapter-uc2-identity-ownership/README.md)
