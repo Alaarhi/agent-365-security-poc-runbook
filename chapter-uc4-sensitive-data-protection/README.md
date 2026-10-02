@@ -20,17 +20,27 @@ Grant the read-only roles first. Only give Compliance/Information-Protection Adm
 
 Validate that Microsoft Purview controls prevent agents from oversharing sensitive content and provide a reliable audit trail.
 
-The PoC validates:
+## 2.2 What you'll build
 
-- Information Protection labels.
-- DLP block on Copilot / agent grounding over Confidential content.
-- DLP block on outbound Exchange email containing sensitive financial data.
-- Audit trail for Copilot interactions and policy decisions.
-- Optional Communication Compliance and Insider Risk Management policies.
+The PoC produces this set of artifacts, scoped to a Copilot Studio agent that is published to Microsoft 365 Copilot:
 
-## 2.2 Documentation links
+- Two **published sensitivity labels**: `Confidential` and `General`.
+- **DLP policy #1** - prevents Microsoft 365 Copilot (and downstream agents grounded through it, including the Copilot Studio agent) from processing `Confidential`-labeled content.
+- **DLP policy #2** - blocks any outbound Exchange email that carries credit card or ABA routing numbers, including messages the Outlook `Send an email (v2)` tool tries to send from the Copilot Studio agent.
+- A **private SharePoint site** with labeled sample docs (VIP roster, vendor invoice, deposits ledger, trail catalog, packing guide, employee expenses).
+- The **Copilot Studio agent re-grounded** on that SharePoint site, with the Outlook `Send an email (v2)` tool added.
+- A **Communication Compliance policy** scoped to Microsoft 365 Copilot interactions (and Microsoft Foundry, when applicable), covering agent prompts and responses. *(Optional.)*
+- The **default Insider Risk Management agent policy** confirmed on. *(Optional.)*
 
-Use these Microsoft documentation links before starting the Purview configuration:
+Why this config is correct for a **Copilot Studio** agent:
+
+- Copilot Studio agents that are published to **Microsoft 365 Copilot / Copilot Chat** are evaluated by DLP policies scoped to those locations. DLP #1 therefore gates grounding on labeled content *through* the agent.
+- The Outlook `Send an email (v2)` connector action sends through the signed-in user's Exchange mailbox. Exchange DLP evaluates that outbound message, so DLP #2 blocks the send without any Copilot Studio-specific wiring.
+- Microsoft Purview sensitivity labels apply to the SharePoint files directly. Permission trimming and label-based evaluation happen regardless of whether the reader is a user or an agent.
+- Communication Compliance has a current template for Microsoft 365 Copilot and Microsoft 365 Copilot Chat interactions, which captures Copilot Studio agent turns that run through M365 Copilot.
+- Insider Risk Management's default agent policy covers registered Agent 365 agents, including Copilot Studio agents, once the agent is in the Agent Registry.
+
+## 2.3 Documentation links
 
 | Topic | Documentation |
 |---|---|
@@ -41,23 +51,28 @@ Use these Microsoft documentation links before starting the Purview configuratio
 | DLP policy creation | [Create and deploy data loss prevention policies](https://learn.microsoft.com/purview/dlp-create-deploy-policy) |
 | DLP for Microsoft 365 Copilot | [Data security and compliance protections for Microsoft 365 Copilot](https://learn.microsoft.com/copilot/microsoft-365/microsoft-365-copilot-privacy#data-security-and-compliance) |
 | Communication Compliance | [Microsoft Purview Communication Compliance](https://learn.microsoft.com/purview/communication-compliance) |
+| Communication Compliance policy templates | [Manage Communication Compliance policies](https://learn.microsoft.com/purview/communication-compliance-policies) |
 | Insider Risk Management | [Microsoft Purview Insider Risk Management](https://learn.microsoft.com/purview/insider-risk-management) |
 | DSPM for AI | [Microsoft Purview Data Security Posture Management for AI](https://learn.microsoft.com/purview/ai-microsoft-purview) |
 
-## 2.3 Purview prerequisites
+## 2.4 Prerequisites
 
-Confirm:
+Before starting the setup, confirm:
 
 1. Test admin has Microsoft 365 E5 and Microsoft 365 Copilot where required.
-2. Test admin has Compliance Administrator and Purview Workload Content Admin.
-3. Test admin is added to Communication Compliance and Insider Risk Management role groups if those features are tested.
-4. Purview Audit is enabled.
-5. SharePoint test content location is ready.
-6. Test user can access the General and Confidential files directly in SharePoint.
-7. The PoC agent is grounded on the SharePoint site or folder.
-8. The PoC agent is published to Microsoft 365 Copilot / Teams if DLP for Copilot grounding is tested.
+2. Test admin has **Compliance Administrator** and **Purview Workload Content Admin**.
+3. Test admin is added to **Communication Compliance** and **Insider Risk Management** role groups if those optional features are in scope.
+4. **Purview Audit** is enabled.
+5. A SharePoint site or folder is ready to host the PoC content.
+6. A standard test user can access the General and Confidential files directly in SharePoint.
+7. The Copilot Studio agent is published to **Microsoft 365 Copilot / Teams**.
+8. The Copilot Studio agent is **grounded on the SharePoint site or folder**.
 
-## 2.4 Setup - enable Microsoft Purview Audit
+---
+
+**Section: Setup - sensitivity labels and SharePoint content**
+
+## 2.5 Enable Microsoft Purview Audit
 
 1. Open Microsoft Purview: <https://purview.microsoft.com>.
 2. Go to **Audit**.
@@ -68,7 +83,7 @@ Confirm:
 - Audit search is available.
 - Audit is recording user and admin activity.
 
-## 2.5 Setup - create or confirm sensitivity labels
+## 2.6 Create or confirm sensitivity labels
 
 If you already have production labels, reuse them. Do not create duplicates unless this is an isolated PoC tenant.
 
@@ -93,7 +108,7 @@ Steps:
 - Test users can see the labels in Word, Excel, and SharePoint/Office web.
 - You can identify the label IDs / GUIDs used by the DLP policy.
 
-## 2.6 Prepared sample content
+## 2.7 Prepared sample content
 
 Ready-to-use sample files with fictional test data are provided in [`samples/`](samples/). Use these if you don't already have a representative Confidential + General content set.
 
@@ -108,7 +123,7 @@ Ready-to-use sample files with fictional test data are provided in [`samples/`](
 
 All sample files use publicly documented test values (Visa / MC / Amex / Discover sandbox card numbers and Federal Reserve public test routing numbers). No real PII.
 
-## 2.7 Setup - label the test content
+## 2.8 Label the test content
 
 1. Upload the PoC documents (your own, or the samples above) to the prepared SharePoint site or folder.
 2. Open each document in Word or Excel.
@@ -120,7 +135,13 @@ All sample files use publicly documented test values (Visa / MC / Amex / Discove
 
 DLP conditions match exact label GUIDs. A parent label and a sublabel are different GUIDs. If files use mixed Confidential labels or sublabels, the DLP rule may not apply consistently.
 
-## 2.7 Setup - DLP policy #1: block Copilot from processing Confidential content
+---
+
+**Section: Setup - DLP policies**
+
+Two DLP policies form the core of this chapter. Create both and let them propagate before testing. DLP policy activation can take up to 24 hours.
+
+## 2.9 DLP policy #1 - block Copilot from processing Confidential content
 
 1. In Purview, go to **Solutions** > **Data Loss Prevention** > **Policies**.
 2. Select **+ Create policy**.
@@ -145,7 +166,7 @@ DLP conditions match exact label GUIDs. A parent label and a sublabel are differ
 - Rule targets the exact label IDs used on the Confidential test files.
 - Propagation window has passed.
 
-## 2.8 Setup - DLP policy #2: block outbound email with financial data
+## 2.10 DLP policy #2 - block outbound email with financial data
 
 1. In Purview, go to **Solutions** > **Data Loss Prevention** > **Policies**.
 2. Select **+ Create policy**.
@@ -169,7 +190,11 @@ DLP conditions match exact label GUIDs. A parent label and a sublabel are differ
 - Exchange email is the only selected location.
 - Sensitive info types are configured correctly.
 
-## 2.9 Setup - ground the agent on the SharePoint content
+---
+
+**Section: Setup - Copilot Studio agent configuration**
+
+## 2.11 Ground the Copilot Studio agent on the SharePoint content
 
 For Copilot Studio:
 
@@ -195,7 +220,7 @@ contains them.
 - Agent can answer from General-labeled content.
 - Agent is available in Microsoft 365 Copilot / Teams for the test user.
 
-## 2.10 Setup - add email send path if testing Exchange DLP
+## 2.12 Add the Outlook Send email (v2) tool
 
 For Copilot Studio:
 
@@ -217,7 +242,13 @@ and use the Office 365 Outlook Send an email (v2) tool to deliver it.
 - Agent can attempt to send an email.
 - DLP blocks the send when sensitive financial information is included.
 
-## 2.11 Optional setup - Communication Compliance
+---
+
+**Section: Optional - Communication Compliance and Insider Risk Management**
+
+Both policies below are optional. Skip the whole section if the PoC scope is limited to labels, DLP, and audit.
+
+## 2.13 Communication Compliance (optional)
 
 1. In Purview, go to **Solutions** > **Communication Compliance** > **Policies**.
 2. Select **+ Create policy**.
@@ -237,7 +268,7 @@ See [Manage Communication Compliance policies](https://learn.microsoft.com/purvi
 - Policy is enabled.
 - Reviewer can access the Communication Compliance queue.
 
-## 2.12 Optional setup - Insider Risk Management
+## 2.14 Insider Risk Management (optional)
 
 1. In Purview, go to **Solutions** > **Insider Risk Management** > **Policies**.
 2. Switch to the **Agent policies** view.
@@ -248,7 +279,11 @@ See [Manage Communication Compliance policies](https://learn.microsoft.com/purvi
 - Default agent policy is enabled.
 - Registered agents are covered after they appear in Agent 365.
 
-## 2.13 Test - allowed grounding from General content
+---
+
+**Section: Tests**
+
+## 2.15 Test - allowed grounding from General content
 
 Run as the standard test user in Microsoft 365 Copilot or Teams using the PoC agent.
 
@@ -271,7 +306,7 @@ Check evidence:
 - Audit record shows successful access to General content.
 - No DLP alert is generated for this allowed interaction.
 
-## 2.14 Test - DLP block for Confidential grounding
+## 2.16 Test - DLP block for Confidential grounding
 
 Run as the standard test user through Microsoft 365 Copilot / Copilot Chat with the PoC agent.
 
@@ -296,7 +331,7 @@ Check evidence:
 5. Open the `CopilotInteraction` record and inspect `AccessedResources`.
 6. Confirm the Confidential file has a sensitivity label ID and policy details showing the restriction.
 
-## 2.15 Test - Exchange DLP block for email exfiltration
+## 2.17 Test - Exchange DLP block for email exfiltration
 
 Run as the standard test user through the PoC agent.
 
@@ -324,7 +359,7 @@ Check evidence:
 4. Confirm sensitive info types such as `Credit Card Number` or `ABA Routing Number` were detected.
 5. Confirm the email was not delivered to the recipient.
 
-## 2.16 Optional test - Communication Compliance
+## 2.18 Test - Communication Compliance (optional)
 
 Run as the standard test user.
 
@@ -347,7 +382,7 @@ Check evidence:
 3. Confirm the interaction appears in the reviewer queue.
 4. Confirm source attribution matches the agent platform (Microsoft 365 Copilot, Copilot Studio, or Microsoft Foundry, depending on template scope).
 
-## 2.17 Audit trail - what to prove
+## 2.19 Audit trail - what to prove
 
 For each major Purview test, capture:
 
@@ -369,7 +404,7 @@ For Copilot audit records, look for:
 - `Status`
 - `AgentId`
 
-## 2.18 Common failure modes
+## 2.20 Common failure modes
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
@@ -381,7 +416,7 @@ For Copilot audit records, look for:
 | Advanced Hunting has no agent rows | Agent not registered/published or ingestion delay | Confirm Agent 365 registration and exercise the agent again. |
 | SDK-onboarded agent bypasses DLP #1 | Custom-engine agent does not run through Microsoft 365 Copilot orchestration | See Section 2.19 - Purview DLP for SDK-onboarded agents. |
 
-## 2.19 Purview DLP for SDK-onboarded agents (Agent 365 SDK / custom-engine)
+## 2.21 Purview DLP for SDK-onboarded agents (Agent 365 SDK / custom-engine)
 
 ### 2.19.1 What applies out of the box
 

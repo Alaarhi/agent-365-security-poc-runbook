@@ -38,7 +38,11 @@ Grant the read-only role first. Only the person creating the policy needs the Co
 
 Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md), [UC1](../chapter-uc1-agent-discovery/README.md), and [UC2](../chapter-uc2-identity-ownership/README.md).
 
-## Setup - Conditional Access policy to block high-risk agents
+---
+
+**Section: 1. Conditional Access**
+
+## 3.1 Setup - CA policy to block high-risk agents
 
 Performed by **Conditional Access Administrator**.
 
@@ -51,7 +55,7 @@ Performed by **Conditional Access Administrator**.
 7. **Enable policy** = **Report-only** first (lets you observe the deny in the sign-in log without actually blocking the agent), then **On** after validation.
 8. **Create**.
 
-## Test - make an agent risky, confirm it is blocked
+## 3.2 Test - make an agent risky, confirm it is blocked
 
 ### Step 1 - make the lab agent high-risk
 
@@ -79,7 +83,7 @@ Performed by anyone with **Global Reader**, **Reports Reader**, or **Security Re
 3. Filter by the agent's name or App ID.
 4. Confirm a **Failure** entry with **Conditional Access = Failure** and the policy name `Block high-risk agent identities`.
 
-**Expected result**
+### Expected result
 
 - The agent's token request fails after it is marked high-risk.
 - The sign-in log shows the deny with the policy name attached.
@@ -91,21 +95,11 @@ Dismiss or confirm-safe the risk state on the lab agent when you are done so it 
 
 **Entra ID** > **Protection** > **ID Protection** > **Risky agents** > select the agent > **Confirm safe** (or **Dismiss**).
 
-## Setup - just-in-time access via access package (optional)
+---
 
-Performed by **Identity Governance Administrator**.
+**Section: 2. Lifecycle Workflow - sponsor change**
 
-1. Open <https://entra.microsoft.com> > **Identity Governance** > **Entitlement management** > **Access packages** > **New access package**.
-2. Scope the package to the specific resource(s) the agent needs.
-3. Set expiry (for example 8 hours) so grants are time-bounded.
-4. Assign to the agent identity (or a group containing agent identities).
-
-**Check result (Setup role)**
-
-- Access package assignment appears on the agent.
-- The agent can invoke the target resource only within the grant window.
-
-## Setup - sponsor change via Lifecycle Workflows (optional)
+## 3.3 Setup - sponsor change via Lifecycle Workflows
 
 Performed by **Lifecycle Workflows Administrator**.
 
@@ -117,24 +111,43 @@ Performed by **Lifecycle Workflows Administrator**.
    - Transfer agent identity sponsorships to manager.
 5. Save.
 
-## Test - CA block is provable in sign-in logs
-
-Covered inside the risk-based test above (Step 3). Replay the same steps against any CA policy you build later for the same evidence pattern.
-
-## Test - JIT grant expires
-
-Performed by anyone with **Global Reader**.
-
-1. Confirm the agent can invoke the target resource inside the grant window.
-2. After the grant window expires, retry and confirm the call fails and appears as denied in the sign-in log.
-
-## Test - sponsor change workflow (if configured)
+## 3.4 Test - sponsor change workflow
 
 Performed by anyone with **Global Reader** on the workflow history.
 
 1. Change the sponsor's attribute so they leave scope (for example department change).
 2. Run the workflow on demand.
-3. Confirm the sponsor is transferred to the manager and the notification email is sent.
+
+### Expected result
+
+- The sponsor is transferred to the manager automatically.
+- The notification email is sent to the manager.
+- The workflow run history shows the transfer with the actor, timestamp, and target agent.
+
+---
+
+**Section: 3. Just-in-time access via access package (optional)**
+
+## 3.5 Setup - just-in-time access via access package (optional)
+
+Performed by **Identity Governance Administrator**.
+
+1. Open <https://entra.microsoft.com> > **Identity Governance** > **Entitlement management** > **Access packages** > **New access package**.
+2. Scope the package to the specific resource(s) the agent needs.
+3. Set expiry (for example 8 hours) so grants are time-bounded.
+4. Assign to the agent identity (or a group containing agent identities).
+
+## 3.6 Test - JIT grant expires
+
+Performed by anyone with **Global Reader**.
+
+1. Confirm the agent can invoke the target resource inside the grant window.
+2. After the grant window expires, retry.
+
+### Expected result
+
+- Inside the grant window: the call succeeds.
+- After the grant expires: the call fails and appears as denied in the sign-in log.
 
 ## Evidence to capture
 
