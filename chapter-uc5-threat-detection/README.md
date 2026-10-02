@@ -7,33 +7,36 @@
 
 | Task | Role | Notes |
 |---|---|---|
-| Enable preview features, Security for AI agents, and Copilot Studio real-time protection | **Security Administrator** | Required to change Defender settings. Assign Active for the PoC window. |
-| Configure the Copilot Studio / Power Platform integration | **Power Platform Administrator** or environment admin | Required in addition to Security Admin for the Copilot Studio real-time-protection setup. |
-| Connect the Microsoft 365 app connector | **Application Administrator** or **Cloud Application Administrator** | Required only if the app connector needs to be re-consented. |
-| Create custom detection rules from KQL | **Security Operator** or **Security Administrator** | Required to create/edit custom detections. |
-| Read-only / validation - hunting, alerts, inventory | **Security Reader** | Sufficient to run KQL, read alerts, and see AI agent inventory. Use this for reviewers, auditors, and SOC analysts on read-only rotations. |
+| Enable Security for AI, connect Microsoft 365 connector, enable Copilot Studio real-time protection | **Security Administrator** or higher in Microsoft Entra ID | Required to change Defender settings. Assign Active for the PoC window. |
+| Configure the Power Platform side of the Copilot Studio integration | **Power Platform Administrator** | Required in addition to Security Admin. Hands the App ID back to the Security Admin. |
+| Register the Entra ID application used by the external security provider | **Application Administrator** or **Cloud Application Administrator** | Required only if the Entra app is created fresh. |
+| Create custom detection rules from KQL | **Security Operator** or **Security Administrator** | Required to create and edit custom detections. |
+| Read-only / validation - hunting, alerts, inventory | **Security Reader** | Sufficient to run KQL, read alerts, and see the AI agent inventory. Use this role for reviewers, auditors, and SOC analysts on read-only rotations. |
 
-Grant Security Reader first. Only escalate to Security Administrator or Security Operator when a change is actually being made.
+Grant Security Reader first. Escalate to Security Administrator or Security Operator only when a change is actually being made.
 
 ## 1.1 Objective
 
-Connect Agent 365 to Microsoft Defender so the customer can validate:
+Connect Agent 365 to Microsoft Defender so you can validate:
 
 - Agent inventory and posture visibility.
-- AI agent security settings.
-- Real-time protection and investigation.
-- Advanced Hunting visibility.
-- Optional custom detections.
+- Security for AI data collection and detections.
+- Real-time protection for Copilot Studio custom agents.
+- Advanced Hunting visibility over agent activity.
+- Optional custom detection rules.
+
+> AI agent protection in Microsoft Defender is currently in **public preview**. The Microsoft Defender preview terms apply.
 
 ## 1.2 Documentation links
 
-Use these Microsoft documentation links before starting the Defender configuration:
-
 | Topic | Documentation |
 |---|---|
-| Defender protection for AI agents | [Detect, block, and investigate threats to AI agents using Microsoft Defender](https://learn.microsoft.com/defender-xdr/security-for-ai/ai-agent-detection-protection) |
-| Agent 365 and Defender | [How Microsoft Defender supports Agent 365](https://learn.microsoft.com/microsoft-agent-365/leadership/defender-agent-365) |
+| Enable security for AI agents | [Enable security for AI agents using Microsoft Defender](https://learn.microsoft.com/defender-xdr/security-for-ai/get-started-defender-security-for-ai) |
+| Detect and investigate threats to AI agents | [Detect and investigate threats to AI agents using Microsoft Defender (Preview)](https://learn.microsoft.com/defender-xdr/security-for-ai/ai-agent-detection-protection) |
+| Protect AI agents overview | [Protect AI agents using Microsoft Defender](https://learn.microsoft.com/defender-xdr/security-for-ai/defender-security-for-ai) |
+| Real-time protection | [Protect AI agents in real time using Microsoft Defender](https://learn.microsoft.com/defender-xdr/security-for-ai/ai-agent-real-time-protection) |
 | AI agent inventory | [AI agent inventory in Microsoft Defender XDR](https://learn.microsoft.com/defender-xdr/security-for-ai/ai-agent-inventory) |
+| Local agent protection | [AI agent runtime protection in Microsoft Defender for Endpoint](https://learn.microsoft.com/defender-endpoint/configure-ai-agent-runtime-protection) |
 | Advanced Hunting overview | [Advanced hunting overview](https://learn.microsoft.com/defender-xdr/advanced-hunting-overview) |
 | `AgentsInfo` table | [`AgentsInfo` advanced hunting table](https://learn.microsoft.com/defender-xdr/advanced-hunting-agentsinfo-table) |
 | Custom detections | [Create and manage custom detection rules](https://learn.microsoft.com/defender-xdr/custom-detection-rules) |
@@ -41,80 +44,95 @@ Use these Microsoft documentation links before starting the Defender configurati
 
 ## 1.3 Defender prerequisites
 
-The customer should confirm:
+Before starting:
 
-1. The organization is onboarded to Agent 365.
+1. Agent 365 is onboarded.
 2. The PoC agents are published and visible as managed agents.
-3. The setup owner has a Defender role that can change settings, for example Security Administrator.
-4. The hunting user has at least Security Reader.
-5. If custom detections will be created, the user has Security Operator or Security Administrator.
-6. If Microsoft 365 app connector setup is required, the user has Application Administrator or Cloud Application Administrator.
-7. If Copilot Studio real-time protection is in scope, a Power Platform Administrator or environment admin is available.
+3. The setup owner has **Security Administrator** or higher in Microsoft Entra ID.
+4. For Copilot Studio real-time protection, a **Power Platform Administrator** is available.
+5. (Optional) For local agent protection, Microsoft Defender for Endpoint is running in **active mode**.
 
-## 1.4 Setup - enable Defender preview features
+## 1.4 Setup - open the Security for AI Get started wizard
 
-1. Open the Microsoft Defender portal: <https://security.microsoft.com>.
-2. Go to **System** > **Settings** > **Microsoft Defender XDR**.
-3. Enable **Preview features**.
-4. Save the setting.
+Performed by **Security Administrator**.
 
-**Check result**
+1. Sign in to the [Microsoft Defender portal](https://security.microsoft.com).
+2. Go to **Settings** > **Security for AI** > **Get started**.
+3. Confirm the **Enable** toggle is **on** (it is on by default once Agent 365 is onboarded).
+4. On the setup checklist, confirm **Agent 365** shows **Done**. This happens automatically after Agent 365 onboarding and provides unified visibility into AI agents.
 
-- Defender preview features are enabled.
-- AI agent evidence and inventory experiences are visible in the Defender portal.
-
-## 1.5 Setup - turn on Security for AI agents
-
-1. In the Defender portal, go to **System** > **Settings** > **Security for AI agents**.
-2. Turn on **Security for AI agents**.
-3. Under **AI real-time protection & investigation**, confirm **Agent 365** shows as **Connected**.
+The remaining steps in this chapter walk through the other items in the checklist: Microsoft 365 connector and Copilot Studio real-time protection.
 
 **Check result**
 
-- Agent 365 connection status is **Connected**.
-- Agent 365-managed agents are in scope for posture, detection, and real-time protection.
+- The **Enable** toggle is on.
+- **Agent 365** on the setup checklist is marked **Done**.
 
-## 1.6 Setup - Copilot Studio real-time protection
+## 1.5 Setup - connect the Microsoft 365 connector
 
-Use this step only if the customer will test Copilot Studio agent protection.
+Required for investigation and Advanced Hunting over AI agent activity. Performed by **Security Administrator**.
 
-1. In Defender, go to **System** > **Settings** > **Security for AI agents**.
-2. Under **AI real-time protection & investigation**, open **Copilot Studio real-time protection**.
-3. Turn **Real-time protection** on.
-4. Copy the **Power Platform Integration URL** shown by Defender.
-5. Register a Microsoft Entra application for the integration.
-6. Configure the Federated Identity Credential using the organization-specific identifier and Defender endpoint.
-7. Copy the Entra application's **Application (client) ID**.
-8. Paste the App ID back into the Defender Copilot Studio protection pane and save.
-9. If the customer environment requires configuration through the Power Platform admin center, open **Power Platform admin center** at <https://aka.ms/ppac>, then go to **Security** > **Threat detection** > **Additional threat detection**. Choose the environment, allow Copilot Studio to share data, paste the App ID and endpoint link, then save.
-
-**Power Platform admin dependency**
-
-The customer should have a Power Platform Administrator or environment admin available for this step. The integration may require environment-level configuration in the Power Platform admin center, not only Defender configuration.
+1. On the **Get started** page, select the **Microsoft 365 connector** step.
+2. On the **Select Microsoft 365 components** step, select at least:
+   - **Microsoft Entra ID Management events** (audit of admin activities in Entra ID).
+   - **Microsoft 365 activities** (audit of user activities in Microsoft 365 apps).
+   - **Microsoft Entra Users and groups** is a prerequisite and is selected by default.
+3. Select **Connect Microsoft 365** and complete the consent prompt.
 
 **Check result**
 
-- Copilot Studio real-time protection is enabled.
-- The App ID and endpoint are saved successfully.
-- Defender shows Copilot Studio / Agent 365 as connected for real-time protection.
+- The Microsoft 365 connector status shows **Connected**.
+- The **Get started** checklist marks the step **Connected**.
 
-## 1.7 Setup - connect Microsoft 365 app connector for near-real-time detections
+> If the Microsoft 365 connector is not connected, Copilot Studio real-time protection continues to block suspicious actions during runtime, but related alerts and incidents will not appear in the Defender portal.
 
-This supports Microsoft 365 audit events flowing into Defender for Cloud Apps and Advanced Hunting scenarios.
+## 1.6 Setup - connect Copilot Studio real-time protection
 
-1. In Defender, go to **Settings** > **Cloud Apps**.
-2. Under **Connected apps**, select **App Connectors**.
-3. Select **+ Connect an app**.
-4. Choose **Microsoft 365**.
-5. Leave all Microsoft 365 components selected unless the customer has a specific reason to limit scope.
-6. Select **Connect**.
-7. Complete the consent prompt.
-8. Confirm connector status is **Connected**.
+Required only if Copilot Studio custom agents are in scope. Performed jointly by **Security Administrator** (Defender) and **Power Platform Administrator** (Power Platform).
+
+### 1.6.1 In the Defender portal (Security Admin)
+
+1. On the **Get started** page, select the **Copilot Studio** step. The **Copilot Studio real-time protection** pane opens.
+2. Toggle **Real-time protection** on.
+3. Under **Enable Power Platform Integration**, copy the URL shown. Share it with the Power Platform Administrator.
+
+The **Get started** page shows a list of **Identified Power Platform Admins** who have permission to complete the Power Platform side.
+
+### 1.6.2 In Power Platform (Power Platform Admin)
+
+Follow the current docs for [Enable external threat detection and protection for Copilot Studio custom agents](https://learn.microsoft.com/microsoft-copilot-studio/external-security-provider):
+
+1. **Step 1 - Register the Microsoft Entra application.** Create a single-tenant Entra ID app, configure a Federated Identity Credential pointing at Defender, and copy the **Application (client) ID**.
+2. **Step 2 - Configure the threat detection system in Power Platform admin center.** In <https://admin.powerplatform.microsoft.com>, go to the environment > **Security** > **Threat detection** > **Additional threat detection**. Enter the Entra app ID and the endpoint URL shared by the Security Admin, allow Copilot Studio to share data, and save.
+3. Share the **App ID** back with the Security Admin.
+
+> The App ID used in Power Platform must be the **same** as the App ID used in the Microsoft Entra ID application.
+
+### 1.6.3 Finish in the Defender portal (Security Admin)
+
+1. In the **Copilot Studio real-time protection** pane, paste the App ID into the **App ID** field.
+2. Select **Save**.
+
+If the App ID was recently updated in Power Platform, allow up to one minute for propagation before saving.
 
 **Check result**
 
-- Microsoft 365 connector status is **Connected**.
-- New events begin appearing after ingestion delay.
+- Real-time protection toggle is **on**.
+- App ID is saved without a validation error.
+- The **Get started** checklist marks the **Copilot Studio** step **Connected**.
+
+## 1.7 Setup (optional) - local AI agent runtime protection
+
+Required only if the PoC covers AI agents that run locally on endpoints.
+
+1. Confirm Microsoft Defender for Endpoint is deployed and in **active mode** on the target endpoints.
+2. Follow [AI agent runtime protection in Microsoft Defender for Endpoint](https://learn.microsoft.com/defender-endpoint/configure-ai-agent-runtime-protection) to onboard local agents.
+
+Local agents are onboarded separately from cloud agents.
+
+**Check result**
+
+- Local agent protection is enabled on in-scope endpoints.
 
 ## 1.8 Test - agent inventory in Advanced Hunting
 
@@ -131,7 +149,7 @@ AgentsInfo
 
 **Expected result**
 
-- The customer's PoC agents appear in the result set.
+- Your PoC agents appear in the result set.
 - Agent names, platforms, owners, and lifecycle state match the PoC configuration.
 
 ## 1.9 Test - cloud app activity
@@ -169,7 +187,7 @@ AgentsInfo
 **Expected result**
 
 - A clean environment may return no rows.
-- If rows appear, the customer should review whether the agents are missing instructions or guardrails.
+- If rows appear, review whether the agents are missing instructions or guardrails before progressing.
 
 ## 1.11 Test - ownerless agent hunt
 

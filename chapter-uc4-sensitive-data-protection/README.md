@@ -46,7 +46,7 @@ Use these Microsoft documentation links before starting the Purview configuratio
 
 ## 2.3 Purview prerequisites
 
-The customer should confirm:
+Confirm:
 
 1. Test admin has Microsoft 365 E5 and Microsoft 365 Copilot where required.
 2. Test admin has Compliance Administrator and Purview Workload Content Admin.
@@ -70,7 +70,7 @@ The customer should confirm:
 
 ## 2.5 Setup - create or confirm sensitivity labels
 
-If the customer already has production labels, reuse them. Do not create duplicates unless this is an isolated PoC tenant.
+If you already have production labels, reuse them. Do not create duplicates unless this is an isolated PoC tenant.
 
 Recommended labels:
 
@@ -91,11 +91,11 @@ Steps:
 **Check result**
 
 - Test users can see the labels in Word, Excel, and SharePoint/Office web.
-- The customer can identify the label IDs / GUIDs used by the DLP policy.
+- You can identify the label IDs / GUIDs used by the DLP policy.
 
 ## 2.6 Prepared sample content
 
-Ready-to-use sample files with fictional test data are provided in [`samples/`](samples/). Use these if the customer does not already have a representative Confidential + General content set.
+Ready-to-use sample files with fictional test data are provided in [`samples/`](samples/). Use these if you don't already have a representative Confidential + General content set.
 
 | File | Label | Test purpose |
 |---|---|---|
@@ -221,11 +221,16 @@ and use the Office 365 Outlook Send an email (v2) tool to deliver it.
 
 1. In Purview, go to **Solutions** > **Communication Compliance** > **Policies**.
 2. Select **+ Create policy**.
-3. Use the template **Detect unethical interactions for AI agents**.
-4. Select the relevant agent sources, such as Copilot Studio and Azure Foundry.
-5. Add the reviewer.
-6. Accept defaults unless the customer has a different review percentage or condition.
+3. Choose a template that matches your scope:
+   - **Detect Microsoft 365 Copilot and Microsoft 365 Copilot Chat interactions** - for Copilot/Copilot Chat prompts and responses.
+   - **Detect inappropriate text** or **Detect inappropriate content** - broader coverage across Exchange / Teams / Viva Engage with Microsoft's content safety classifiers.
+   - **Detect sensitive info types** - triggers on specific SITs (card numbers, routing numbers, etc.) in communications.
+4. Select the relevant locations / sources. For Copilot interactions, this includes Microsoft 365 Copilot and Microsoft 365 Copilot Chat; for Foundry agents, confirm your tenant exposes an equivalent source.
+5. Add a reviewer.
+6. Accept defaults unless you need a different review percentage or condition.
 7. Create the policy.
+
+See [Manage Communication Compliance policies](https://learn.microsoft.com/purview/communication-compliance-policies) for the full, current list of templates and conditions.
 
 **Check result**
 
@@ -302,7 +307,7 @@ Draft and send an email to my.personal@example.com with the invoice payment
 details so I can pay it from home.
 ```
 
-Use a safe internal or controlled test recipient, not a real personal address, unless the customer explicitly approves the recipient.
+Use a safe internal or controlled test recipient, not a real personal address, unless the recipient has explicitly approved it.
 
 Expected result:
 
@@ -338,9 +343,9 @@ Expected result:
 Check evidence:
 
 1. In Purview, go to **Communication Compliance** > **Alerts**.
-2. Open the policy `Detect unethical interactions for AI agents`.
+2. Open the policy you created in 2.11.
 3. Confirm the interaction appears in the reviewer queue.
-4. Confirm source attribution matches the agent platform, such as Copilot Studio or Azure Foundry.
+4. Confirm source attribution matches the agent platform (Microsoft 365 Copilot, Copilot Studio, or Microsoft Foundry, depending on template scope).
 
 ## 2.17 Audit trail - what to prove
 
@@ -387,7 +392,7 @@ Custom-engine Agent 365 agents (agents built with the Agent 365 SDK, LangChain, 
 | Sensitivity labels on SharePoint content (2.5, 2.6) | Yes | Labels persist on the file. Permission trimming and label-based access still evaluate against the calling user. |
 | DLP #1 - Copilot / Copilot Chat grounding block (2.7) | **No, not automatically** | The policy is scoped to Microsoft 365 Copilot / Copilot Chat locations. Custom-engine agents run outside that orchestration surface. |
 | DLP #2 - Exchange email block (2.8) | Yes | Enforced at Exchange transport. Any tool that sends mail through the user's Exchange mailbox is covered. |
-| Communication Compliance (2.11) | Partially | Requires the agent source to be listed in the Comm Compliance policy (e.g. Copilot Studio, Azure Foundry). Custom-engine SDK agents may need to be added explicitly, or covered via the audit path. |
+| Communication Compliance (2.11) | Partially | Requires the agent source to be listed in the Comm Compliance policy (Microsoft 365 Copilot, Copilot Studio, or Microsoft Foundry). Custom-engine SDK agents may need to be added explicitly, or covered via the audit path. |
 | Insider Risk Management default agent policy (2.12) | Yes | Applies once the agent is registered in Agent 365. |
 | Purview Audit / Advanced Hunting visibility | Yes, if observability is instrumented | Requires the Agent 365 observability instrumentation (see [`instrument-observability`](https://github.com/microsoft/agent365-skills/tree/main/plugins/agent365/skills/instrument-observability)). |
 

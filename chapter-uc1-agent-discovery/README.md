@@ -42,7 +42,7 @@ Microsoft 365 admin center - <https://admin.cloud.microsoft> > **Agents**.
 Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md). In addition:
 
 1. Agent 365 is enabled for the tenant.
-2. Frontier features are opted in if the customer wants Frontier-only capabilities.
+2. Frontier features are opted in if Frontier-only capabilities are in scope.
 3. At least one Microsoft-native agent exists (Copilot Studio, Foundry, or Microsoft 365 Copilot Agent Builder) so there is content to discover.
 4. If connected platforms are in scope (Databricks, Vertex, Snowflake, Bedrock, Agentforce), those tenant-side integrations are ready.
 
@@ -180,7 +180,7 @@ Performed by anyone with **AI Reader**.
 
 ## Optional - programmatic discovery with Microsoft Graph
 
-The UI in the Microsoft 365 admin center is the fastest path for a visual review, but Microsoft Graph exposes the same inventory programmatically. Use this when the customer needs scheduled exports, external reporting, CMDB sync, or automated reconciliation against a source of truth.
+The UI in the Microsoft 365 admin center is the fastest path for a visual review, but Microsoft Graph exposes the same inventory programmatically. Use this when you need scheduled exports, external reporting, CMDB sync, or automated reconciliation against a source of truth.
 
 ### What you can retrieve
 

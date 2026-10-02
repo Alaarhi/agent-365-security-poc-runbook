@@ -1,6 +1,6 @@
 # UC1 - Agent samples
 
-Minimal, generic examples of each agent type the Agent Registry can discover. Use these for walkthroughs, demos, or as a starting point when the customer does not already have a representative agent to onboard.
+Minimal, generic examples of each agent type the Agent Registry can discover. Use these for walkthroughs, demos, or as a starting point if you don't already have a representative agent to onboard.
 
 | Folder | Agent type | What it demonstrates |
 |---|---|---|

@@ -23,7 +23,7 @@ Grant read-only roles first. Only grant setup roles to whoever will actually mak
 
 ## 0.1 Confirm PoC scope
 
-Agree upfront which use cases the customer wants to validate:
+Agree upfront which use cases are in scope for this PoC:
 
 | Use case | Pillar | Included in this guide |
 |---|---|---|
@@ -36,7 +36,7 @@ Agree upfront which use cases the customer wants to validate:
 
 ## 0.2 Confirm access and licensing
 
-The customer should confirm the PoC team has:
+Confirm the PoC team has:
 
 - Agent 365 trial license or equivalent Agent 365 access for the PoC.
 - Access to the Microsoft 365 admin center (<https://admin.cloud.microsoft>).

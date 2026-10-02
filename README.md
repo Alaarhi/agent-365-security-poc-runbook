@@ -38,7 +38,7 @@ Combined PDF at the root: `Agent-365-Security-PoC-Runbook.pdf`.
 
 ## Final readiness checklist
 
-Before the joint test session, the customer should confirm:
+Before the joint test session, confirm:
 
 - [ ] PoC agents are published and accessible to the test user.
 - [ ] Agent 365 is connected in Defender.
