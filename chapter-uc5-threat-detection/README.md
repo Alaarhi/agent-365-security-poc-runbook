@@ -44,13 +44,7 @@ Connect Agent 365 to Microsoft Defender so you can validate:
 
 ## 1.3 Defender prerequisites
 
-Before starting:
-
-1. Agent 365 is onboarded.
-2. The PoC agents are published and visible as managed agents.
-3. The setup owner has **Security Administrator** or higher in Microsoft Entra ID.
-4. For Copilot Studio real-time protection, a **Power Platform Administrator** is available.
-5. (Optional) For local agent protection, Microsoft Defender for Endpoint is running in **active mode**.
+Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md). Agent 365 should be onboarded with at least one PoC agent published, and the test admin has **Security Administrator** or higher. For Copilot Studio real-time protection, a **Power Platform Administrator** is available for Section 1.6. For local agent protection (optional, Section 1.7), Microsoft Defender for Endpoint runs in **active mode** on the target endpoints.
 
 ## 1.4 Setup - open the Security for AI Get started wizard
 

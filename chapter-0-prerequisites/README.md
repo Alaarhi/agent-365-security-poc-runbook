@@ -91,9 +91,9 @@ Recommended content categories:
 
 | Content category | Label | Purpose |
 |---|---|---|
-| Sensitive customer / financial documents | Confidential | Used to prove Copilot grounding is restricted. |
-| Public or broadly shareable operational documents | General | Used as the positive control for allowed grounding. |
-| Financial identifiers in invoice or ledger content | Confidential | Used to prove Exchange DLP blocks outbound email exfiltration. |
+| Sensitive customer / financial documents | A365-Restricted | Used to prove Copilot grounding is restricted. |
+| Public or broadly shareable operational documents | A365-Open | Used as the positive control for allowed grounding. |
+| Financial identifiers in invoice or ledger content | A365-Restricted | Used to prove Exchange DLP blocks outbound email exfiltration. |
 
 Sample files are provided for UC4 testing. See [UC4 - Sensitive Data Protection](../chapter-uc4-sensitive-data-protection/README.md#2-6-prepared-sample-content) for the file list, labeling guidance, and the samples folder (`chapter-uc4-sensitive-data-protection/samples/`).
 

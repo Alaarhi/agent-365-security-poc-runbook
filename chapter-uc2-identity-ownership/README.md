@@ -59,10 +59,7 @@ Custom security attributes are under **Entra ID** > **Protect & secure** > **Cus
 
 ## Prerequisites
 
-Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md) and [UC1 - Agent Discovery](../chapter-uc1-agent-discovery/README.md). In addition:
-
-1. Each in-scope agent has a nominated **owner** (technical administrator) and **sponsor** (business accountability).
-2. If Copilot Studio agents are in scope, Entra Agent Identity is enabled at the Copilot Studio environment level in the Power Platform admin center.
+Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md) and [UC1 - Agent Discovery](../chapter-uc1-agent-discovery/README.md). For Copilot Studio agents, Entra Agent Identity is enabled at the Copilot Studio environment level in Section 2.1 below.
 
 ## 2.1 Setup - enable Entra Agent Identity at the Copilot Studio environment level
 

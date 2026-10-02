@@ -39,12 +39,7 @@ Microsoft 365 admin center - <https://admin.cloud.microsoft> > **Agents**.
 
 ## Prerequisites
 
-Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md). In addition:
-
-1. Agent 365 is enabled for the tenant.
-2. Frontier features are opted in if Frontier-only capabilities are in scope.
-3. At least one Microsoft-native agent exists (Copilot Studio, Foundry, or Microsoft 365 Copilot Agent Builder) so there is content to discover.
-4. If connected platforms are in scope (Databricks, Vertex, Snowflake, Bedrock, Agentforce), those tenant-side integrations are ready.
+Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md). Agent 365 should be enabled and at least one Microsoft-native agent (Copilot Studio, Foundry, or Microsoft 365 Copilot Agent Builder) should exist so there is content to discover. If connected platforms are in scope (AWS Bedrock, Google Vertex AI, Databricks Genie, Snowflake Cortex, Salesforce Agentforce), their tenant-side integrations are configured in the optional connected-platforms section at the end of this chapter.
 
 ## Setup steps
 

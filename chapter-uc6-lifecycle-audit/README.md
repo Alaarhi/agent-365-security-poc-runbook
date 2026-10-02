@@ -32,10 +32,7 @@ Reviewers should hold only the read-only roles. The AI Administrator role is req
 
 ## Prerequisites
 
-Complete Chapters 0, UC1, UC2, UC4, and UC5. In addition:
-
-1. Purview Audit is on and recording user and admin activity.
-2. Agents have generated real activity (prompts, tool calls, outputs) before you attempt lifecycle actions - the point of this UC is to prove the trail is complete.
+Complete Chapters 0, UC1, UC2, UC4, and UC5. Purview Audit must be on, and the agents should have generated real activity (prompts, tool calls, outputs) before you attempt lifecycle actions - the point of this UC is to prove the trail is complete.
 
 ## Test - retrieve an end-to-end audit trail for one agent
 

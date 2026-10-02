@@ -47,7 +47,7 @@ Before the joint test session, confirm:
 - [ ] Microsoft 365 app connector is connected if near-real-time detections are required.
 - [ ] Purview Audit is enabled.
 - [ ] Sensitivity labels are published and visible to test users.
-- [ ] Confidential and General files are uploaded and labeled.
+- [ ] `A365-Restricted` and `A365-Open` files are uploaded and labeled.
 - [ ] DLP policy for Copilot / Copilot Chat is enabled.
 - [ ] DLP policy for Exchange email is enabled.
 - [ ] Test user has SharePoint access and can invoke the PoC agent.
