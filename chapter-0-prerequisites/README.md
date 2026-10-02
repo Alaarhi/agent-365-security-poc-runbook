@@ -52,7 +52,7 @@ Assign these Active for the PoC window. Full role detail is in each chapter.
 | Use case | Setup role | Read-only / validation role |
 |---|---|---|
 | UC1 - Agent Discovery | AI Administrator | AI Reader or Global Reader |
-| UC2 - Identity & Ownership | Agent ID Developer, Agent Registry Administrator, Attribute Definition Administrator, Attribute Assignment Administrator | Directory Readers, AI Reader |
+| UC2 - Identity & Ownership | Agent ID Administrator or Cloud Application Administrator (manage), Agent ID Developer (blueprints), Attribute Definition Administrator, Attribute Assignment Administrator | No admin role needed to view (any Microsoft Entra user) |
 | UC3 - Least-Privilege Access | Conditional Access Administrator, Identity Governance Administrator, Lifecycle Workflows Administrator | Global Reader, Reports Reader, Security Reader |
 | UC4 - Sensitive Data Protection | Compliance Administrator, Information Protection Administrator, Purview Workload Content Admin, Communication Compliance Administrator, Insider Risk Management Administrator | Audit Reader, Global Reader, Compliance Reader |
 | UC5 - Threat Detection & Protection | Security Administrator, Security Operator, Power Platform Administrator (for Copilot Studio integration), Application Administrator or Cloud Application Administrator | Security Reader |
