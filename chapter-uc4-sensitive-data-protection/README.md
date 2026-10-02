@@ -93,9 +93,24 @@ Steps:
 - Test users can see the labels in Word, Excel, and SharePoint/Office web.
 - The customer can identify the label IDs / GUIDs used by the DLP policy.
 
-## 2.6 Setup - label the test content
+## 2.6 Prepared sample content
 
-1. Upload the PoC documents to the prepared SharePoint site or folder.
+Ready-to-use sample files with fictional test data are provided in [`samples/`](samples/). Use these if the customer does not already have a representative Confidential + General content set.
+
+| File | Label | Test purpose |
+|---|---|---|
+| [`Sample_Confidential_Customer_Roster.docx`](samples/Sample_Confidential_Customer_Roster.docx) | Confidential | Sensitive customer data / direct PII prompt |
+| [`Sample_Confidential_Vendor_Invoice.docx`](samples/Sample_Confidential_Vendor_Invoice.docx) | Confidential | Financial details for email exfiltration test |
+| [`Sample_Confidential_Payments_Ledger.xlsx`](samples/Sample_Confidential_Payments_Ledger.xlsx) | Confidential | Structured financial data for grounding block |
+| [`Sample_Confidential_Employee_Expenses.xlsx`](samples/Sample_Confidential_Employee_Expenses.xlsx) | Confidential | Sub-agent / employee expense sensitive content test |
+| [`Sample_General_Public_Guide.docx`](samples/Sample_General_Public_Guide.docx) | General | Allowed grounding positive control |
+| [`Sample_General_Checklist.docx`](samples/Sample_General_Checklist.docx) | General | Allowed grounding positive control |
+
+All sample files use publicly documented test values (Visa / MC / Amex / Discover sandbox card numbers and Federal Reserve public test routing numbers). No real PII.
+
+## 2.7 Setup - label the test content
+
+1. Upload the PoC documents (your own, or the samples above) to the prepared SharePoint site or folder.
 2. Open each document in Word or Excel.
 3. Apply the correct sensitivity label.
 4. Confirm autosave completes.

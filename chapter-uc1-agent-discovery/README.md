@@ -13,13 +13,17 @@
 
 Grant the read-only role first; only grant the setup role to whoever will make configuration changes.
 
-## Scope - which agent types get discovered
+## Scope - agent types and discovery paths
 
-| Category | Example platforms | Onboarding path |
-|---|---|---|
-| Microsoft-native (auto-discovered) | Microsoft 365 Copilot / Agent Builder declarative agents, Copilot Studio, Microsoft Foundry, SharePoint agents | Automatic once Agent 365 is enabled |
-| Connected platforms (Registry sync) | Databricks Genie, Google Vertex AI, Snowflake Cortex, AWS Bedrock, Salesforce Agentforce | Registry sync configured per platform |
-| Custom (Agent 365 SDK) | Customer-built agents in Node.js, Python, or .NET | Onboarded via [`microsoft/agent365-skills`](https://github.com/microsoft/agent365-skills) |
+The Agent Registry discovers three categories of agent. Each has a different discovery path and surfaces different metadata. Sample agents of each type are provided in [`agent-samples/`](agent-samples/).
+
+| Category | Example platforms | Discovery path | Sample |
+|---|---|---|---|
+| Microsoft-native | Microsoft 365 Copilot / Agent Builder declarative agents, Copilot Studio, Azure AI Foundry, SharePoint agents | Automatic once Agent 365 is enabled. Agent appears in the Registry after publish (Copilot Studio / Agent Builder) or after agent creation (Foundry). Full propagation up to 24 hours. | [`agent-samples/copilot-studio/`](agent-samples/copilot-studio/), [`agent-samples/foundry/`](agent-samples/foundry/) |
+| Connected platforms | Databricks Genie, Google Vertex AI, Snowflake Cortex, AWS Bedrock, Salesforce Agentforce | Registry sync configured per platform in `admin.cloud.microsoft` > **Agents** > **Connected platforms**. The source platform's agent inventory is pulled into the Agent Registry on a schedule. See the optional connected-platforms section at the end of this chapter. | - |
+| Custom (Agent 365 SDK) | Customer-built agents in Node.js, Python, or .NET | Onboarded through [`microsoft/agent365-skills`](https://github.com/microsoft/agent365-skills) by running `a365 setup all`. Appears in the Registry once the Blueprint and Entra Agent Identity are provisioned. | [`agent-samples/sdk/`](agent-samples/sdk/) |
+
+Each sample folder has a README that walks through the discovery path step by step.
 
 ## Portal
 
@@ -100,6 +104,79 @@ Performed by anyone with **AI Reader**.
 | Owner column blank | Sponsor / owner not assigned during agent creation | Assign an owner in the agent's platform (Copilot Studio, Foundry, or Entra Enterprise Applications). Covered in [UC2](../chapter-uc2-identity-ownership/README.md). |
 | Connected platform not syncing | Registry sync not configured or credentials expired | Reconfigure Registry sync per platform documentation. |
 | SDK agent missing | `a365 setup all` not completed for that project | Rerun `a365 setup all` and confirm Blueprint is registered. |
+
+## Optional - connected platforms (AWS Bedrock, Google Vertex AI, Databricks Genie)
+
+Agent 365 can pull agents from non-Microsoft platforms into the same Registry so they are visible, assignable to owners, and in scope for the governance and audit workstreams. Setup is a one-time per-platform configuration in the Microsoft 365 admin center. All three paths below share the same pattern - prepare the source platform, register a connection, and let Registry sync populate the inventory on its schedule.
+
+### Common portal entry point
+
+Microsoft 365 admin center - <https://admin.cloud.microsoft> > **Agents** > **Connected platforms** > **+ Add platform**.
+
+### AWS Bedrock
+
+| Step | What to do |
+|---|---|
+| 1. AWS prerequisites | At least one Bedrock agent exists in an AWS account and region in scope. Create an IAM role or user with least-privilege read access to Bedrock agents (for example `bedrock:ListAgents`, `bedrock:GetAgent`). |
+| 2. Credentials | Prepare the credentials or federation that Agent 365 will use to call Bedrock (IAM role ARN with trust policy, or access key for the IAM user). |
+| 3. In Agent 365 | Open **Connected platforms** > **+ Add platform** > **AWS Bedrock**. Enter the AWS account ID, region(s), and credentials or federation details. Save. |
+| 4. Validate | Confirm connector status is **Connected**. Wait for the first sync (typically within an hour). |
+| 5. Verify in Registry | Bedrock agents appear under **Agents** > **All agents** with platform = AWS Bedrock, the AWS agent ID, and a configurable business owner. |
+
+Documentation:
+- [Amazon Bedrock Agents](https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html)
+- [IAM for Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/security-iam.html)
+- [Agent 365 - Connected platforms](https://learn.microsoft.com/microsoft-agent-365/administrator/connected-platforms)
+
+### Google Vertex AI
+
+| Step | What to do |
+|---|---|
+| 1. Google Cloud prerequisites | At least one Vertex AI agent exists in a Google Cloud project in scope. Enable the Vertex AI API on the project. |
+| 2. Service account | Create a Google Cloud service account with least-privilege read access to Vertex AI (for example `aiplatform.agents.list`, `aiplatform.agents.get`). Download the service-account key or configure Workload Identity Federation with Entra. |
+| 3. In Agent 365 | Open **Connected platforms** > **+ Add platform** > **Google Vertex AI**. Enter the GCP project ID, region, and the service-account credentials or federation. Save. |
+| 4. Validate | Confirm connector status is **Connected**. Wait for the first sync. |
+| 5. Verify in Registry | Vertex agents appear with platform = Google Vertex AI, the Vertex agent/project ID, and an owner you can edit. |
+
+Documentation:
+- [Vertex AI Agents overview](https://cloud.google.com/vertex-ai/docs/agents)
+- [Service accounts in Google Cloud](https://cloud.google.com/iam/docs/service-account-overview)
+- [Workload Identity Federation with Microsoft Entra](https://cloud.google.com/iam/docs/workload-identity-federation)
+- [Agent 365 - Connected platforms](https://learn.microsoft.com/microsoft-agent-365/administrator/connected-platforms)
+
+### Databricks Genie
+
+| Step | What to do |
+|---|---|
+| 1. Databricks prerequisites | At least one Genie space / agent exists in the Databricks workspace(s) in scope. Confirm the workspace URL and that the Genie product is enabled. |
+| 2. Databricks credentials | Create a Databricks service principal (or personal access token for a bootstrap) with least-privilege read scope on Genie resources. |
+| 3. In Agent 365 | Open **Connected platforms** > **+ Add platform** > **Databricks Genie**. Enter the Databricks workspace URL and credentials. Save. |
+| 4. Validate | Confirm connector status is **Connected**. Wait for the first sync (typically within an hour). |
+| 5. Verify in Registry | Genie agents appear with platform = Databricks Genie, the Databricks workspace, and owners you can assign. |
+
+Documentation:
+- [Databricks AI/BI Genie overview](https://learn.microsoft.com/azure/databricks/genie/)
+- [Databricks service principals](https://learn.microsoft.com/azure/databricks/admin/users-groups/service-principals)
+- [Agent 365 - Connected platforms](https://learn.microsoft.com/microsoft-agent-365/administrator/connected-platforms)
+
+### Test - connected agents in the Registry
+
+Performed by anyone with **AI Reader**.
+
+1. Open <https://admin.cloud.microsoft> > **Agents** > **All agents**.
+2. Filter by platform (AWS Bedrock, Google Vertex AI, Databricks Genie).
+3. Confirm every expected connected agent is listed.
+4. Confirm each has an assignable owner.
+5. Export the filtered list as evidence.
+
+### Common issues
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Connector status = Error | Invalid credentials or missing permission on the source platform | Verify the IAM / service-account / service-principal permissions match the connector's requirements. |
+| No agents sync | Connector connected but source platform has no agents, or Registry sync has not run yet | Confirm the source has agents; wait for the next sync cycle. |
+| Partial sync | Permission scoped too narrowly on the source platform | Grant list + get permissions across the agent resources. |
+| Agent appears without owner | Owner is set in Agent 365, not inherited from the source | Assign a business owner in the Agent 365 Registry UI. |
 
 ## Optional - programmatic discovery with Microsoft Graph
 
