@@ -41,9 +41,9 @@ Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md), [UC1
 
 ---
 
-**Section: 1. Conditional Access**
+## Section 1 - Conditional Access
 
-## 3.1 Setup - CA policy to block high-risk agents
+### Task - setup CA policy to block high-risk agents
 
 Performed by **Conditional Access Administrator**.
 
@@ -56,9 +56,9 @@ Performed by **Conditional Access Administrator**.
 7. **Enable policy** = **Report-only** first (lets you observe the deny in the sign-in log without actually blocking the agent), then **On** after validation.
 8. **Create**.
 
-## 3.2 Test - make an agent risky, confirm it is blocked
+### Task - make an agent risky, confirm it is blocked
 
-### Agent type required for this flow
+#### Agent type required for this flow
 
 Use a **non-OBO Agent 365 agent identity**: an autonomous agent registered in Agent 365 whose **agent blueprint app** authenticates with **client credentials** (client secret or certificate) and then exchanges the token for the **agent identity** through the FMI/token-exchange flow.
 
@@ -70,7 +70,7 @@ The expected authentication shape is:
 2. **T2 - resource token as the agent identity:** the agent identity uses T1 as a JWT bearer client assertion to request the resource token, for example `https://graph.microsoft.com/.default`.
 3. Conditional Access for agents evaluates the **T2** request. T1 can still succeed; the block is proven when T2 fails.
 
-### Step 1 - make the lab agent high-risk
+#### Step 1 - make the lab agent high-risk
 
 Rather than wait for real risky behavior, flag a lab agent directly through Microsoft Graph. Any user with permission to run the Identity Protection `confirmCompromised` action can do this (for example from Graph Explorer):
 
@@ -83,7 +83,7 @@ Content-Type: application/json
 
 A `204 No Content` response confirms the risk state. The agent appears under **Entra ID** > **Protection** > **ID Protection** > **Risky agents** as **High** risk.
 
-### Step 2 - exercise the agent
+#### Step 2 - exercise the agent
 
 Have the **non-OBO, client-credentials-based agent** attempt a call that requires a new resource token (for example a Microsoft Graph request as part of its normal flow).
 
@@ -95,7 +95,7 @@ For a deterministic lab test, run a two-leg token-exchange script against the sa
 
 The reference article includes a sample PowerShell script for this exact T1-to-T2 validation pattern: [AgentID-AuthenticationFlow.ps1](https://github.com/Blue161616/Agent-Identity/blob/main/AgentID-AuthenticationFlow.ps1).
 
-### Step 3 - confirm the block in the sign-in log
+#### Step 3 - confirm the block in the sign-in log
 
 Performed by anyone with **Global Reader**, **Reports Reader**, or **Security Reader**.
 
@@ -104,14 +104,14 @@ Performed by anyone with **Global Reader**, **Reports Reader**, or **Security Re
 3. Filter by the agent's name or App ID.
 4. Confirm a **Failure** entry with **Conditional Access = Failure** and the policy name `Block high-risk agent identities`.
 
-### Expected result
+#### Expected result
 
 - The agent's token request fails after it is marked high-risk.
 - The failure is on the **T2 resource-token request** for the **agent identity**, not on a user OBO token.
 - The sign-in log shows the deny with the policy name attached.
 - A separate run against a low-risk agent (no `confirmCompromised` flag) succeeds, proving the policy fires on risk, not on identity.
 
-### Cleanup
+#### Cleanup
 
 Dismiss or confirm-safe the risk state on the lab agent when you are done so it does not sit in a confirmed-compromised state:
 
@@ -119,36 +119,9 @@ Dismiss or confirm-safe the risk state on the lab agent when you are done so it 
 
 ---
 
-**Section: 2. Just-in-time access via access package (optional)**
+## Section 2 - Lifecycle Workflow sponsor change
 
-## 3.3 Setup - just-in-time access via access package (optional)
-
-Performed by **Identity Governance Administrator**.
-
-1. Open <https://entra.microsoft.com> > **Identity Governance** > **Entitlement management** > **Access packages** > **New access package**.
-2. Scope the package to the specific resource(s) the agent needs.
-3. Set expiry (for example 8 hours) so grants are time-bounded.
-4. Assign to the agent identity (or a group containing agent identities).
-
-## 3.4 Test - JIT grant expires
-
-Performed by anyone with **Global Reader**.
-
-1. Confirm the agent can invoke the target resource inside the grant window.
-2. After the grant window expires, retry.
-
-### Expected result
-
-- Inside the grant window: the call succeeds.
-- After the grant expires: the call fails and appears as denied in the sign-in log.
-
----
-
-**Task 4 - Lifecycle Workflow sponsor change**
-
-This is a separate governance task, not part of the UC3 Conditional Access token-block test.
-
-## 4.1 Setup - sponsor change via Lifecycle Workflows
+### Task - setup sponsor change via Lifecycle Workflows
 
 Performed by **Lifecycle Workflows Administrator**.
 
@@ -160,25 +133,50 @@ Performed by **Lifecycle Workflows Administrator**.
    - Transfer agent identity sponsorships to manager.
 5. Save.
 
-## 4.2 Test - sponsor change workflow
+### Task - test sponsor change workflow
 
 Performed by anyone with **Global Reader** on the workflow history.
 
 1. Change the sponsor's attribute so they leave scope (for example department change).
 2. Run the workflow on demand.
 
-### Expected result
+#### Expected result
 
 - The sponsor is transferred to the manager automatically.
 - The notification email is sent to the manager.
 - The workflow run history shows the transfer with the actor, timestamp, and target agent.
+
+---
+
+## Section 3 - Just-in-time access via access package (optional)
+
+### Task - setup just-in-time access via access package
+
+Performed by **Identity Governance Administrator**.
+
+1. Open <https://entra.microsoft.com> > **Identity Governance** > **Entitlement management** > **Access packages** > **New access package**.
+2. Scope the package to the specific resource(s) the agent needs.
+3. Set expiry (for example 8 hours) so grants are time-bounded.
+4. Assign to the agent identity (or a group containing agent identities).
+
+### Task - test JIT grant expiry
+
+Performed by anyone with **Global Reader**.
+
+1. Confirm the agent can invoke the target resource inside the grant window.
+2. After the grant window expires, retry.
+
+#### Expected result
+
+- Inside the grant window: the call succeeds.
+- After the grant expires: the call fails and appears as denied in the sign-in log.
 
 ## Evidence to capture
 
 - Screenshot of the CA policy in **Report-only** and then in **On** state.
 - Sign-in log export showing at least one Deny and one Allow for the same agent identity within a short window.
 - Access package assignment record with expiry.
-- Task 4 lifecycle workflow run history if sponsor change is tested.
+- Lifecycle workflow run history if sponsor change is tested.
 
 ## Common issues
 
