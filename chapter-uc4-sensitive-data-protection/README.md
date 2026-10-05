@@ -3,7 +3,7 @@
 **Pillar:** Secure
 **What it proves:** your existing Purview labels and DLP still hold when the reader is an agent. A365-Restricted content is withheld from the answer, outbound financial data is blocked, and the match is logged against the agent identity.
 
-## Roles - least privilege
+## Section 1 - Roles, objective, and prerequisites
 
 | Task | Role | Notes |
 |---|---|---|
@@ -16,11 +16,11 @@
 
 Grant the read-only roles first. Only give Compliance/Information-Protection Admin to the person who actually creates or edits policies.
 
-## 4.1 Objective
+### Task 1 - confirm objective
 
 Validate that Microsoft Purview controls prevent agents from oversharing sensitive content and provide a reliable audit trail.
 
-## 4.2 What you'll build
+### Task 2 - confirm what you will build
 
 The PoC produces this set of artifacts, scoped to a Copilot Studio agent that is published to Microsoft 365 Copilot:
 
@@ -40,7 +40,7 @@ Why this config is correct for a **Copilot Studio** agent:
 - Communication Compliance has a current template for Microsoft 365 Copilot and Microsoft 365 Copilot Chat interactions, which captures Copilot Studio agent turns that run through M365 Copilot.
 - Insider Risk Management's default agent policy covers registered Agent 365 agents, including Copilot Studio agents, once the agent is in the Agent Registry.
 
-## 4.3 Documentation links
+### Task 3 - review documentation
 
 | Topic | Documentation |
 |---|---|
@@ -55,15 +55,15 @@ Why this config is correct for a **Copilot Studio** agent:
 | Insider Risk Management | [Microsoft Purview Insider Risk Management](https://learn.microsoft.com/purview/insider-risk-management) |
 | DSPM for AI | [Microsoft Purview Data Security Posture Management for AI](https://learn.microsoft.com/purview/ai-microsoft-purview) |
 
-## 4.4 Prerequisites
+### Task 4 - confirm prerequisites
 
 Chapter 0 covers the common PoC prerequisites. The Purview-specific items (Audit on, labels published, SharePoint content ready, Copilot Studio agent grounded + published) are produced by the setup sections below, in order.
 
 ---
 
-**Section: Setup - sensitivity labels and SharePoint content**
+## Section 2 - Sensitivity labels and SharePoint content
 
-## 4.5 Enable Microsoft Purview Audit
+### Task 1 - enable Microsoft Purview Audit
 
 1. Open Microsoft Purview: <https://purview.microsoft.com>.
 2. Go to **Audit**.
@@ -74,7 +74,7 @@ Chapter 0 covers the common PoC prerequisites. The Purview-specific items (Audit
 - Audit search is available.
 - Audit is recording user and admin activity.
 
-## 4.6 Create or confirm sensitivity labels
+### Task 2 - create or confirm sensitivity labels
 
 If you already have production labels, reuse them. Do not create duplicates unless this is an isolated PoC tenant.
 
@@ -99,7 +99,7 @@ Steps:
 - Test users can see the labels in Word, Excel, and SharePoint/Office web.
 - You can identify the label IDs / GUIDs used by the DLP policy.
 
-## 4.7 Prepared sample content
+### Task 3 - prepare sample content
 
 Ready-to-use sample files with fictional test data are provided in [`samples/`](samples/). Use these if you don't already have a representative A365-Restricted + A365-Open content set.
 
@@ -114,7 +114,7 @@ Ready-to-use sample files with fictional test data are provided in [`samples/`](
 
 All sample files use publicly documented test values (Visa / MC / Amex / Discover sandbox card numbers and Federal Reserve public test routing numbers). No real PII.
 
-## 4.8 Label the test content
+### Task 4 - label the test content
 
 1. Upload the PoC documents (your own, or the samples above) to the prepared SharePoint site or folder.
 2. Open each document in Word or Excel.
@@ -128,11 +128,11 @@ DLP conditions match exact label GUIDs. A parent label and a sublabel are differ
 
 ---
 
-**Section: Setup - DLP policies**
+## Section 3 - DLP policies
 
 Two DLP policies form the core of this chapter. Create both and let them propagate before testing. DLP policy activation can take up to 24 hours.
 
-## 4.9 DLP policy #1 - block Copilot from processing A365-Restricted content
+### Task 1 - create DLP policy to block Copilot from processing A365-Restricted content
 
 1. In Purview, go to **Solutions** > **Data Loss Prevention** > **Policies**.
 2. Select **+ Create policy**.
@@ -157,7 +157,7 @@ Two DLP policies form the core of this chapter. Create both and let them propaga
 - Rule targets the exact label IDs used on the A365-Restricted test files.
 - Propagation window has passed.
 
-## 4.10 DLP policy #2 - block outbound email with financial data
+### Task 2 - create DLP policy to block outbound email with financial data
 
 1. In Purview, go to **Solutions** > **Data Loss Prevention** > **Policies**.
 2. Select **+ Create policy**.
@@ -183,9 +183,9 @@ Two DLP policies form the core of this chapter. Create both and let them propaga
 
 ---
 
-**Section: Setup - Copilot Studio agent configuration**
+## Section 4 - Copilot Studio agent configuration
 
-## 4.11 Ground the Copilot Studio agent on the SharePoint content
+### Task 1 - ground the Copilot Studio agent on the SharePoint content
 
 For Copilot Studio:
 
@@ -211,7 +211,7 @@ contains them.
 - Agent can answer from A365-Open-labeled content.
 - Agent is available in Microsoft 365 Copilot / Teams for the test user.
 
-## 4.12 Add the Outlook Send email (v2) tool
+### Task 2 - add the Outlook Send email (v2) tool
 
 For Copilot Studio:
 
@@ -235,11 +235,11 @@ and use the Office 365 Outlook Send an email (v2) tool to deliver it.
 
 ---
 
-**Section: Optional - Communication Compliance and Insider Risk Management**
+## Section 5 - Optional Communication Compliance and Insider Risk Management
 
 Both policies below are optional. Skip the whole section if the PoC scope is limited to labels, DLP, and audit.
 
-## 4.13 Communication Compliance (optional)
+### Task 1 - configure Communication Compliance (optional)
 
 1. In Purview, go to **Solutions** > **Communication Compliance** > **Policies**.
 2. Select **+ Create policy**.
@@ -259,7 +259,7 @@ See [Manage Communication Compliance policies](https://learn.microsoft.com/purvi
 - Policy is enabled.
 - Reviewer can access the Communication Compliance queue.
 
-## 4.14 Insider Risk Management (optional)
+### Task 2 - confirm Insider Risk Management (optional)
 
 1. In Purview, go to **Solutions** > **Insider Risk Management** > **Policies**.
 2. Switch to the **Agent policies** view.
@@ -272,9 +272,9 @@ See [Manage Communication Compliance policies](https://learn.microsoft.com/purvi
 
 ---
 
-**Section: Tests**
+## Section 6 - Tests
 
-## 4.15 Test - allowed grounding from A365-Open content
+### Task 1 - test allowed grounding from A365-Open content
 
 Run as the standard test user in Microsoft 365 Copilot or Teams using the PoC agent.
 
@@ -297,7 +297,7 @@ Check evidence:
 - Audit record shows successful access to A365-Open content.
 - No DLP alert is generated for this allowed interaction.
 
-## 4.16 Test - DLP block for A365-Restricted grounding
+### Task 2 - test DLP block for A365-Restricted grounding
 
 Run as the standard test user through Microsoft 365 Copilot / Copilot Chat with the PoC agent.
 
@@ -322,7 +322,7 @@ Check evidence:
 5. Open the `CopilotInteraction` record and inspect `AccessedResources`.
 6. Confirm the A365-Restricted file has a sensitivity label ID and policy details showing the restriction.
 
-## 4.17 Test - Exchange DLP block for email exfiltration
+### Task 3 - test Exchange DLP block for email exfiltration
 
 Run as the standard test user through the PoC agent.
 
@@ -350,7 +350,7 @@ Check evidence:
 4. Confirm sensitive info types such as `Credit Card Number` or `ABA Routing Number` were detected.
 5. Confirm the email was not delivered to the recipient.
 
-## 4.18 Test - Communication Compliance (optional)
+### Task 4 - test Communication Compliance (optional)
 
 Run as the standard test user.
 
@@ -369,11 +369,11 @@ Expected result:
 Check evidence:
 
 1. In Purview, go to **Communication Compliance** > **Alerts**.
-2. Open the policy you created in 2.11.
+2. Open the policy you created in Section 5, Task 1.
 3. Confirm the interaction appears in the reviewer queue.
 4. Confirm source attribution matches the agent platform (Microsoft 365 Copilot, Copilot Studio, or Microsoft Foundry, depending on template scope).
 
-## 4.19 Audit trail - what to prove
+### Task 5 - capture the audit trail
 
 For each major Purview test, capture:
 
@@ -395,7 +395,7 @@ For Copilot audit records, look for:
 - `Status`
 - `AgentId`
 
-## 4.20 Common failure modes
+## Section 7 - Common failure modes
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
@@ -405,24 +405,24 @@ For Copilot audit records, look for:
 | Test works in standalone bot but not in M365 Copilot | Different orchestration surface | Run DLP grounding tests through Microsoft 365 Copilot / Copilot Chat. |
 | Exchange email sends successfully | Email body did not contain detectable sensitive info or policy is not active | Confirm sensitive info types and retest after policy propagation. |
 | Advanced Hunting has no agent rows | Agent not registered/published or ingestion delay | Confirm Agent 365 registration and exercise the agent again. |
-| SDK-onboarded agent bypasses DLP #1 | Custom-engine agent does not run through Microsoft 365 Copilot orchestration | See Section 2.19 - Purview DLP for SDK-onboarded agents. |
+| SDK-onboarded agent bypasses DLP #1 | Custom-engine agent does not run through Microsoft 365 Copilot orchestration | See Section 8 - Purview DLP for SDK-onboarded agents. |
 
-## 4.21 Purview DLP for SDK-onboarded agents (Agent 365 SDK / custom-engine)
+## Section 8 - Purview DLP for SDK-onboarded agents
 
-### 2.19.1 What applies out of the box
+### Task 1 - confirm what applies out of the box
 
 Custom-engine Agent 365 agents (agents built with the Agent 365 SDK, LangChain, Semantic Kernel, OpenAI Agents SDK, AgentFramework, etc., and onboarded via [`microsoft/agent365-skills`](https://github.com/microsoft/agent365-skills)) do NOT run through the Microsoft 365 Copilot orchestrator. That has direct consequences for which controls in this runbook apply automatically:
 
 | Control from this runbook | Applies to SDK-onboarded agent? | Why |
 |---|---|---|
-| Sensitivity labels on SharePoint content (2.5, 2.6) | Yes | Labels persist on the file. Permission trimming and label-based access still evaluate against the calling user. |
-| DLP #1 - Copilot / Copilot Chat grounding block (2.7) | **No, not automatically** | The policy is scoped to Microsoft 365 Copilot / Copilot Chat locations. Custom-engine agents run outside that orchestration surface. |
-| DLP #2 - Exchange email block (2.8) | Yes | Enforced at Exchange transport. Any tool that sends mail through the user's Exchange mailbox is covered. |
-| Communication Compliance (2.11) | Partially | Requires the agent source to be listed in the Comm Compliance policy (Microsoft 365 Copilot, Copilot Studio, or Microsoft Foundry). Custom-engine SDK agents may need to be added explicitly, or covered via the audit path. |
-| Insider Risk Management default agent policy (2.12) | Yes | Applies once the agent is registered in Agent 365. |
+| Sensitivity labels on SharePoint content (Section 2) | Yes | Labels persist on the file. Permission trimming and label-based access still evaluate against the calling user. |
+| DLP #1 - Copilot / Copilot Chat grounding block (Section 3, Task 1) | **No, not automatically** | The policy is scoped to Microsoft 365 Copilot / Copilot Chat locations. Custom-engine agents run outside that orchestration surface. |
+| DLP #2 - Exchange email block (Section 3, Task 2) | Yes | Enforced at Exchange transport. Any tool that sends mail through the user's Exchange mailbox is covered. |
+| Communication Compliance (Section 5, Task 1) | Partially | Requires the agent source to be listed in the Comm Compliance policy (Microsoft 365 Copilot, Copilot Studio, or Microsoft Foundry). Custom-engine SDK agents may need to be added explicitly, or covered via the audit path. |
+| Insider Risk Management default agent policy (Section 5, Task 2) | Yes | Applies once the agent is registered in Agent 365. |
 | Purview Audit / Advanced Hunting visibility | Yes, if observability is instrumented | Requires the Agent 365 observability instrumentation (see [`instrument-observability`](https://github.com/microsoft/agent365-skills/tree/main/plugins/agent365/skills/instrument-observability)). |
 
-### 2.19.2 What extra config is needed
+### Task 2 - identify extra configuration needed
 
 To get equivalent grounding/prompt DLP on a custom-engine SDK agent, add the **Purview DLP guard** in the agent code path. The `agent365-skills` repository provides a ready-made skill for this:
 
@@ -431,7 +431,7 @@ To get equivalent grounding/prompt DLP on a custom-engine SDK agent, add the **P
 - Runs as: the agent's own Microsoft 365 identity, so Purview evaluates the request like a real user.
 - Supported languages: Node.js, Python, .NET (Agent 365 SDK).
 
-### 2.19.3 What a developer needs to do
+### Task 3 - wire the developer guard
 
 Goal: get Purview to see the user's prompt before your LLM does, and block it if it matches your DLP policy.
 
@@ -460,16 +460,16 @@ An admin creates a Purview DLP policy scoped to **AI apps** with the sensitive i
 
 That's it. Test with `4111 1111 1111 1111` in a prompt — the agent should reply "blocked by policy" and the LLM should never be called.
 
-### 2.19.4 Test for SDK-onboarded agents
+### Task 4 - test SDK-onboarded agents
 
-Run the same A365-Restricted grounding prompt from **4.16** and the exfiltration prompt from **4.17** against the SDK agent. Additionally:
+Run the same A365-Restricted grounding prompt from **Section 6, Task 2** and the exfiltration prompt from **Section 6, Task 3** against the SDK agent. Additionally:
 
 1. Send a message containing test sensitive info (for example a Visa sandbox card number: `4111 1111 1111 1111`).
 2. Confirm the agent returns a policy-blocked response and does NOT call the LLM.
 3. In Purview Audit and DLP Alerts, confirm a `processContent` audit entry and a DLP match are recorded against the agent identity.
 4. In Advanced Hunting, confirm the agent activity is visible in `AgentsInfo` and related tables.
 
-### 2.19.5 Common failure modes specific to SDK agents
+### Task 5 - troubleshoot SDK-specific failure modes
 
 | Symptom | Likely cause | Fix |
 |---|---|---|

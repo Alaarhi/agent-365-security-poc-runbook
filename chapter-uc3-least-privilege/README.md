@@ -3,7 +3,7 @@
 **Pillar:** Govern
 **What it proves:** a compromised agent reaches only what you scoped it to. Broad standing access is replaced by a bounded, just-in-time, revocable grant, and the deny is provable in the sign-in log.
 
-## Roles - least privilege
+## Section 1 - Roles, portals, and prerequisites
 
 | Task | Role | Notes |
 |---|---|---|
@@ -16,7 +16,7 @@
 
 Grant the read-only role first. Only the person creating the policy needs the Conditional Access Administrator role.
 
-## Portals
+### Task 1 - open the required portals
 
 - Microsoft Entra admin center - <https://entra.microsoft.com>
   - **Protection** > **Conditional Access** - policies for agent identities.
@@ -24,7 +24,7 @@ Grant the read-only role first. Only the person creating the policy needs the Co
   - **Identity Governance** > **Lifecycle Workflows** - sponsor changes.
   - **Monitoring** > **Sign-in logs** - allow/deny evidence.
 
-## Documentation
+### Task 2 - review documentation
 
 | Topic | Documentation |
 |---|---|
@@ -35,15 +35,15 @@ Grant the read-only role first. Only the person creating the policy needs the Co
 | Entitlement management | [What is entitlement management?](https://learn.microsoft.com/entra/id-governance/entitlement-management-overview) |
 | Lifecycle workflows | [Lifecycle Workflows overview](https://learn.microsoft.com/entra/id-governance/what-are-lifecycle-workflows) |
 
-## Prerequisites
+### Task 3 - confirm prerequisites
 
 Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md), [UC1](../chapter-uc1-agent-discovery/README.md), and [UC2](../chapter-uc2-identity-ownership/README.md).
 
 ---
 
-## Section 1 - Conditional Access
+## Section 2 - Conditional Access
 
-### Task - setup CA policy to block high-risk agents
+### Task 1 - setup CA policy to block high-risk agents
 
 Performed by **Conditional Access Administrator**.
 
@@ -56,7 +56,7 @@ Performed by **Conditional Access Administrator**.
 7. **Enable policy** = **Report-only** first (lets you observe the deny in the sign-in log without actually blocking the agent), then **On** after validation.
 8. **Create**.
 
-### Task - make an agent risky, confirm it is blocked
+### Task 2 - make an agent risky and confirm it is blocked
 
 #### Agent type required for this flow
 
@@ -119,9 +119,9 @@ Dismiss or confirm-safe the risk state on the lab agent when you are done so it 
 
 ---
 
-## Section 2 - Lifecycle Workflow sponsor change
+## Section 3 - Lifecycle Workflow sponsor change
 
-### Task - setup sponsor change via Lifecycle Workflows
+### Task 1 - setup sponsor change via Lifecycle Workflows
 
 Performed by **Lifecycle Workflows Administrator**.
 
@@ -133,7 +133,7 @@ Performed by **Lifecycle Workflows Administrator**.
    - Transfer agent identity sponsorships to manager.
 5. Save.
 
-### Task - test sponsor change workflow
+### Task 2 - test sponsor change workflow
 
 Performed by anyone with **Global Reader** on the workflow history.
 
@@ -148,9 +148,9 @@ Performed by anyone with **Global Reader** on the workflow history.
 
 ---
 
-## Section 3 - Just-in-time access via access package (optional)
+## Section 4 - Just-in-time access via access package (optional)
 
-### Task - setup just-in-time access via access package
+### Task 1 - setup just-in-time access via access package
 
 Performed by **Identity Governance Administrator**.
 
@@ -159,7 +159,7 @@ Performed by **Identity Governance Administrator**.
 3. Set expiry (for example 8 hours) so grants are time-bounded.
 4. Assign to the agent identity (or a group containing agent identities).
 
-### Task - test JIT grant expiry
+### Task 2 - test JIT grant expiry
 
 Performed by anyone with **Global Reader**.
 
@@ -171,14 +171,16 @@ Performed by anyone with **Global Reader**.
 - Inside the grant window: the call succeeds.
 - After the grant expires: the call fails and appears as denied in the sign-in log.
 
-## Evidence to capture
+## Section 5 - Evidence and common issues
+
+### Task 1 - capture evidence
 
 - Screenshot of the CA policy in **Report-only** and then in **On** state.
 - Sign-in log export showing at least one Deny and one Allow for the same agent identity within a short window.
 - Access package assignment record with expiry.
 - Lifecycle workflow run history if sponsor change is tested.
 
-## Common issues
+### Task 2 - troubleshoot common issues
 
 | Symptom | Likely cause | Fix |
 |---|---|---|

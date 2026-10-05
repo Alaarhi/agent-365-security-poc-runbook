@@ -3,7 +3,7 @@
 **Pillar:** Govern
 **What it proves:** anonymous agents become governable identities. Every agent gets a directory identity in Microsoft Entra ID with assigned **owners** and **sponsors** and a lifecycle state, so its access can be attributed and revoked like any other workload identity.
 
-## Concepts (short)
+## Section 1 - Concepts, roles, and prerequisites
 
 Microsoft Entra Agent ID has three related objects:
 
@@ -20,7 +20,7 @@ Each agent identity has:
 
 Owners and sponsors are shown as a single **Owners and Sponsors** column in the Entra admin center.
 
-## Roles - least privilege
+### Task 1 - confirm least-privilege roles
 
 Taken directly from [Manage agent identities in your organization](https://learn.microsoft.com/entra/agent-id/manage-agent-identities-admin#prerequisites).
 
@@ -36,7 +36,7 @@ Taken directly from [Manage agent identities in your organization](https://learn
 
 **Least privilege for the PoC validation step** is: no admin role at all. Any user can view agent identities. Grant the admin roles only to the person who actually configures.
 
-## Portal
+### Task 2 - open the identity portals
 
 Microsoft Entra admin center - <https://entra.microsoft.com> > **Entra ID** > **Agents**:
 
@@ -45,7 +45,7 @@ Microsoft Entra admin center - <https://entra.microsoft.com> > **Entra ID** > **
 
 Custom security attributes are under **Entra ID** > **Protect & secure** > **Custom security attributes**.
 
-## Documentation
+### Task 3 - review documentation
 
 | Topic | Documentation |
 |---|---|
@@ -57,11 +57,13 @@ Custom security attributes are under **Entra ID** > **Protect & secure** > **Cus
 | Custom security attributes | [Custom security attributes in Microsoft Entra ID](https://learn.microsoft.com/entra/fundamentals/custom-security-attributes-overview) |
 | Migrate Copilot Studio agents to Agent ID | [Recreate Copilot Studio agents in Microsoft Entra Agent ID](https://learn.microsoft.com/entra/agent-id/migrate-copilot-studio-agents-to-agent-id) |
 
-## Prerequisites
+### Task 4 - confirm prerequisites
 
-Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md) and [UC1 - Agent Discovery](../chapter-uc1-agent-discovery/README.md). For Copilot Studio agents, Entra Agent Identity is enabled at the Copilot Studio environment level in Section 2.1 below.
+Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md) and [UC1 - Agent Discovery](../chapter-uc1-agent-discovery/README.md). For Copilot Studio agents, Entra Agent Identity is enabled at the Copilot Studio environment level in Section 2, Task 1 below.
 
-## 2.1 Setup - enable Entra Agent Identity at the Copilot Studio environment level
+## Section 2 - Identity setup and validation tasks
+
+### Task 1 - enable Entra Agent Identity at the Copilot Studio environment level
 
 Required only if Copilot Studio agents are in scope. Performed by a **Power Platform Administrator** or environment admin.
 
@@ -71,7 +73,7 @@ Required only if Copilot Studio agents are in scope. Performed by a **Power Plat
 
 Once enabled, every new Copilot Studio agent created in that environment automatically receives an Entra Agent ID. Legacy agents created before enablement continue using traditional app registrations and can be migrated using the docs link above.
 
-## 2.2 Setup - confirm and assign owners and sponsors
+### Task 2 - confirm and assign owners and sponsors
 
 Performed by **Agent ID Administrator** or **Cloud Application Administrator**. (The agent's existing owner can also do this for their own agent without those roles.)
 
@@ -81,7 +83,7 @@ Performed by **Agent ID Administrator** or **Cloud Application Administrator**. 
 4. On the agent's management page, open **Owners and sponsors**.
 5. Confirm the correct **owner** (technical administrator) and **sponsor** (business accountable) are listed. Add any missing entries.
 
-## 2.3 (Optional) Setup - custom security attributes for governance
+### Task 3 - configure custom security attributes for governance (optional)
 
 Performed by **Attribute Definition Administrator** (step 1-2) then **Attribute Assignment Administrator** (step 3).
 
@@ -100,7 +102,7 @@ Performed by **Attribute Definition Administrator** (step 1-2) then **Attribute 
    | `Project` | `Agent365PoC` |
    | `Environment` | `Pilot` |
 
-## 2.4 Test - identity and ownership (no admin role required)
+### Task 4 - test identity and ownership
 
 Performed by any Microsoft Entra user.
 
@@ -128,13 +130,15 @@ Performed by any Microsoft Entra user.
 - Owner is consistent between Entra and the Agent 365 Registry.
 - If custom security attributes are used, filtering by `AgentGovernance/Project = Agent365PoC` returns every PoC agent in one list.
 
-## Evidence to capture
+## Section 3 - Evidence and common issues
+
+### Task 1 - capture evidence
 
 - Export of the Agent identities list for the PoC (Name, Object ID, Status, Blueprint App ID, Owners and Sponsors, CSA values).
 - Screenshot of one agent's details page showing Owners and Sponsors, granted permissions, and sign-in log entries.
 - Screenshot of the Agent 365 Registry with matching owner.
 
-## Common issues
+### Task 2 - troubleshoot common issues
 
 | Symptom | Likely cause | Fix |
 |---|---|---|

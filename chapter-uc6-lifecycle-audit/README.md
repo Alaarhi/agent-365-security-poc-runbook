@@ -3,7 +3,7 @@
 **Pillar:** Observe / Govern
 **What it proves:** an agent can be retired cleanly and provably. Block, deactivate, delete - no orphaned identity, no leftover permission, and an audit trail that satisfies an auditor.
 
-## Roles - least privilege
+## Section 1 - Roles, portals, and prerequisites
 
 | Task | Role | Notes |
 |---|---|---|
@@ -14,14 +14,14 @@
 
 Reviewers should hold only the read-only roles. The AI Administrator role is required only when the lifecycle action is executed.
 
-## Portals
+### Task 1 - open the required portals
 
 - Microsoft 365 admin center - <https://admin.cloud.microsoft> > **Agents** > lifecycle actions.
 - Microsoft Purview portal - <https://purview.microsoft.com> > **Audit**.
 - Microsoft Defender portal - <https://security.microsoft.com> > **Hunting** > **Advanced hunting**.
 - Microsoft Entra admin center - <https://entra.microsoft.com> > **Enterprise applications** (confirm Agent ID retired).
 
-## Documentation
+### Task 2 - review documentation
 
 | Topic | Documentation |
 |---|---|
@@ -30,11 +30,13 @@ Reviewers should hold only the read-only roles. The AI Administrator role is req
 | `AgentsInfo` table | [`AgentsInfo` advanced hunting table](https://learn.microsoft.com/defender-xdr/advanced-hunting-agentsinfo-table) |
 | Agent lifecycle in Agent 365 | [Overview of Microsoft Agent 365](https://learn.microsoft.com/microsoft-agent-365/overview) |
 
-## Prerequisites
+### Task 3 - confirm prerequisites
 
 Complete Chapters 0, UC1, UC2, UC4, and UC5. Purview Audit must be on, and the agents should have generated real activity (prompts, tool calls, outputs) before you attempt lifecycle actions - the point of this UC is to prove the trail is complete.
 
-## Test - retrieve an end-to-end audit trail for one agent
+## Section 2 - Lifecycle and audit validation tasks
+
+### Task 1 - retrieve an end-to-end audit trail for one agent
 
 Performed by **Audit Reader**.
 
@@ -60,7 +62,7 @@ CloudAppEvents
 | sort by Timestamp desc
 ```
 
-## Test - block the agent
+### Task 2 - block the agent
 
 Performed by **AI Administrator**.
 
@@ -73,7 +75,7 @@ Performed by **AI Administrator**.
 - The invocation fails.
 - The failure appears in the audit log tied to the agent identity.
 
-## Test - deactivate the agent
+### Task 3 - deactivate the agent
 
 Performed by **AI Administrator**.
 
@@ -87,7 +89,7 @@ Performed by **AI Administrator**.
 - No new tokens are issued to the agent.
 - Audit trail shows the deactivate action with actor, timestamp, and target.
 
-## Test - delete the agent (final retire)
+### Task 4 - delete the agent (final retire)
 
 Performed by **AI Administrator**.
 
@@ -105,7 +107,9 @@ Performed by **AI Administrator**.
 - No leftover permission grants for the retired agent.
 - Historical audit records are preserved for the retention window.
 
-## Evidence to capture
+## Section 3 - Evidence and common issues
+
+### Task 1 - capture evidence
 
 - Audit search export for the agent's full active window.
 - Screenshots or log entries for the Block, Deactivate, and Delete actions with actor + timestamp.
@@ -113,7 +117,7 @@ Performed by **AI Administrator**.
 - Confirmation that the Entra Agent ID no longer exists (or is disabled).
 - Retention window confirmed against tenant setting.
 
-## Common issues
+### Task 2 - troubleshoot common issues
 
 | Symptom | Likely cause | Fix |
 |---|---|---|

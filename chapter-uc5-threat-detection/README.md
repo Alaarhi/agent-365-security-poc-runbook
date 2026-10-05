@@ -3,7 +3,7 @@
 **Pillar:** Secure
 **What it proves:** your SOC sees agents as first-class actors. A simulated risky action alerts the SOC, and the owner contains it within minutes.
 
-## Roles - least privilege
+## Section 1 - Roles, objective, and prerequisites
 
 | Task | Role | Notes |
 |---|---|---|
@@ -15,7 +15,7 @@
 
 Grant Security Reader first. Escalate to Security Administrator or Security Operator only when a change is actually being made.
 
-## 1.1 Objective
+### Task 1 - confirm objective
 
 Connect Agent 365 to Microsoft Defender so you can validate:
 
@@ -27,7 +27,7 @@ Connect Agent 365 to Microsoft Defender so you can validate:
 
 > AI agent protection in Microsoft Defender is currently in **public preview**. The Microsoft Defender preview terms apply.
 
-## 1.2 Documentation links
+### Task 2 - review documentation
 
 | Topic | Documentation |
 |---|---|
@@ -42,11 +42,13 @@ Connect Agent 365 to Microsoft Defender so you can validate:
 | Custom detections | [Create and manage custom detection rules](https://learn.microsoft.com/defender-xdr/custom-detection-rules) |
 | Copilot Studio external security provider | [Enable external threat detection and protection for Copilot Studio custom agents](https://learn.microsoft.com/microsoft-copilot-studio/external-security-provider) |
 
-## 1.3 Defender prerequisites
+### Task 3 - confirm Defender prerequisites
 
-Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md). Agent 365 should be onboarded with at least one PoC agent published, and the test admin has **Security Administrator** or higher. For Copilot Studio real-time protection, a **Power Platform Administrator** is available for Section 1.6. For local agent protection (optional, Section 1.7), Microsoft Defender for Endpoint runs in **active mode** on the target endpoints.
+Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md). Agent 365 should be onboarded with at least one PoC agent published, and the test admin has **Security Administrator** or higher. For Copilot Studio real-time protection, a **Power Platform Administrator** is available for Section 2, Task 3. For local agent protection (optional, Section 2, Task 4), Microsoft Defender for Endpoint runs in **active mode** on the target endpoints.
 
-## 1.4 Setup - open the Security for AI Get started wizard
+## Section 2 - Defender setup tasks
+
+### Task 1 - open the Security for AI Get started wizard
 
 Performed by **Security Administrator**.
 
@@ -62,7 +64,7 @@ The remaining steps in this chapter walk through the other items in the checklis
 - The **Enable** toggle is on.
 - **Agent 365** on the setup checklist is marked **Done**.
 
-## 1.5 Setup - connect the Microsoft 365 connector
+### Task 2 - connect the Microsoft 365 connector
 
 Required for investigation and Advanced Hunting over AI agent activity. Performed by **Security Administrator**.
 
@@ -80,11 +82,11 @@ Required for investigation and Advanced Hunting over AI agent activity. Performe
 
 > If the Microsoft 365 connector is not connected, Copilot Studio real-time protection continues to block suspicious actions during runtime, but related alerts and incidents will not appear in the Defender portal.
 
-## 1.6 Setup - connect Copilot Studio real-time protection
+### Task 3 - connect Copilot Studio real-time protection
 
 Required only if Copilot Studio custom agents are in scope. Performed jointly by **Security Administrator** (Defender) and **Power Platform Administrator** (Power Platform).
 
-### 1.6.1 In the Defender portal (Security Admin)
+#### Step 1 - configure the Defender portal side
 
 1. On the **Get started** page, select the **Copilot Studio** step. The **Copilot Studio real-time protection** pane opens.
 2. Toggle **Real-time protection** on.
@@ -92,7 +94,7 @@ Required only if Copilot Studio custom agents are in scope. Performed jointly by
 
 The **Get started** page shows a list of **Identified Power Platform Admins** who have permission to complete the Power Platform side.
 
-### 1.6.2 In Power Platform (Power Platform Admin)
+#### Step 2 - configure the Power Platform side
 
 Follow the current docs for [Enable external threat detection and protection for Copilot Studio custom agents](https://learn.microsoft.com/microsoft-copilot-studio/external-security-provider):
 
@@ -102,7 +104,7 @@ Follow the current docs for [Enable external threat detection and protection for
 
 > The App ID used in Power Platform must be the **same** as the App ID used in the Microsoft Entra ID application.
 
-### 1.6.3 Finish in the Defender portal (Security Admin)
+#### Step 3 - finish in the Defender portal
 
 1. In the **Copilot Studio real-time protection** pane, paste the App ID into the **App ID** field.
 2. Select **Save**.
@@ -115,7 +117,7 @@ If the App ID was recently updated in Power Platform, allow up to one minute for
 - App ID is saved without a validation error.
 - The **Get started** checklist marks the **Copilot Studio** step **Connected**.
 
-## 1.7 Setup (optional) - local AI agent runtime protection
+### Task 4 - enable local AI agent runtime protection (optional)
 
 Required only if the PoC covers AI agents that run locally on endpoints.
 
@@ -128,7 +130,9 @@ Local agents are onboarded separately from cloud agents.
 
 - Local agent protection is enabled on in-scope endpoints.
 
-## 1.8 Test - agent inventory in Advanced Hunting
+## Section 3 - Defender validation tasks
+
+### Task 1 - test agent inventory in Advanced Hunting
 
 Open **Defender portal** > **Hunting** > **Advanced hunting** and run:
 
@@ -146,7 +150,7 @@ AgentsInfo
 - Your PoC agents appear in the result set.
 - Agent names, platforms, owners, and lifecycle state match the PoC configuration.
 
-## 1.9 Test - cloud app activity
+### Task 2 - test cloud app activity
 
 Run:
 
@@ -163,7 +167,7 @@ CloudAppEvents
 - Relevant Copilot, Teams, or cloud app activity appears after the test user exercises the agent.
 - No unexpected users or locations are present.
 
-## 1.10 Test - weak agent configuration hunt
+### Task 3 - test weak agent configuration hunt
 
 Run:
 
@@ -183,7 +187,7 @@ AgentsInfo
 - A clean environment may return no rows.
 - If rows appear, review whether the agents are missing instructions or guardrails before progressing.
 
-## 1.11 Test - ownerless agent hunt
+### Task 4 - test ownerless agent hunt
 
 Run:
 
@@ -208,7 +212,7 @@ AgentsInfo
 - No ownerless active PoC agents.
 - Any result should be triaged with the agent owner or identity governance team.
 
-## 1.12 Optional - save a custom detection
+### Task 5 - save a custom detection (optional)
 
 1. Take a validated hunting query.
 2. Select **Save** > **Save as**.

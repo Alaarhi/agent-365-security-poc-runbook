@@ -3,7 +3,7 @@
 **Pillar:** Observe
 **What it proves:** you cannot govern what you cannot see. Every agent in the tenant surfaces in one registry, including the ones nobody registered, each with a named, accountable owner.
 
-## Roles - least privilege
+## Section 1 - Roles, scope, and prerequisites
 
 | Task | Role | Notes |
 |---|---|---|
@@ -13,7 +13,7 @@
 
 Grant the read-only role first; only grant the setup role to whoever will make configuration changes.
 
-## Scope - agent types and discovery paths
+### Task 1 - confirm agent types and discovery paths
 
 The Agent Registry discovers three categories of agent. Each has a different discovery path and surfaces different metadata. Sample agents of each type are provided in [`agent-samples/`](agent-samples/).
 
@@ -25,11 +25,11 @@ The Agent Registry discovers three categories of agent. Each has a different dis
 
 Each sample folder has a README that walks through the discovery path step by step.
 
-## Portal
+### Task 2 - open the Agent 365 portal
 
 Microsoft 365 admin center - <https://admin.cloud.microsoft> > **Agents**.
 
-## Documentation
+### Task 3 - review documentation
 
 | Topic | Documentation |
 |---|---|
@@ -37,11 +37,13 @@ Microsoft 365 admin center - <https://admin.cloud.microsoft> > **Agents**.
 | Agent Registry | [Agent Registry in Microsoft Agent 365](https://learn.microsoft.com/microsoft-agent-365/administrator/agent-registry) |
 | Connected platforms | [Connected platforms for Agent 365](https://learn.microsoft.com/microsoft-agent-365/administrator/connected-platforms) |
 
-## Prerequisites
+### Task 4 - confirm prerequisites
 
 Complete [Chapter 0 - Prerequisites](../chapter-0-prerequisites/README.md). Agent 365 should be enabled and at least one Microsoft-native agent (Copilot Studio, Foundry, or Microsoft 365 Copilot Agent Builder) should exist so there is content to discover. If connected platforms are in scope (AWS Bedrock, Google Vertex AI, Databricks Genie, Snowflake Cortex, Salesforce Agentforce), their tenant-side integrations are configured in the optional connected-platforms section at the end of this chapter.
 
-## Setup steps
+## Section 2 - Discovery setup and validation tasks
+
+### Task 1 - setup Agent Registry discovery
 
 Performed by the AI Administrator.
 
@@ -57,7 +59,7 @@ Performed by the AI Administrator.
 - Each agent shows a named business owner.
 - Connected platform syncs report healthy.
 
-## Test - registry inventory
+### Task 2 - test registry inventory
 
 Performed by anyone with **AI Reader**.
 
@@ -72,7 +74,7 @@ Performed by anyone with **AI Reader**.
 - Every agent has a business owner.
 - No unknown or orphaned agents remain.
 
-## Test - Agent Map
+### Task 3 - test Agent Map
 
 Performed by anyone with **AI Reader**.
 
@@ -85,13 +87,15 @@ Performed by anyone with **AI Reader**.
 - Agent Map renders known interactions.
 - Discovered agents that were not previously known are triaged with their owner.
 
-## Evidence to capture
+## Section 3 - Evidence and common issues
+
+### Task 1 - capture evidence
 
 - Registry export (CSV/JSON) with owner column populated.
 - Agent Map screenshot.
 - List of any newly discovered / previously unknown agents, with owner assignment status.
 
-## Common issues
+### Task 2 - troubleshoot common issues
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
@@ -100,15 +104,15 @@ Performed by anyone with **AI Reader**.
 | Connected platform not syncing | Registry sync not configured or credentials expired | Reconfigure Registry sync per platform documentation. |
 | SDK agent missing | `a365 setup all` not completed for that project | Rerun `a365 setup all` and confirm Blueprint is registered. |
 
-## Optional - connected platforms (AWS Bedrock, Google Vertex AI, Databricks Genie)
+## Section 4 - Optional connected-platform discovery
 
 Agent 365 can pull agents from non-Microsoft platforms into the same Registry so they are visible, assignable to owners, and in scope for the governance and audit workstreams. Setup is a one-time per-platform configuration in the Microsoft 365 admin center. All three paths below share the same pattern - prepare the source platform, register a connection, and let Registry sync populate the inventory on its schedule.
 
-### Common portal entry point
+### Task 1 - open the connected-platforms entry point
 
 Microsoft 365 admin center - <https://admin.cloud.microsoft> > **Agents** > **Connected platforms** > **+ Add platform**.
 
-### AWS Bedrock
+### Task 2 - connect AWS Bedrock
 
 | Step | What to do |
 |---|---|
@@ -123,7 +127,7 @@ Documentation:
 - [IAM for Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/security-iam.html)
 - [Agent 365 - Connected platforms](https://learn.microsoft.com/microsoft-agent-365/administrator/connected-platforms)
 
-### Google Vertex AI
+### Task 3 - connect Google Vertex AI
 
 | Step | What to do |
 |---|---|
@@ -139,7 +143,7 @@ Documentation:
 - [Workload Identity Federation with Microsoft Entra](https://cloud.google.com/iam/docs/workload-identity-federation)
 - [Agent 365 - Connected platforms](https://learn.microsoft.com/microsoft-agent-365/administrator/connected-platforms)
 
-### Databricks Genie
+### Task 4 - connect Databricks Genie
 
 | Step | What to do |
 |---|---|
@@ -154,7 +158,7 @@ Documentation:
 - [Databricks service principals](https://learn.microsoft.com/azure/databricks/admin/users-groups/service-principals)
 - [Agent 365 - Connected platforms](https://learn.microsoft.com/microsoft-agent-365/administrator/connected-platforms)
 
-### Test - connected agents in the Registry
+### Task 5 - test connected agents in the Registry
 
 Performed by anyone with **AI Reader**.
 
@@ -164,7 +168,7 @@ Performed by anyone with **AI Reader**.
 4. Confirm each has an assignable owner.
 5. Export the filtered list as evidence.
 
-### Common issues
+### Task 6 - troubleshoot connected-platform issues
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
@@ -173,11 +177,11 @@ Performed by anyone with **AI Reader**.
 | Partial sync | Permission scoped too narrowly on the source platform | Grant list + get permissions across the agent resources. |
 | Agent appears without owner | Owner is set in Agent 365, not inherited from the source | Assign a business owner in the Agent 365 Registry UI. |
 
-## Optional - programmatic discovery with Microsoft Graph
+## Section 5 - Optional programmatic discovery with Microsoft Graph
 
 The UI in the Microsoft 365 admin center is the fastest path for a visual review, but Microsoft Graph exposes the same inventory programmatically. Use this when you need scheduled exports, external reporting, CMDB sync, or automated reconciliation against a source of truth.
 
-### What you can retrieve
+### Task 1 - confirm retrievable Graph signals
 
 | Signal | Where to get it in Graph |
 |---|---|
@@ -190,7 +194,7 @@ The UI in the Microsoft 365 admin center is the fastest path for a visual review
 | Audit of lifecycle actions on an agent (create, update, block, delete) | `/auditLogs/directoryAudits` and Microsoft Purview Audit APIs |
 | Copilot interaction records (for UC4/UC6 cross-check) | Microsoft Purview Audit via Microsoft 365 Management Activity API, or Graph audit APIs where available |
 
-### Minimum required Graph permissions (least-privilege)
+### Task 2 - confirm minimum Graph permissions
 
 | Scope | Why |
 |---|---|
@@ -203,7 +207,7 @@ The UI in the Microsoft 365 admin center is the fastest path for a visual review
 
 Prefer delegated permissions scoped to a read-only account. Only grant application permissions for an unattended service that needs to run outside a user context.
 
-### Example - list agent service principals
+### Task 3 - list agent service principals
 
 ```http
 GET https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalType eq 'Application'&$select=id,displayName,appId,servicePrincipalType,tags
@@ -218,7 +222,7 @@ ConsistencyLevel: eventual
 Authorization: Bearer <token>
 ```
 
-### Example - get sign-in activity for one agent
+### Task 4 - get sign-in activity for one agent
 
 ```http
 GET https://graph.microsoft.com/v1.0/auditLogs/signIns?$filter=appId eq '<agent-app-id>'&$top=50
@@ -227,14 +231,14 @@ Authorization: Bearer <token>
 
 Returns the service-principal sign-ins for the agent, including Conditional Access decisions. Used in [UC3](../chapter-uc3-least-privilege/README.md) and [UC6](../chapter-uc6-lifecycle-audit/README.md).
 
-### Example - read custom security attributes on an agent
+### Task 5 - read custom security attributes on an agent
 
 ```http
 GET https://graph.microsoft.com/v1.0/servicePrincipals/{id}?$select=id,displayName,customSecurityAttributes
 Authorization: Bearer <token>
 ```
 
-### Documentation
+### Task 6 - review Graph documentation
 
 | Topic | Documentation |
 |---|---|
@@ -249,7 +253,7 @@ Authorization: Bearer <token>
 | Entra Agent ID (reference) | [Microsoft Entra Agent ID](https://learn.microsoft.com/entra/agent-id/overview) |
 | PowerShell with Graph | [Microsoft Graph PowerShell SDK](https://learn.microsoft.com/powershell/microsoftgraph/overview) |
 
-### When to use Graph vs the portal
+### Task 7 - choose Graph or portal
 
 | Need | Use |
 |---|---|

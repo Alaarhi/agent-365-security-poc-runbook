@@ -2,7 +2,7 @@
 
 Baseline steps and readiness checks before running any of the six use cases.
 
-## What this chapter covers
+## Section 1 - Chapter overview
 
 - Which use cases are in scope for this PoC.
 - Access and licensing.
@@ -12,7 +12,7 @@ Baseline steps and readiness checks before running any of the six use cases.
 - SharePoint content for Purview tests (UC4).
 - Propagation windows.
 
-## Least-privilege model
+## Section 2 - Least-privilege model
 
 Every chapter in this runbook uses the same pattern:
 
@@ -21,7 +21,7 @@ Every chapter in this runbook uses the same pattern:
 
 Grant read-only roles first. Only grant setup roles to whoever will actually make the change.
 
-## 0.1 Confirm PoC scope
+### Task 1 - confirm PoC scope
 
 Agree upfront which use cases are in scope for this PoC:
 
@@ -34,7 +34,7 @@ Agree upfront which use cases are in scope for this PoC:
 | UC5 - Threat Detection & Protection (Defender) | Secure | Yes |
 | UC6 - Lifecycle & Audit | Observe / Govern | Yes |
 
-## 0.2 Confirm access and licensing
+### Task 2 - confirm access and licensing
 
 Confirm the PoC team has:
 
@@ -45,7 +45,7 @@ Confirm the PoC team has:
 - Access to the Microsoft Defender portal (<https://security.microsoft.com>).
 - Access to the Power Platform admin center (if Copilot Studio is in scope).
 
-## 0.3 Roles at a glance
+### Task 3 - review roles at a glance
 
 Assign these Active for the PoC window. Full role detail is in each chapter.
 
@@ -64,17 +64,17 @@ Two rules that save PoC time:
 1. Roles assigned as **eligible-only** show up as "you lack permission" to the admin at the moment they try to act. Always assign the role **Active** for the PoC window. Use PIM only for Global Administrator.
 2. Split the role assignments explicitly - do not give the admin who executes a change the read-only reviewer's role, and do not give the reviewer the admin role.
 
-## 0.4 Confirm test identities
+### Task 4 - confirm test identities
 
 Prepare at least two accounts:
 
 | Account | Purpose | Roles assigned |
 |---|---|---|
-| Test admin | Configures Agent 365, Entra, Purview, Defender, SharePoint, labels, policies, and agent publishing. | Setup roles per the table in 0.3, scoped to the use cases in scope. |
+| Test admin | Configures Agent 365, Entra, Purview, Defender, SharePoint, labels, policies, and agent publishing. | Setup roles per the roles-at-a-glance table, scoped to the use cases in scope. |
 | Standard test user | Runs the agent tests. Permission trimming, labels, and DLP evaluate against this user. | Standard user with access to the PoC agent, SharePoint site, and Teams / M365 Copilot as required. |
-| Reviewer / auditor (optional) | Views evidence without making changes. | Read-only / validation roles per the table in 0.3. |
+| Reviewer / auditor (optional) | Views evidence without making changes. | Read-only / validation roles per the roles-at-a-glance table. |
 
-## 0.5 Prepare agents
+### Task 5 - prepare agents
 
 Before starting UC1:
 
@@ -83,7 +83,7 @@ Before starting UC1:
 3. If using Agent 365 registration, confirm the agent appears in the Agent 365 registry.
 4. Exercise the agent with a few baseline prompts so activity exists for logs, hunting, and audit.
 
-## 0.6 Prepare SharePoint content for Purview tests (UC4)
+### Task 6 - prepare SharePoint content for Purview tests (UC4)
 
 Create a dedicated SharePoint site or folder for PoC content. A dedicated site is preferred for clean permissions and easy teardown.
 
@@ -95,11 +95,11 @@ Recommended content categories:
 | Public or broadly shareable operational documents | A365-Open | Used as the positive control for allowed grounding. |
 | Financial identifiers in invoice or ledger content | A365-Restricted | Used to prove Exchange DLP blocks outbound email exfiltration. |
 
-Sample files are provided for UC4 testing. See [UC4 - Sensitive Data Protection](../chapter-uc4-sensitive-data-protection/README.md#2-6-prepared-sample-content) for the file list, labeling guidance, and the samples folder (`chapter-uc4-sensitive-data-protection/samples/`).
+Sample files are provided for UC4 testing. See [UC4 - Sensitive Data Protection](../chapter-uc4-sensitive-data-protection/README.md#section-2---sensitivity-labels-and-sharepoint-content) for the file list, labeling guidance, and the samples folder (`chapter-uc4-sensitive-data-protection/samples/`).
 
 All sample files use publicly documented test values (Visa/MC/Amex/Discover sandbox card numbers and Federal Reserve public test routing numbers). No real PII.
 
-## 0.7 Important propagation windows
+### Task 7 - plan for propagation windows
 
 Plan for propagation time:
 
