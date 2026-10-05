@@ -31,6 +31,7 @@ Grant the read-only role first. Only the person creating the policy needs the Co
 | Conditional Access for agents | [Conditional Access for agents](https://learn.microsoft.com/entra/identity/conditional-access/agent-id) |
 | Target agent identities in CA | [Target agent identities in Conditional Access](https://learn.microsoft.com/entra/identity/conditional-access/howto-target-agent-identities) |
 | Recommended policies for autonomous agents | [Recommended policies for autonomous agents](https://learn.microsoft.com/entra/identity/conditional-access/policy-autonomous-agents) |
+| Lab reference - risk and custom security attributes | [Conditional Access for Agents: Blocking Agent Identities with Risk and Custom Security Attributes](https://derkvanderwoude.medium.com/conditional-access-for-agents-blocking-agent-identities-with-risk-and-custom-security-attributes-2ec3d6bf995b) |
 | Entitlement management | [What is entitlement management?](https://learn.microsoft.com/entra/id-governance/entitlement-management-overview) |
 | Lifecycle workflows | [Lifecycle Workflows overview](https://learn.microsoft.com/entra/id-governance/what-are-lifecycle-workflows) |
 
@@ -57,6 +58,18 @@ Performed by **Conditional Access Administrator**.
 
 ## 3.2 Test - make an agent risky, confirm it is blocked
 
+### Agent type required for this flow
+
+Use a **non-OBO Agent 365 agent identity**: an autonomous agent registered in Agent 365 whose **agent blueprint app** authenticates with **client credentials** (client secret or certificate) and then exchanges the token for the **agent identity** through the FMI/token-exchange flow.
+
+Do **not** use an OBO / delegated-user AI Teammate flow for this test. This scenario is meant to prove Conditional Access enforcement on the **agent identity's service-principal token exchange**, not a user-delegated OBO token. If the agent only obtains tokens on behalf of a signed-in user, this lab will not clearly prove the high-risk agent identity block.
+
+The expected authentication shape is:
+
+1. **T1 - blueprint token-exchange token:** the blueprint app uses `client_credentials` with scope `api://AzureADTokenExchange/.default` and `fmi_path=<agent-object-id>`.
+2. **T2 - resource token as the agent identity:** the agent identity uses T1 as a JWT bearer client assertion to request the resource token, for example `https://graph.microsoft.com/.default`.
+3. Conditional Access for agents evaluates the **T2** request. T1 can still succeed; the block is proven when T2 fails.
+
 ### Step 1 - make the lab agent high-risk
 
 Rather than wait for real risky behavior, flag a lab agent directly through Microsoft Graph. Any user with permission to run the Identity Protection `confirmCompromised` action can do this (for example from Graph Explorer):
@@ -72,7 +85,15 @@ A `204 No Content` response confirms the risk state. The agent appears under **E
 
 ### Step 2 - exercise the agent
 
-Have the agent attempt a call that requires a token (for example a Microsoft Graph request as part of its normal flow).
+Have the **non-OBO, client-credentials-based agent** attempt a call that requires a new resource token (for example a Microsoft Graph request as part of its normal flow).
+
+For a deterministic lab test, run a two-leg token-exchange script against the same agent identity:
+
+1. Request T1 with the blueprint app credential, `scope=api://AzureADTokenExchange/.default`, and `fmi_path=<agent-object-id>`.
+2. Request T2 with `client_assertion=T1`, `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer`, and the target resource scope, for example `https://graph.microsoft.com/.default`.
+3. Treat a T2 failure with the Conditional Access policy in the sign-in log as the successful test result.
+
+The reference article includes a sample PowerShell script for this exact T1-to-T2 validation pattern: [AgentID-AuthenticationFlow.ps1](https://github.com/Blue161616/Agent-Identity/blob/main/AgentID-AuthenticationFlow.ps1).
 
 ### Step 3 - confirm the block in the sign-in log
 
@@ -86,6 +107,7 @@ Performed by anyone with **Global Reader**, **Reports Reader**, or **Security Re
 ### Expected result
 
 - The agent's token request fails after it is marked high-risk.
+- The failure is on the **T2 resource-token request** for the **agent identity**, not on a user OBO token.
 - The sign-in log shows the deny with the policy name attached.
 - A separate run against a low-risk agent (no `confirmCompromised` flag) succeeds, proving the policy fires on risk, not on identity.
 
