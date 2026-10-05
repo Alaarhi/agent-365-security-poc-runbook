@@ -119,9 +119,36 @@ Dismiss or confirm-safe the risk state on the lab agent when you are done so it 
 
 ---
 
-**Section: 2. Lifecycle Workflow - sponsor change**
+**Section: 2. Just-in-time access via access package (optional)**
 
-## 3.3 Setup - sponsor change via Lifecycle Workflows
+## 3.3 Setup - just-in-time access via access package (optional)
+
+Performed by **Identity Governance Administrator**.
+
+1. Open <https://entra.microsoft.com> > **Identity Governance** > **Entitlement management** > **Access packages** > **New access package**.
+2. Scope the package to the specific resource(s) the agent needs.
+3. Set expiry (for example 8 hours) so grants are time-bounded.
+4. Assign to the agent identity (or a group containing agent identities).
+
+## 3.4 Test - JIT grant expires
+
+Performed by anyone with **Global Reader**.
+
+1. Confirm the agent can invoke the target resource inside the grant window.
+2. After the grant window expires, retry.
+
+### Expected result
+
+- Inside the grant window: the call succeeds.
+- After the grant expires: the call fails and appears as denied in the sign-in log.
+
+---
+
+**Task 4 - Lifecycle Workflow sponsor change**
+
+This is a separate governance task, not part of the UC3 Conditional Access token-block test.
+
+## 4.1 Setup - sponsor change via Lifecycle Workflows
 
 Performed by **Lifecycle Workflows Administrator**.
 
@@ -133,7 +160,7 @@ Performed by **Lifecycle Workflows Administrator**.
    - Transfer agent identity sponsorships to manager.
 5. Save.
 
-## 3.4 Test - sponsor change workflow
+## 4.2 Test - sponsor change workflow
 
 Performed by anyone with **Global Reader** on the workflow history.
 
@@ -146,37 +173,12 @@ Performed by anyone with **Global Reader** on the workflow history.
 - The notification email is sent to the manager.
 - The workflow run history shows the transfer with the actor, timestamp, and target agent.
 
----
-
-**Section: 3. Just-in-time access via access package (optional)**
-
-## 3.5 Setup - just-in-time access via access package (optional)
-
-Performed by **Identity Governance Administrator**.
-
-1. Open <https://entra.microsoft.com> > **Identity Governance** > **Entitlement management** > **Access packages** > **New access package**.
-2. Scope the package to the specific resource(s) the agent needs.
-3. Set expiry (for example 8 hours) so grants are time-bounded.
-4. Assign to the agent identity (or a group containing agent identities).
-
-## 3.6 Test - JIT grant expires
-
-Performed by anyone with **Global Reader**.
-
-1. Confirm the agent can invoke the target resource inside the grant window.
-2. After the grant window expires, retry.
-
-### Expected result
-
-- Inside the grant window: the call succeeds.
-- After the grant expires: the call fails and appears as denied in the sign-in log.
-
 ## Evidence to capture
 
 - Screenshot of the CA policy in **Report-only** and then in **On** state.
 - Sign-in log export showing at least one Deny and one Allow for the same agent identity within a short window.
 - Access package assignment record with expiry.
-- Lifecycle workflow run history if used.
+- Task 4 lifecycle workflow run history if sponsor change is tested.
 
 ## Common issues
 
