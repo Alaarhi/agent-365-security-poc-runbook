@@ -117,7 +117,7 @@ If the App ID was recently updated in Power Platform, allow up to one minute for
 - App ID is saved without a validation error.
 - The **Get started** checklist marks the **Copilot Studio** step **Connected**.
 
-### Task 4 - enable local AI agent runtime protection (optional)
+### Task 4 - enable local AI agent runtime protection (Optional)
 
 Required only if the PoC covers AI agents that run locally on endpoints.
 
@@ -212,7 +212,7 @@ AgentsInfo
 - No ownerless active PoC agents.
 - Any result should be triaged with the agent owner or identity governance team.
 
-### Task 5 - save a custom detection (optional)
+### Task 5 - save a custom detection (Optional)
 
 1. Take a validated hunting query.
 2. Select **Save** > **Save as**.

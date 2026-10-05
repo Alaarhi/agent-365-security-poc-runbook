@@ -9,7 +9,7 @@
 |---|---|---|
 | Setup / configuration | **AI Administrator** | Required to enable Agent 365, configure Registry sync for connected platforms, approve agents, and change registry settings. Assign Active for the PoC window. |
 | Read-only / validation | **AI Reader** (or **Global Reader**) | Sufficient to view the Agent Registry, list agents, see owners, and export the registry. Use this role for reviewers, auditors, and anyone verifying results. |
-| Optional (SDK agents) | **Agent ID Developer** | Required for developers onboarding custom-built agents via the Agent 365 SDK. Not required for viewing. |
+| SDK agents (Optional) | **Agent ID Developer** | Required for developers onboarding custom-built agents via the Agent 365 SDK. Not required for viewing. |
 
 Grant the read-only role first; only grant the setup role to whoever will make configuration changes.
 
@@ -95,7 +95,7 @@ Performed by anyone with **AI Reader**.
 - Agent Map screenshot.
 - List of any newly discovered / previously unknown agents, with owner assignment status.
 
-## Section 4 - Optional connected-platform discovery
+## Section 4 - Connected-platform discovery (Optional)
 
 Agent 365 can pull agents from non-Microsoft platforms into the same Registry so they are visible, assignable to owners, and in scope for the governance and audit workstreams. Setup is a one-time per-platform configuration in the Microsoft 365 admin center. All three paths below share the same pattern - prepare the source platform, register a connection, and let Registry sync populate the inventory on its schedule.
 
@@ -159,7 +159,7 @@ Performed by anyone with **AI Reader**.
 4. Confirm each has an assignable owner.
 5. Export the filtered list as evidence.
 
-## Section 5 - Optional programmatic discovery with Microsoft Graph
+## Section 5 - Programmatic discovery with Microsoft Graph (Optional)
 
 The UI in the Microsoft 365 admin center is the fastest path for a visual review, but Microsoft Graph exposes the same inventory programmatically. Use this when you need scheduled exports, external reporting, CMDB sync, or automated reconciliation against a source of truth.
 

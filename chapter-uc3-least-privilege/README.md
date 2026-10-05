@@ -148,7 +148,7 @@ Performed by anyone with **Global Reader** on the workflow history.
 
 ---
 
-## Section 4 - Just-in-time access via access package (optional)
+## Section 4 - Just-in-time access via access package (Optional)
 
 ### Task 1 - setup just-in-time access via access package
 

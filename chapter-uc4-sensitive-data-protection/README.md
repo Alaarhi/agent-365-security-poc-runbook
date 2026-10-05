@@ -235,11 +235,11 @@ and use the Office 365 Outlook Send an email (v2) tool to deliver it.
 
 ---
 
-## Section 5 - Optional Communication Compliance and Insider Risk Management
+## Section 5 - Communication Compliance and Insider Risk Management (Optional)
 
 Both policies below are optional. Skip the whole section if the PoC scope is limited to labels, DLP, and audit.
 
-### Task 1 - configure Communication Compliance (optional)
+### Task 1 - configure Communication Compliance (Optional)
 
 1. In Purview, go to **Solutions** > **Communication Compliance** > **Policies**.
 2. Select **+ Create policy**.
@@ -259,7 +259,7 @@ See [Manage Communication Compliance policies](https://learn.microsoft.com/purvi
 - Policy is enabled.
 - Reviewer can access the Communication Compliance queue.
 
-### Task 2 - confirm Insider Risk Management (optional)
+### Task 2 - confirm Insider Risk Management (Optional)
 
 1. In Purview, go to **Solutions** > **Insider Risk Management** > **Policies**.
 2. Switch to the **Agent policies** view.
@@ -350,7 +350,7 @@ Check evidence:
 4. Confirm sensitive info types such as `Credit Card Number` or `ABA Routing Number` were detected.
 5. Confirm the email was not delivered to the recipient.
 
-### Task 4 - test Communication Compliance (optional)
+### Task 4 - test Communication Compliance (Optional)
 
 Run as the standard test user.
 

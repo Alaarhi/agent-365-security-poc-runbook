@@ -83,7 +83,7 @@ Performed by **Agent ID Administrator** or **Cloud Application Administrator**. 
 4. On the agent's management page, open **Owners and sponsors**.
 5. Confirm the correct **owner** (technical administrator) and **sponsor** (business accountable) are listed. Add any missing entries.
 
-### Task 3 - configure custom security attributes for governance (optional)
+### Task 3 - configure custom security attributes for governance (Optional)
 
 Performed by **Attribute Definition Administrator** (step 1-2) then **Attribute Assignment Administrator** (step 3).
 
@@ -120,7 +120,7 @@ Performed by any Microsoft Entra user.
    - Sign-in logs for the agent.
    - Audit log entries for owner / sponsor changes.
 7. Cross-check in the Agent 365 Registry (<https://admin.cloud.microsoft> > **Agents**) that the same agent shows the same owner.
-8. Export the agent-identities list as evidence (CSV from the view, or via Microsoft Graph - see [UC1](../chapter-uc1-agent-discovery/README.md#optional---programmatic-discovery-with-microsoft-graph)).
+8. Export the agent-identities list as evidence (CSV from the view, or via Microsoft Graph - see [UC1](../chapter-uc1-agent-discovery/README.md#section-5---programmatic-discovery-with-microsoft-graph-optional)).
 
 **Expected result**
 
