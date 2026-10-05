@@ -171,7 +171,7 @@ Performed by anyone with **Global Reader**.
 - Inside the grant window: the call succeeds.
 - After the grant expires: the call fails and appears as denied in the sign-in log.
 
-## Section 5 - Evidence and common issues
+## Section 5 - Evidence
 
 ### Task 1 - capture evidence
 
@@ -180,7 +180,9 @@ Performed by anyone with **Global Reader**.
 - Access package assignment record with expiry.
 - Lifecycle workflow run history if sponsor change is tested.
 
-### Task 2 - troubleshoot common issues
+## Section 6 - Troubleshooting
+
+### Task 1 - troubleshoot common issues
 
 | Symptom | Likely cause | Fix |
 |---|---|---|

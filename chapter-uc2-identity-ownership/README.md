@@ -130,7 +130,7 @@ Performed by any Microsoft Entra user.
 - Owner is consistent between Entra and the Agent 365 Registry.
 - If custom security attributes are used, filtering by `AgentGovernance/Project = Agent365PoC` returns every PoC agent in one list.
 
-## Section 3 - Evidence and common issues
+## Section 3 - Evidence
 
 ### Task 1 - capture evidence
 
@@ -138,7 +138,9 @@ Performed by any Microsoft Entra user.
 - Screenshot of one agent's details page showing Owners and Sponsors, granted permissions, and sign-in log entries.
 - Screenshot of the Agent 365 Registry with matching owner.
 
-### Task 2 - troubleshoot common issues
+## Section 4 - Troubleshooting
+
+### Task 1 - troubleshoot common issues
 
 | Symptom | Likely cause | Fix |
 |---|---|---|

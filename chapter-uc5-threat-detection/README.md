@@ -225,6 +225,18 @@ AgentsInfo
 - Query is saved.
 - Optional detection rule is created and visible in Defender.
 
+## Section 4 - Troubleshooting
+
+### Task 1 - troubleshoot common issues
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Security for AI setup checklist does not show Agent 365 as done | Agent 365 onboarding has not completed or has not propagated to Defender | Confirm Agent 365 is enabled and wait for propagation before continuing Defender validation. |
+| Microsoft 365 connector is not connected | Consent was not completed or the required Microsoft 365 components were not selected | Reopen the connector setup, select the required components, and complete consent with the correct admin role. |
+| Copilot Studio real-time protection fails to save | App ID mismatch or Power Platform configuration has not propagated | Confirm the same Entra app ID is used in Power Platform and Defender, then retry after propagation. |
+| Advanced Hunting returns no agent rows | Agent inventory has not ingested yet, or the PoC agent has not generated activity | Confirm the agent is registered and published, exercise the agent, then rerun the query after ingestion. |
+| Custom detection cannot be created | User has read-only permissions | Use Security Operator or Security Administrator only for creating the optional detection rule. |
+
 ---
 
 Previous: [UC4 - Sensitive Data Protection](../chapter-uc4-sensitive-data-protection/README.md) · Next: [UC6 - Lifecycle & Audit](../chapter-uc6-lifecycle-audit/README.md)

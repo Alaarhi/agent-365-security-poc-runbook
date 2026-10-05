@@ -107,7 +107,7 @@ Performed by **AI Administrator**.
 - No leftover permission grants for the retired agent.
 - Historical audit records are preserved for the retention window.
 
-## Section 3 - Evidence and common issues
+## Section 3 - Evidence
 
 ### Task 1 - capture evidence
 
@@ -117,7 +117,9 @@ Performed by **AI Administrator**.
 - Confirmation that the Entra Agent ID no longer exists (or is disabled).
 - Retention window confirmed against tenant setting.
 
-### Task 2 - troubleshoot common issues
+## Section 4 - Troubleshooting
+
+### Task 1 - troubleshoot common issues
 
 | Symptom | Likely cause | Fix |
 |---|---|---|

@@ -395,19 +395,7 @@ For Copilot audit records, look for:
 - `Status`
 - `AgentId`
 
-## Section 7 - Common failure modes
-
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| Agent reveals A365-Restricted content | DLP policy not propagated, wrong location, or wrong label GUID | Confirm policy locations, wait for propagation, verify exact label/sublabel ID. |
-| A365-Restricted files are cited but content is not revealed | Expected behavior | Treat as success if sensitive values are withheld and DLP alert exists. |
-| DLP alert missing | Audit/alert ingestion delay or policy mismatch | Wait 15-30 minutes, confirm policy/rule status, confirm test surface is Microsoft 365 Copilot / Copilot Chat. |
-| Test works in standalone bot but not in M365 Copilot | Different orchestration surface | Run DLP grounding tests through Microsoft 365 Copilot / Copilot Chat. |
-| Exchange email sends successfully | Email body did not contain detectable sensitive info or policy is not active | Confirm sensitive info types and retest after policy propagation. |
-| Advanced Hunting has no agent rows | Agent not registered/published or ingestion delay | Confirm Agent 365 registration and exercise the agent again. |
-| SDK-onboarded agent bypasses DLP #1 | Custom-engine agent does not run through Microsoft 365 Copilot orchestration | See Section 8 - Purview DLP for SDK-onboarded agents. |
-
-## Section 8 - Purview DLP for SDK-onboarded agents
+## Section 7 - Purview DLP for SDK-onboarded agents
 
 ### Task 1 - confirm what applies out of the box
 
@@ -469,7 +457,21 @@ Run the same A365-Restricted grounding prompt from **Section 6, Task 2** and the
 3. In Purview Audit and DLP Alerts, confirm a `processContent` audit entry and a DLP match are recorded against the agent identity.
 4. In Advanced Hunting, confirm the agent activity is visible in `AgentsInfo` and related tables.
 
-### Task 5 - troubleshoot SDK-specific failure modes
+## Section 8 - Troubleshooting
+
+### Task 1 - troubleshoot Purview test issues
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Agent reveals A365-Restricted content | DLP policy not propagated, wrong location, or wrong label GUID | Confirm policy locations, wait for propagation, verify exact label/sublabel ID. |
+| A365-Restricted files are cited but content is not revealed | Expected behavior | Treat as success if sensitive values are withheld and DLP alert exists. |
+| DLP alert missing | Audit/alert ingestion delay or policy mismatch | Wait 15-30 minutes, confirm policy/rule status, confirm test surface is Microsoft 365 Copilot / Copilot Chat. |
+| Test works in standalone bot but not in M365 Copilot | Different orchestration surface | Run DLP grounding tests through Microsoft 365 Copilot / Copilot Chat. |
+| Exchange email sends successfully | Email body did not contain detectable sensitive info or policy is not active | Confirm sensitive info types and retest after policy propagation. |
+| Advanced Hunting has no agent rows | Agent not registered/published or ingestion delay | Confirm Agent 365 registration and exercise the agent again. |
+| SDK-onboarded agent bypasses DLP #1 | Custom-engine agent does not run through Microsoft 365 Copilot orchestration | See Section 7 - Purview DLP for SDK-onboarded agents. |
+
+### Task 2 - troubleshoot SDK-specific issues
 
 | Symptom | Likely cause | Fix |
 |---|---|---|

@@ -87,22 +87,13 @@ Performed by anyone with **AI Reader**.
 - Agent Map renders known interactions.
 - Discovered agents that were not previously known are triaged with their owner.
 
-## Section 3 - Evidence and common issues
+## Section 3 - Evidence
 
 ### Task 1 - capture evidence
 
 - Registry export (CSV/JSON) with owner column populated.
 - Agent Map screenshot.
 - List of any newly discovered / previously unknown agents, with owner assignment status.
-
-### Task 2 - troubleshoot common issues
-
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| Agent missing from registry | Agent 365 not enabled for that platform, or agent never invoked | Enable the platform integration; run at least one turn on the agent. |
-| Owner column blank | Sponsor / owner not assigned during agent creation | Assign an owner in the agent's platform (Copilot Studio, Foundry, or Entra Enterprise Applications). Covered in [UC2](../chapter-uc2-identity-ownership/README.md). |
-| Connected platform not syncing | Registry sync not configured or credentials expired | Reconfigure Registry sync per platform documentation. |
-| SDK agent missing | `a365 setup all` not completed for that project | Rerun `a365 setup all` and confirm Blueprint is registered. |
 
 ## Section 4 - Optional connected-platform discovery
 
@@ -167,15 +158,6 @@ Performed by anyone with **AI Reader**.
 3. Confirm every expected connected agent is listed.
 4. Confirm each has an assignable owner.
 5. Export the filtered list as evidence.
-
-### Task 6 - troubleshoot connected-platform issues
-
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| Connector status = Error | Invalid credentials or missing permission on the source platform | Verify the IAM / service-account / service-principal permissions match the connector's requirements. |
-| No agents sync | Connector connected but source platform has no agents, or Registry sync has not run yet | Confirm the source has agents; wait for the next sync cycle. |
-| Partial sync | Permission scoped too narrowly on the source platform | Grant list + get permissions across the agent resources. |
-| Agent appears without owner | Owner is set in Agent 365, not inherited from the source | Assign a business owner in the Agent 365 Registry UI. |
 
 ## Section 5 - Optional programmatic discovery with Microsoft Graph
 
@@ -261,6 +243,26 @@ Authorization: Bearer <token>
 | Scheduled export / CMDB reconciliation | Graph via PowerShell SDK or a lightweight job |
 | Cross-tenant / multi-environment reporting | Graph with application permissions, scoped read-only |
 | Evidence pack for an auditor | Portal export plus Graph `/auditLogs/*` extracts |
+
+## Section 6 - Troubleshooting
+
+### Task 1 - troubleshoot discovery issues
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Agent missing from registry | Agent 365 not enabled for that platform, or agent never invoked | Enable the platform integration; run at least one turn on the agent. |
+| Owner column blank | Sponsor / owner not assigned during agent creation | Assign an owner in the agent's platform (Copilot Studio, Foundry, or Entra Enterprise Applications). Covered in [UC2](../chapter-uc2-identity-ownership/README.md). |
+| Connected platform not syncing | Registry sync not configured or credentials expired | Reconfigure Registry sync per platform documentation. |
+| SDK agent missing | `a365 setup all` not completed for that project | Rerun `a365 setup all` and confirm Blueprint is registered. |
+
+### Task 2 - troubleshoot connected-platform issues
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Connector status = Error | Invalid credentials or missing permission on the source platform | Verify the IAM / service-account / service-principal permissions match the connector's requirements. |
+| No agents sync | Connector connected but source platform has no agents, or Registry sync has not run yet | Confirm the source has agents; wait for the next sync cycle. |
+| Partial sync | Permission scoped too narrowly on the source platform | Grant list + get permissions across the agent resources. |
+| Agent appears without owner | Owner is set in Agent 365, not inherited from the source | Assign a business owner in the Agent 365 Registry UI. |
 
 ---
 
