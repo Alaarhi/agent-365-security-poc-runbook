@@ -4,7 +4,7 @@
 **What it proves:** You can't govern what you can't see. Every agent available to the organization appears in one inventory, the Agent Registry in the Microsoft 365 admin center, with its type, platform, owner, status and risk signals. You can also read the same inventory programmatically with Microsoft Graph.
 
 **Success criteria**
-- Each in-scope Microsoft-native test agent (Copilot Studio, Microsoft Foundry and SharePoint, where in scope) is listed in **Agents** > **All agents** > **Registry**.
+- Each in-scope Microsoft-native test agent (Copilot Studio and Microsoft Foundry, where in scope) is listed in **Agents** > **All agents** > **Registry**.
 - Every in-scope agent has a named owner, or is listed under **Agents without owners** and has a recorded remediation decision.
 - The **Agents at risk** tile and **Risks** column were reviewed, and every agent with a high-severity risk signal has a named follow-up owner.
 - Agent Map shows the test agents in their platform clusters.
@@ -21,7 +21,7 @@ Grant the read-only role first. Grant setup roles only to the people who make ch
 | View the Agent Registry, Overview, filters, risk counts and export | **AI Reader** or **Global Reader** | 1.3 |
 | Open risk source deep links into Microsoft Entra and Microsoft Defender | **Global Reader**, **Security Reader**, **Security Administrator**, **AI Administrator** or **Global Administrator** | 1.3.4 |
 | Open risk source deep links for Microsoft Purview Insider Risk Management alerts | **IRM Analyst** or **IRM Investigator** | 1.3.4 |
-| Open Agent Map and Single Agent Map (preview) | **AI Administrator** | 1.4 |
+| Open Agent Map | **AI Administrator** | 1.4 |
 | Approve, publish or reject agent requests | **AI Administrator** | 1.5 |
 | View **Data & tools**, tag an agent and take actions from the details pane | **AI Administrator** | 1.6 |
 | Read the Agent 365 catalog through Graph (`/copilot/admin/catalog/packages`) | **AI Administrator** | 1.7 |
@@ -32,7 +32,7 @@ Grant the read-only role first. Grant setup roles only to the people who make ch
 | Register the app for app-only access | **Application Developer** | 1.7.4 |
 | Grant admin consent to Microsoft Graph application permissions | **Privileged Role Administrator** | 1.7.4 |
 | View agents in governed tenants (optional, preview) | **Global Reader** (delegated, in each governed tenant). **AI Administrator** to act. | 1.8 |
-| Validation and read-only review | **AI Reader** | 1.9 |
+| Validation and read-only review | **AI Reader** | 1.3, 1.5, 1.6 |
 
 Notes on roles:
 - Only **AI Administrator** and **Global Administrator** can perform governance actions such as approving agent requests or assigning ownership. Other roles can monitor governance gaps but can't take administrative action.
@@ -85,15 +85,6 @@ Performed by **Foundry Project Manager** (publishing).
 **Check result**
 - The published agent appears in the Registry.
 - In the Microsoft Entra admin center (`https://entra.microsoft.com`), **Entra ID** > **Agents** > **Agent identities** lists the agent identity of the published agent.
-
-### 1.2.3 Create a SharePoint test agent (optional)
-
-Performed by a **test maker account**.
-
-1. Follow [Get started with agents in SharePoint](https://learn.microsoft.com/sharepoint/get-started-sharepoint-agents) to create an agent from your PoC SharePoint site.
-
-**Check result**
-- The agent is listed in the Registry when you filter by the **SharePoint** platform.
 
 ## 1.3 Review the Agent Registry
 
@@ -234,32 +225,6 @@ Usage and observability filters are currently available only for tenants with fe
 **Check result**
 - The four summary cards are displayed, and the map can be filtered by platform.
 
-### 1.4.3 Open the Single Agent Map (preview)
-
-Performed by **AI Administrator**.
-
-The Single Agent Map (preview) gives a connected view of one agent, the users who interact with it and the tools it calls. It uses Agent 365 observability data. It supports any agent that sends observability data to Agent 365, including first-party Microsoft agents and agents built with Copilot Studio.
-
-1. Select **Agents** > **All agents** > **Map**.
-2. Select an agent that has observability data.
-3. In the agent view, review summary metrics such as users, sessions and exceptions.
-4. Select **All connections** to open the Single Agent Map.
-5. Review the top 50 users and top 50 tools. Connection lines are weighted by interaction volume. A line to a tool is highlighted when that tool's exception rate is above 1% during the selected period. Review the last 7 days or the last 30 days (default).
-6. Select a tool node to review its tool calls, exception counts and last activity.
-
-Knowledge signals aren't included yet. If **Conceal user, group, and site names in all reports** is turned on, user names are concealed in the Single Agent Map. You can change this setting under **Org settings** > **Reports**.
-
-**Check result**
-- A screenshot of the Single Agent Map for one test agent is captured, or the absence of observability data for the test agents is recorded.
-
-### 1.4.4 Take action from the map (optional)
-
-Performed by **AI Administrator**.
-
-1. Select an agent on the map to open its details pane.
-2. Review the actions available for the agent's current state: **Assign new owner**, **Block**, **Unblock**, **Install** and **Pin for users**.
-3. Don't take any action on production agents during the PoC. Actions taken here are reflected in both the Agent Map and the Registry tab. Lifecycle actions are tested in [Chapter 5 – Agent Lifecycle and Audit](../chapter-05-lifecycle-audit/README.md).
-
 ## 1.5 Review agent requests
 
 **Documentation:** [Manage agent requests in Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/admin/manage/agent-requests) · [Governance and lifecycle actions for agents](https://learn.microsoft.com/microsoft-365/admin/manage/agent-actions)
@@ -352,18 +317,16 @@ Tags are labels that admins and users apply to agents to organize and find them,
 
 ## 1.7 Programmatic discovery with Microsoft Graph
 
-**Documentation:** [Graph API for agent registry and agent details](https://learn.microsoft.com/microsoft-agent-365/admin/graph-api) · [Package Management API overview](https://learn.microsoft.com/microsoft-365/copilot/extensibility/api/admin-settings/package/overview) · [List Copilot packages](https://learn.microsoft.com/microsoft-365/copilot/extensibility/api/admin-settings/package/copilotpackages-list) · [List agentIdentity objects](https://learn.microsoft.com/graph/api/agentidentity-list?view=graph-rest-1.0) · [List riskyAgents](https://learn.microsoft.com/graph/api/riskyagent-list?view=graph-rest-beta) · [Microsoft Entra Agent ID logs](https://learn.microsoft.com/entra/agent-id/sign-in-audit-logs-agents) · [agentSignIn resource type (agentType values)](https://learn.microsoft.com/graph/api/resources/agentic-agentsignin?view=graph-rest-beta) · [security: runHuntingQuery](https://learn.microsoft.com/graph/api/security-security-runhuntingquery?view=graph-rest-1.0) · [Agent Registry convergence with Microsoft Agent 365](https://learn.microsoft.com/entra/agent-id/agent-registry-convergence)
+**Documentation:** [Graph API for agent registry and agent details](https://learn.microsoft.com/microsoft-agent-365/admin/graph-api) · [Package Management API overview](https://learn.microsoft.com/microsoft-365/copilot/extensibility/api/admin-settings/package/overview) · [List Copilot packages](https://learn.microsoft.com/microsoft-365/copilot/extensibility/api/admin-settings/package/copilotpackages-list) · [List agentIdentity objects](https://learn.microsoft.com/graph/api/agentidentity-list?view=graph-rest-1.0) · [List riskyAgents](https://learn.microsoft.com/graph/api/riskyagent-list?view=graph-rest-beta) · [Microsoft Entra Agent ID logs](https://learn.microsoft.com/entra/agent-id/sign-in-audit-logs-agents) · [agentSignIn resource type (agentType values)](https://learn.microsoft.com/graph/api/resources/agentic-agentsignin?view=graph-rest-beta) · [security: runHuntingQuery](https://learn.microsoft.com/graph/api/security-security-runhuntingquery?view=graph-rest-1.0)
 
 Two data sources answer different questions:
 
-- **The Agent 365 catalog** (Package Management API, `/copilot/admin/catalog/packages`). A package represents an agent in the organization catalog. Use the List packages API to get all agents in your inventory, and the Get package details API to get detailed metadata for one agent. These APIs require the AI Administrator or Global Administrator role. The Agent Registry article describes these endpoints as preview. They're documented in both `v1.0` and `beta`.
+- **The Agent 365 catalog** (Package Management API, `/copilot/admin/catalog/packages`). A package represents an agent in the organization catalog. Use the List packages API to get all agents in your inventory, and the Get package details API to get detailed metadata for one agent. These APIs require the AI Administrator or Global Administrator role.
 - **Microsoft Entra Agent ID objects** (agent identities, blueprints and blueprint principals). The Microsoft Entra admin center shows agents that have a Microsoft Entra Agent ID. The comprehensive agent inventory, including agents without a Microsoft Entra agent identity, is available in Agent 365.
-
-The Microsoft Graph Agent Registry APIs (`/agentRegistry/agentInstances`, `/agentRegistry/agentCollections`, `/agentRegistry/agentCardManifests`, beta) are being replaced by the Agent Registry APIs powered by Microsoft Agent 365, starting May 2026. This chapter uses the Agent 365 APIs.
 
 ### 1.7.1 Choose the right API
 
-All APIs in this table are read operations. **Permission** is the least-privileged Microsoft Graph permission documented on the API page. Unless stated otherwise, it's documented for both delegated and application access. **Role** is the Microsoft Entra role documented for delegated calls.
+All APIs in this table are read operations. **Permission** is the least-privileged Microsoft Graph permission documented on the API page.
 
 | Question you want to answer | API | Version | Permission | Role (delegated) |
 |---|---|---|---|---|
@@ -374,7 +337,7 @@ All APIs in this table are read operations. **Permission** is the least-privileg
 | Which agent identity blueprints exist? | `GET /applications/microsoft.graph.agentIdentityBlueprint` | v1.0 | `AgentIdentityBlueprint.Read.All` | Agent ID Administrator |
 | Which blueprint principals exist in my tenant? | `GET /servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal` | v1.0 | `AgentIdentityBlueprintPrincipal.Read.All` | Agent ID Administrator |
 | Who owns an agent identity? | `GET /servicePrincipals/{id}/microsoft.graph.agentIdentity/owners` | v1.0 | `AgentIdentity.Read.All` | Directory Readers or Global Reader |
-| Who sponsors an agent identity? | `GET /servicePrincipals/{id}/microsoft.graph.agentIdentity/sponsors` | v1.0 | Application only: `AgentIdentity.ReadWrite.All`. Delegated isn't supported. | — |
+| Who sponsors an agent identity? | `GET /servicePrincipals/{id}/microsoft.graph.agentIdentity/sponsors` | v1.0 | `AgentIdentity.Read.All` (delegated, validated in a lab tenant). The API page lists the application permission `AgentIdentity.ReadWrite.All`. | Validated with Global Administrator |
 | Which agents does ID Protection consider risky? | `GET /identityProtection/riskyAgents` | **beta** | `IdentityRiskyAgent.Read.All` | Security Reader, Security Operator, Global Reader or Security Administrator |
 | Which risk detections were raised for agents? | `GET /identityProtection/agentRiskDetections` | **beta** | `IdentityRiskEvent.Read.All` | Security Reader, Security Operator, Global Reader or Security Administrator |
 | Which agent identities signed in? | `GET /auditLogs/signIns` with the filter `agent/agentType eq 'agenticAppInstance'` | **beta** | `AuditLog.Read.All` | Reports Reader |
@@ -421,7 +384,7 @@ Performed by **AI Administrator** (catalog queries), **Agent ID Administrator** 
 
 ```json
 {
-  "Query": "AgentsInfo | summarize arg_max(Timestamp, *) by AgentId | project AgentId, AgentName, Platform, PublishedStatus, LifecycleStatus, Owners, EntraAgentId, EntraBlueprintId"
+  "Query": "AgentsInfo | summarize arg_max(Timestamp, *) by AgentId | project AgentId, Name, Platform, PublishedStatus, LifecycleStatus, Owners, EntraAgentID, EntraBlueprintID"
 }
 ```
 
@@ -496,9 +459,9 @@ The `AgentsInfo` table (preview) contains information about AI agents and their 
 ```kql
 AgentsInfo
 | summarize arg_max(Timestamp, *) by AgentId
-| project AgentId, AgentName, Platform, PublishedStatus, LifecycleStatus, Availability,
-          Owners, EntraAgentId, EntraBlueprintId, InstanceCount, LastUpdatedDateTime
-| order by Platform asc, AgentName asc
+| project AgentId, Name, Platform, PublishedStatus, LifecycleStatus, Availability,
+          Owners, EntraAgentID, EntraBlueprintID, InstanceCount, LastUpdatedDateTime
+| order by Platform asc, Name asc
 ```
 
 3. To run the same query from automation, call `POST https://graph.microsoft.com/v1.0/security/runHuntingQuery` with the request body shown in 1.7.2.
@@ -538,86 +501,20 @@ Performed by **Global Reader**.
 **Check result**
 - The consolidated inventory lists agents from the governed tenants in scope. The PoC doesn't run cross-tenant **Install** or **Block** unless the customer explicitly asks for it.
 
-## 1.9 Test and validation
-
-### 1.9.1 Registry completeness
-
-Performed by **AI Reader**.
-
-1. Open **Agents** > **All agents** > **Registry**, and filter by **Platform** (or by the `Agent365-PoC` tag).
-2. Confirm that each test agent from 1.2 is listed with its platform, publisher type, status and owner.
-3. Export the filtered list (1.3.5).
-
-**Expected result**
-- The Copilot Studio test agent is listed from the time it was created. The Foundry test agent is listed after it was published.
-- The owner of each test agent is recorded.
-
-### 1.9.2 Ownerless and at-risk triage
-
-Performed by **AI Reader**.
-
-1. Select **Agents without owners**, then **Agents at risk**.
-2. For each agent listed, record the agent name, platform, reason and follow-up owner.
-
-**Expected result**
-- Both lists are captured, and every entry has a named follow-up owner and a decision.
-
-### 1.9.3 Agent Map
-
-Performed by **AI Administrator**.
-
-1. Open **Agents** > **All agents** > **Map**.
-2. Confirm that the test agents appear in their platform clusters.
-3. For one agent with observability data, select **All connections**.
-
-**Expected result**
-- The map shows agents grouped by platform. The Single Agent Map shows the users and tools of the selected agent.
-
-### 1.9.4 Request approval flow
-
-Performed by **AI Administrator**.
-
-1. Confirm that the Copilot Studio agent submitted in 1.2.1 is listed in the **Requests** tab.
-2. Publish it to a test group (1.5.2), or reject it (1.5.3).
-
-**Expected result**
-- A published agent is available for installation to the test group. A rejected agent isn't made available to the organization.
-
-### 1.9.5 Graph reconciliation
-
-Performed by **AI Administrator**.
-
-1. Run the PowerShell example from 1.7.3.
-2. Compare the **Total agents** value printed by the script with the **Total agents** tile in the Registry and with the Registry export from 1.3.5.
-3. Run the agent identity query from 1.7.2 and confirm that the agent identity of the published Foundry test agent is returned.
-
-**Expected result**
-- The PoC test agents appear in both the Registry export and the Graph results. Any difference in counts is recorded in the evidence pack.
-
-### 1.9.6 Least-privilege check
-
-Performed by **AI Reader**.
-
-1. Sign in with the AI Reader account and open **Agents** > **All agents** > **Registry**.
-2. Try to approve a request and to open **Map**.
-
-**Expected result**
-- The AI Reader account can view the agent registry information but can't perform governance actions such as approving agent requests or assigning ownership. Agent Map requires the Global Administrator or AI Administrator role.
-
-## 1.10 Evidence
+## 1.9 Evidence
 
 - Agent overview screenshot showing the **Agent registry** count and the **Pending requests**, **Agents without owners** and **Agents at risk** cards.
 - Registry export of all agents, and a filtered export of the PoC test agents with the owner column populated.
-- Screenshots of the **Agents without owners** list and the **Agents at risk** list, with the triage decisions (1.9.2).
+- Screenshots of the **Agents without owners** list and the **Agents at risk** list, with the triage decisions.
 - Screenshot of one **Risk details** pane, if any agent has risk signals.
-- Agent Map screenshot showing the platform clusters, plus one Single Agent Map screenshot (preview).
+- Agent Map screenshot showing the platform clusters.
 - Screenshots of the **Requests** tab before and after the approval or rejection in 1.5.
 - Screenshot of a test agent's details pane (**Details** and **Data & tools** tabs) showing the applied tag.
 - Microsoft Graph results: the Graph Explorer response of the catalog query and the agent identity query, and the output of the PowerShell example (1.7.3). Mark results from beta APIs (`riskyAgents`, `agentRiskDetections`, `signIns`) as beta.
 - `AgentsInfo` query results from Advanced Hunting.
 - A note that records any difference between the Registry export and the Graph results.
 
-## 1.11 Troubleshooting
+## 1.10 Troubleshooting
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
@@ -629,14 +526,13 @@ Performed by **AI Reader**.
 | **Usage** filters missing on the map | Usage and observability filters are available only for tenants with fewer than 4,000 users, and usage is based on agents that report activity through Agent 365 | Use the other map filters. |
 | Risk source deep link doesn't open the source data | Deep links are subject to the user's roles and permissions in the target portal | Use a role listed in 1.3.4. |
 | Risk count differs from the security portal | Counts in the admin center might be up to an hour behind the security portals | Refresh the Registry later. |
-| User names hidden in the Single Agent Map | **Conceal user, group, and site names in all reports** is turned on | Clear the setting under **Org settings** > **Reports**, if your policies allow. |
 | `400 Bad Request` from `/copilot/admin/catalog/packages` with a filter | Unsupported filter, such as a request property combined with `supportedHosts`, `elementTypes` or `platform`; `eq`, `gt` or `lt` on `lastModifiedDateTime`; `or`, `ne` or `contains`; or `$count` with a request filter | Use one of the supported filter expressions listed in [List Copilot packages](https://learn.microsoft.com/microsoft-365/copilot/extensibility/api/admin-settings/package/copilotpackages-list). |
 | `agentIdentityBlueprintPrincipal` or `agentIDuser` values aren't returned | The `Prefer` header is missing | Add `Prefer: include-unknown-enum-members`. |
 | An admin action on an agent fails in the Microsoft 365 admin center | The agent is in a Power Platform environment with IP firewall in active enforcement mode | In the Power Platform admin center, go to **Security** > **Identity and access** > **IP firewall**, select the environment, and check the **Advanced** tab. See [Governance and lifecycle actions](https://learn.microsoft.com/microsoft-365/admin/manage/agent-actions). |
 
-## 1.12 Cleanup
+## 1.11 Cleanup
 
-- Delete the test agents (`poc-cs-trail-guide`, `poc-foundry-trail-guide`, and the SharePoint agent if created) after evidence is collected, unless later chapters still use them.
+- Delete the test agents (`poc-cs-trail-guide`, `poc-foundry-trail-guide`) after evidence is collected, unless later chapters still use them.
 - Remove the `Agent365-PoC` tag from any agent that isn't part of the PoC.
 - Delete the `agent365-poc-inventory` app registration, if you created it.
 - Remove time-bound role assignments (AI Administrator, Agent ID Administrator, Security Reader, Reports Reader, Application Developer, Privileged Role Administrator) at the end of the PoC window.

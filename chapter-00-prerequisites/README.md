@@ -162,7 +162,7 @@ Performed by the **maker** or the **developer**, as described in the linked sect
 
 | Test asset | How to build it | Used in |
 |---|---|---|
-| Microsoft-native test agents (Copilot Studio, Agent Builder, Microsoft Foundry, SharePoint) | [1.2 Discover Microsoft-native agents](../chapter-01-agent-discovery/README.md#12-discover-microsoft-native-agents) | 1, 3, 5 |
+| Microsoft-native test agents (Copilot Studio, Agent Builder, Microsoft Foundry) | [1.2 Discover Microsoft-native agents](../chapter-01-agent-discovery/README.md#12-discover-microsoft-native-agents) | 1, 3, 5 |
 | SharePoint communication site with the synthetic Word and Excel files labelled **Confidential** | [7.4 SharePoint communication site and PoC files](../chapter-07-sensitive-data-protection/README.md#74-sharepoint-communication-site-and-poc-files) | 7 |
 | Microsoft 365 Copilot knowledge agent | [7.5 Microsoft 365 Copilot knowledge agent](../chapter-07-sensitive-data-protection/README.md#75-microsoft-365-copilot-knowledge-agent) | 7 |
 | Copilot Studio email agent, published and approved | [7.6 Copilot Studio email agent and publication](../chapter-07-sensitive-data-protection/README.md#76-copilot-studio-email-agent-and-publication) | 7 |
