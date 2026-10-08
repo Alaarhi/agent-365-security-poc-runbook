@@ -17,6 +17,7 @@ Grant the read-only role first. Grant setup roles only to the people who make ch
 
 | Task | Least-privilege role | Section |
 |---|---|---|
+| Create the Copilot Studio and Foundry test agents | **Maker** or **developer** account from Chapter 0 (0.6.1) | 1.2.1, 1.2.2 |
 | Publish a Foundry agent as an Agent Application | **Foundry Project Manager** on the Foundry resource scope | 1.2.2 |
 | View the Agent Registry, Overview, filters, risk counts and export | **AI Reader** or **Global Reader** | 1.3 |
 | Open risk source deep links into Microsoft Entra and Microsoft Defender | **Global Reader**, **Security Reader**, **Security Administrator**, **AI Administrator** or **Global Administrator** | 1.3.4 |
@@ -24,15 +25,15 @@ Grant the read-only role first. Grant setup roles only to the people who make ch
 | Open Agent Map | **AI Administrator** | 1.4 |
 | Approve, publish or reject agent requests | **AI Administrator** | 1.5 |
 | View **Data & tools**, tag an agent and take actions from the details pane | **AI Administrator** | 1.6 |
-| Read the Agent 365 catalog through Graph (`/copilot/admin/catalog/packages`) | **AI Administrator** | 1.7 |
-| Read agent identities, blueprints and blueprint principals through Graph (delegated) | **Agent ID Administrator** | 1.7 |
-| Read risky agents and agent risk detections through Graph (delegated) | **Security Reader** | 1.7 |
-| Read agent sign-in logs through Graph (delegated) | **Reports Reader** | 1.7 |
-| Run Advanced Hunting queries (`AgentsInfo`) | **Security Reader** | 1.7.5 |
+| Read the Agent 365 catalog through Graph (`/copilot/admin/catalog/packages`) | **AI Administrator** | 1.7.2, 1.7.3 |
+| Read agent identities, blueprints and blueprint principals through Graph (delegated) | **Agent ID Administrator** | 1.7.2 |
+| Read risky agents and agent risk detections through Graph (delegated) | **Security Reader** | 1.7.2 |
+| Read agent sign-in logs through Graph (delegated) | **Reports Reader** | 1.7.2 |
+| Run Advanced Hunting queries (`AgentsInfo`) | **Security Reader** | 1.7.2, 1.7.5 |
 | Register the app for app-only access | **Application Developer** | 1.7.4 |
 | Grant admin consent to Microsoft Graph application permissions | **Privileged Role Administrator** | 1.7.4 |
-| View agents in governed tenants (optional, preview) | **Global Reader** (delegated, in each governed tenant). **AI Administrator** to act. | 1.8 |
-| Validation and read-only review | **AI Reader** | 1.3, 1.5, 1.6 |
+| View agents in governed tenants (optional, preview) | **Global Reader** (delegated, in each governed tenant) | 1.8 |
+| Validation and read-only review | **AI Reader** | 1.3 |
 
 Notes on roles:
 - Only **AI Administrator** and **Global Administrator** can perform governance actions such as approving agent requests or assigning ownership. Other roles can monitor governance gaps but can't take administrative action.
@@ -62,7 +63,7 @@ Agents built with Microsoft Foundry, Microsoft Copilot Studio and Agent Builder 
 
 ### 1.2.1 Create a Copilot Studio test agent
 
-Performed by a **test maker account**.
+Performed by the **maker** (Chapter 0, 0.6.1).
 
 1. Open [`samples/copilot-studio/declarative-agent.json`](samples/copilot-studio/declarative-agent.json) and copy the name, description and instructions.
 2. Sign in to Copilot Studio (`https://copilotstudio.microsoft.com`) and create a new agent named `poc-cs-trail-guide`. Use the description and instructions from the sample.
@@ -76,11 +77,11 @@ Performed by a **test maker account**.
 
 ### 1.2.2 Create and publish a Foundry test agent
 
-Performed by **Foundry Project Manager** (publishing).
+Performed by the **developer** (Chapter 0, 0.6.1). Publishing requires the **Foundry Project Manager** role on the Foundry resource scope.
 
 1. Follow [`samples/foundry/README.md`](samples/foundry/README.md) to create the prompt agent `poc-foundry-trail-guide`.
 2. Publish the agent as an Agent Application, as described in [Publish your agent as an Agent Application](https://learn.microsoft.com/azure/foundry/agents/how-to/publish-agent).
-3. Reassign any RBAC permissions that the agent's tools need to the new agent identity. Permissions don't transfer automatically when you publish.
+3. If the agent's tools access other Azure resources, reassign the required RBAC permissions to the new agent identity. Permissions don't transfer automatically when you publish.
 
 **Check result**
 - The published agent appears in the Registry.
@@ -173,6 +174,8 @@ Risk signals in the Agent Registry are a consolidated set of agent-related secur
 | Microsoft Defender | Global Administrator, Global Reader, Security Reader, Security Administrator or AI Administrator |
 | Microsoft Purview, Insider Risk Management alerts | IRM Analyst or IRM Investigator. Global Administrator alone is insufficient. |
 
+5. Record each agent that has a high-severity signal, and name a follow-up owner for it.
+
 The risk signal counts in the Microsoft 365 admin center might be up to an hour behind the security portals. A count of zero indicates that no active signals are currently detected for that agent across the connected platforms.
 
 **Check result**
@@ -229,7 +232,7 @@ Usage and observability filters are currently available only for tenants with fe
 
 **Documentation:** [Manage agent requests in Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/admin/manage/agent-requests) · [Governance and lifecycle actions for agents](https://learn.microsoft.com/microsoft-365/admin/manage/agent-actions)
 
-When a member of your organization publishes an agent to your tenant, the agent requires administrator approval before it becomes available tenant-wide. Agents created with Copilot Studio, Microsoft Foundry or Microsoft 365 Agents Toolkit can be submitted for admin approval.
+When a member of your organization publishes an agent to your tenant, the agent requires administrator approval before it becomes available tenant-wide. Agents created with Copilot Studio, Microsoft Foundry or Microsoft 365 Agents Toolkit can be submitted for admin approval. For the Copilot Studio test agent from 1.2.1, complete either 1.5.2 or 1.5.3.
 
 ### 1.5.1 Review pending requests
 
@@ -252,7 +255,7 @@ Performed by **AI Administrator**.
 Performed by **AI Administrator**.
 
 1. In the agent details pane, select **Publish to store** to open the publishing wizard.
-2. Select the users or groups that can install the agent. For the PoC, use a test group.
+2. Select the users or groups that can install the agent. For the PoC, select the `A365-PoC-Users` group from Chapter 0 (0.4.2).
 3. Optionally, select the users or groups who will have the agent preinstalled.
 4. Select **Next** to view template options. Apply an existing template, the default template or a custom template. See [Policy templates](https://learn.microsoft.com/microsoft-agent-365/admin/policy-template).
 5. Select **Next** to review permissions. In the **Review permissions** step, view the permissions that the agent requests and grant admin consent if appropriate.
@@ -331,7 +334,7 @@ All APIs in this table are read operations. **Permission** is the least-privileg
 | Question you want to answer | API | Version | Permission | Role (delegated) |
 |---|---|---|---|---|
 | Which agents are in the Agent 365 registry? | `GET /copilot/admin/catalog/packages` | v1.0 and beta (preview) | `CopilotPackages.Read.All` | AI Administrator or Global Administrator |
-| What are the detailed metadata of one agent? | `GET /copilot/admin/catalog/packages/{id}` | v1.0 and beta (preview) | `CopilotPackages.Read.All` | AI Administrator or Global Administrator |
+| What are the details of one agent? | `GET /copilot/admin/catalog/packages/{id}` | v1.0 and beta (preview) | `CopilotPackages.Read.All` | AI Administrator or Global Administrator |
 | Which agent requests are open? | `GET /copilot/admin/catalog/packages?$filter=requestStatus eq 'pending'` | v1.0 and beta (preview) | `CopilotPackages.Read.All` | AI Administrator or Global Administrator |
 | Which agent identities exist in Microsoft Entra? | `GET /servicePrincipals/microsoft.graph.agentIdentity` | v1.0 | `AgentIdentity.Read.All` | Agent ID Administrator |
 | Which agent identity blueprints exist? | `GET /applications/microsoft.graph.agentIdentityBlueprint` | v1.0 | `AgentIdentityBlueprint.Read.All` | Agent ID Administrator |
@@ -367,7 +370,7 @@ GET https://graph.microsoft.com/beta/auditLogs/signIns?$filter=signInEventTypes/
 
 ### 1.7.2 Run queries in Graph Explorer
 
-Performed by **AI Administrator** (catalog queries), **Agent ID Administrator** (agent identity queries) and **Security Reader** (risk and hunting queries).
+Performed by **AI Administrator** (catalog queries), **Agent ID Administrator** (agent identity queries), **Security Reader** (risk and hunting queries) and **Reports Reader** (sign-in query).
 
 1. Open [Graph Explorer](https://developer.microsoft.com/graph/graph-explorer).
 2. Select the profile avatar and sign in with your PoC account. Check the tenant that is shown in the top navigation.
@@ -379,16 +382,16 @@ Performed by **AI Administrator** (catalog queries), **Agent ID Administrator** 
    - `value` contains the packages. The documented properties include `id`, `displayName`, `type` (`microsoft`, `external`, `shared`, `custom`), `publisher`, `isBlocked`, `availableTo`, `deployedTo`, `supportedHosts`, `elementTypes` and `lastModifiedDateTime`.
    - If the response contains `@odata.nextLink`, request that URL exactly as returned, and continue until no `@odata.nextLink` is returned.
 8. Repeat for the agent identity query, and consent to `AgentIdentity.Read.All`.
-9. For the beta queries, select **beta** as the API version. For `riskyAgents`, add the request header `Prefer` with the value `include-unknown-enum-members` under **Request headers**, and consent to `IdentityRiskyAgent.Read.All`.
+9. For the beta queries, select **beta** as the API version. For `riskyAgents`, add the request header `Prefer` with the value `include-unknown-enum-members` under **Request headers**, and consent to `IdentityRiskyAgent.Read.All`. For the sign-in query, consent to `AuditLog.Read.All`.
 10. For Advanced Hunting, select **POST**, enter `https://graph.microsoft.com/v1.0/security/runHuntingQuery`, consent to `ThreatHunting.Read.All`, and use this request body:
 
-```json
-{
-  "Query": "AgentsInfo | summarize arg_max(Timestamp, *) by AgentId | project AgentId, Name, Platform, PublishedStatus, LifecycleStatus, Owners, EntraAgentID, EntraBlueprintID"
-}
-```
+    ```json
+    {
+      "Query": "AgentsInfo | summarize arg_max(Timestamp, *) by AgentId | project AgentId, Name, Platform, PublishedStatus, LifecycleStatus, Owners, EntraAgentID, EntraBlueprintID"
+    }
+    ```
 
-The response contains a `schema` array and a `results` array. The optional `Timespan` parameter defaults to 30 days.
+    The response contains a `schema` array and a `results` array. The optional `Timespan` parameter defaults to 30 days.
 
 **Check result**
 - The catalog query returns the PoC test agents, and you recorded the number of items after following every `@odata.nextLink`.
@@ -399,30 +402,33 @@ Performed by **AI Administrator**.
 
 1. Install the Microsoft Graph PowerShell SDK:
 
-```powershell
-Install-Module Microsoft.Graph -Scope CurrentUser -Repository PSGallery -Force
-```
+   ```powershell
+   Install-Module Microsoft.Graph -Scope CurrentUser -Repository PSGallery -Force
+   ```
 
 2. Run the example from the Agent Registry article. It lists all agents in your tenant and follows `@odata.nextLink` until all pages are read:
 
-```powershell
-Connect-MgGraph -Scopes 'CopilotPackages.Read.All'
+   ```powershell
+   Connect-MgGraph -Scopes 'CopilotPackages.Read.All'
+   
+   $uri = "https://graph.microsoft.com/v1.0/copilot/admin/catalog/packages"
+   $agentCount = 0
+   
+   do {
+       $response = Invoke-MgGraphRequest -Method GET -Uri $uri
+       $agentCount += @($response.value).Count
+       $response.value | ForEach-Object { Write-Host $_.displayName }
+       $uri = $response.'@odata.nextLink'
+   } while ($uri)
+   
+   Write-Host "Total agents: $agentCount"
+   ```
 
-$uri = "https://graph.microsoft.com/v1.0/copilot/admin/catalog/packages"
-$agentCount = 0
-
-do {
-    $response = Invoke-MgGraphRequest -Method GET -Uri $uri
-    $agentCount += @($response.value).Count
-    $response.value | ForEach-Object { Write-Host $_.displayName }
-    $uri = $response.'@odata.nextLink'
-} while ($uri)
-
-Write-Host "Total agents: $agentCount"
-```
+3. Compare the **Total agents** value that the script prints with the **Total agents** tile in the Registry (1.3.1) and with the Registry export (1.3.5). Record any difference in counts.
 
 **Check result**
-- The script lists the display name of every agent in the catalog and prints the total count.
+- The script lists the display name of every agent in the catalog, including the PoC test agents, and prints the total count.
+- The comparison with the Registry is recorded.
 
 ### 1.7.4 Run the export unattended with an app registration
 
@@ -440,9 +446,9 @@ Use application permissions when the call runs as a background service without a
 4. A **Privileged Role Administrator** grants tenant-wide admin consent: on **API permissions**, select **Grant admin consent**. Cloud Application Administrator, AI Administrator and Application Administrator can't grant consent to Microsoft Graph application permissions.
 5. Make sure the certificate is present in `Cert:\CurrentUser\My\` or `Cert:\LocalMachine\My\` on the machine that runs the script. Then connect with app-only access and run the loop from 1.7.3 without the `Connect-MgGraph -Scopes` line:
 
-```powershell
-Connect-MgGraph -ClientId "YOUR_APP_ID" -TenantId "YOUR_TENANT_ID" -CertificateThumbprint "YOUR_CERT_THUMBPRINT"
-```
+   ```powershell
+   Connect-MgGraph -ClientId "YOUR_APP_ID" -TenantId "YOUR_TENANT_ID" -CertificateThumbprint "YOUR_CERT_THUMBPRINT"
+   ```
 
 **Check result**
 - The app-only connection succeeds, and the catalog list from 1.7.3 returns the same agents as the delegated run.
@@ -456,13 +462,13 @@ The `AgentsInfo` table (preview) contains information about AI agents and their 
 1. In the Microsoft Defender portal (`https://security.microsoft.com`), select **Hunting** > **Advanced hunting**.
 2. Run this query:
 
-```kql
-AgentsInfo
-| summarize arg_max(Timestamp, *) by AgentId
-| project AgentId, Name, Platform, PublishedStatus, LifecycleStatus, Availability,
-          Owners, EntraAgentID, EntraBlueprintID, InstanceCount, LastUpdatedDateTime
-| order by Platform asc, Name asc
-```
+   ```kql
+   AgentsInfo
+   | summarize arg_max(Timestamp, *) by AgentId
+   | project AgentId, Name, Platform, PublishedStatus, LifecycleStatus, Availability,
+             Owners, EntraAgentID, EntraBlueprintID, InstanceCount, LastUpdatedDateTime
+   | order by Platform asc, Name asc
+   ```
 
 3. To run the same query from automation, call `POST https://graph.microsoft.com/v1.0/security/runHuntingQuery` with the request body shown in 1.7.2.
 
@@ -490,6 +496,9 @@ Performed by **Global Reader** (delegated, in each governed tenant).
 3. Review **Total agents**, **Risky agents** and **Assigned tenants**.
 4. Select an agent and a governed tenant to review that tenant's details. Agent status is tenant-specific.
 
+**Check result**
+- The consolidated inventory lists agents from the governed tenants in scope.
+
 ### 1.8.2 Switch into a governed tenant
 
 Performed by **Global Reader**.
@@ -499,20 +508,22 @@ Performed by **Global Reader**.
 3. Use the tenant switcher again to return to the governing tenant.
 
 **Check result**
-- The consolidated inventory lists agents from the governed tenants in scope. The PoC doesn't run cross-tenant **Install** or **Block** unless the customer explicitly asks for it.
+- The selected governed tenant opens in the Microsoft 365 admin center, and the tenant switcher returns you to the governing tenant. The PoC doesn't run cross-tenant **Install** or **Block** unless the customer explicitly asks for it.
 
 ## 1.9 Evidence
 
+- Screenshot of the Registry listing the Copilot Studio and Foundry test agents (1.2), and of **Entra ID** > **Agents** > **Agent identities** in the Microsoft Entra admin center listing the agent identity of the published Foundry agent (1.2.2).
 - Agent overview screenshot showing the **Agent registry** count and the **Pending requests**, **Agents without owners** and **Agents at risk** cards.
 - Registry export of all agents, and a filtered export of the PoC test agents with the owner column populated.
 - Screenshots of the **Agents without owners** list and the **Agents at risk** list, with the triage decisions.
-- Screenshot of one **Risk details** pane, if any agent has risk signals.
+- Screenshot of one **Risk details** pane, if any agent has risk signals, and the list of agents with high-severity signals and their follow-up owners (1.3.4).
 - Agent Map screenshot showing the platform clusters.
 - Screenshots of the **Requests** tab before and after the approval or rejection in 1.5.
 - Screenshot of a test agent's details pane (**Details** and **Data & tools** tabs) showing the applied tag.
-- Microsoft Graph results: the Graph Explorer response of the catalog query and the agent identity query, and the output of the PowerShell example (1.7.3). Mark results from beta APIs (`riskyAgents`, `agentRiskDetections`, `signIns`) as beta.
+- Microsoft Graph results: the Graph Explorer responses (1.7.2) and the output of the PowerShell example (1.7.3), plus the output of the app-only run if you performed 1.7.4. Mark results from beta APIs (`riskyAgents`, `agentRiskDetections`, `signIns`) as beta.
 - `AgentsInfo` query results from Advanced Hunting.
-- A note that records any difference between the Registry export and the Graph results.
+- A note that records any difference between the Registry export and the Graph results (1.7.3).
+- If you performed 1.8, a screenshot of **All tenants** > **Agents** in the governing tenant.
 
 ## 1.10 Troubleshooting
 
@@ -532,10 +543,10 @@ Performed by **Global Reader**.
 
 ## 1.11 Cleanup
 
-- Delete the test agents (`poc-cs-trail-guide`, `poc-foundry-trail-guide`) after evidence is collected, unless later chapters still use them.
-- Remove the `Agent365-PoC` tag from any agent that isn't part of the PoC.
+- Delete the test agents (`poc-cs-trail-guide`, `poc-foundry-trail-guide`) after evidence is collected, unless later chapters still use them. For the Foundry agent, also delete the Agent Application, as described in [Publish your agent as an Agent Application](https://learn.microsoft.com/azure/foundry/agents/how-to/publish-agent).
+- Delete the `Agent365-PoC` tag under **Agents** > **Settings** > **Tags**. Deleting a tag removes it from every agent that uses it.
 - Delete the `agent365-poc-inventory` app registration, if you created it.
-- Remove time-bound role assignments (AI Administrator, Agent ID Administrator, Security Reader, Reports Reader, Application Developer, Privileged Role Administrator) at the end of the PoC window.
+- Remove the time-bound role assignments for this chapter (AI Administrator, AI Reader, Agent ID Administrator, Security Reader, Reports Reader, Application Developer, Privileged Role Administrator, Foundry Project Manager) at the end of the PoC window.
 - Store the exports in the restricted evidence location, and delete local copies.
 
 ---

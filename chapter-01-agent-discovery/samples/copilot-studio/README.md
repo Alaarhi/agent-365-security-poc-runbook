@@ -21,7 +21,6 @@ The file contains no credentials or secrets.
 | 1. Create | When you create a Copilot Studio agent, an Agent ID is created and the agent appears in the agent registry immediately. Metadata changes are synchronized automatically. |
 | 2. Submit for approval | An agent submitted for admin approval appears in the Microsoft 365 admin center under **Agents** > **All agents** > **Requests**. |
 | 3. Approve | An AI Administrator selects **Publish to store**, selects the users or groups that can install the agent, applies a policy template, reviews permissions and publishes the agent. |
-| 4. Observe | The Single Agent Map (preview) supports agents built with Copilot Studio that send observability data to Agent 365. |
 
 All Copilot Studio app-based agents share a single blueprint, and an Agent ID is created for each agent.
 

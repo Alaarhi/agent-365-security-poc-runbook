@@ -11,7 +11,7 @@
 - Agent sign-ins are visible in the sign-in logs with the **Agent type** and **Is Agent** filters, and agent identity events are visible in the audit logs.
 - A test agent can be confirmed compromised (risk level **High**) and then confirmed safe (risk level **None**).
 - A Lifecycle Workflows run transfers a test sponsor's agent identity sponsorships to that sponsor's manager.
-- The PoC team can explain when to disable an agent identity, a blueprint, or apply a tenant-wide control.
+- An administrator can disable and re-enable a test agent identity, and its **Status** changes to **Disabled** and back to **Active**.
 
 ## 3.1 Required permissions
 
@@ -19,19 +19,19 @@ Grant the read-only role first; assign setup roles only to the person who makes 
 
 | Task | Least-privilege role | Section |
 |---|---|---|
-| View agent identities and blueprints in the admin center | Any Microsoft Entra user (no admin role) | 3.4.1, 3.4.2 |
-| List agent identities with Microsoft Graph | Agent ID Administrator (owners can read their own agent identities) | 3.4.3 |
+| View agent identities and blueprints in the Microsoft Entra admin center | Any Microsoft Entra user (no admin role) | 3.3.1, 3.4.1, 3.4.2, 3.12.1 |
+| List agent identities with Microsoft Graph | Agent ID Administrator (owners can read their own agent identities) | 3.4.3, 3.7.3 |
 | Migrate legacy Copilot Studio agents to Agent ID (preview) | Power Platform Administrator | 3.3.2 |
-| Add or remove owners and sponsors | Agent ID Administrator (owners of the object can do this without a role) | 3.5 |
-| Disable or re-enable agent identities and blueprints | Agent ID Administrator (owners can manage their own agents without a role) | 3.11 |
-| Configure inheritable permissions on a blueprint | Agent ID Developer (blueprints you own) or Agent ID Administrator | 3.6 |
-| Create attribute sets and attribute definitions | Attribute Definition Administrator | 3.7.1 |
-| Assign custom security attribute values to agent identities | Attribute Assignment Administrator | 3.7.2 |
+| Add or remove owners and sponsors | Agent ID Administrator (owners of the object can do this without a role) | 3.5, 3.15 |
+| Disable or re-enable agent identities and blueprints | Agent ID Administrator (owners can manage their own agents without a role; owners and sponsors can disable their agents in My Account) | 3.11, 3.12.2, 3.15 |
+| Configure inheritable permissions on a blueprint | Agent ID Developer (blueprints you own) or Agent ID Administrator | 3.6, 3.15 |
+| Create and deactivate attribute sets and attribute definitions | Attribute Definition Administrator | 3.7.1, 3.15 |
+| Assign or remove custom security attribute values on agent identities | Attribute Assignment Administrator | 3.7.2, 3.15 |
 | Read custom security attribute assignments | Attribute Assignment Reader | 3.7.3 |
 | Read sign-in and audit logs | Reports Reader | 3.8 |
-| View the Risky agents report | Security Reader | 3.9.1 |
-| Confirm compromised, confirm safe, dismiss risk (Microsoft Graph) | Security Administrator | 3.9.2 |
-| Create, run, and delete Lifecycle Workflows | Lifecycle Workflows Administrator | 3.10 |
+| View the Risky Agents report | Security Reader | 3.9.1, 3.12.3 |
+| Confirm compromised, confirm safe, dismiss risk (Microsoft Graph) | Security Administrator | 3.9.2, 3.12.3 |
+| Create, run, and delete Lifecycle Workflows | Lifecycle Workflows Administrator | 3.10, 3.12.4, 3.15 |
 | Validation / read-only review | Any Microsoft Entra user; Reports Reader; Security Reader; Attribute Assignment Reader | 3.12 |
 
 Notes:
@@ -41,10 +41,10 @@ Notes:
 **Before you start:**
 - Complete [Chapter 0 – Prerequisites and PoC preparation](../chapter-00-prerequisites/README.md) (test admin, standard test user, reviewer accounts, published PoC agents).
 - Complete [Chapter 1 – Agent Discovery and Inventory](../chapter-01-agent-discovery/README.md) so you know which agents are in scope.
-- If you use custom or SDK-built agents, complete [Chapter 2 – Third-Party and Custom Agents](../chapter-02-third-party-custom-agents/README.md) so their blueprint and agent identities exist in your tenant.
-- Prepare two extra test users for the sponsor continuity test in 3.10: **PoC Sponsor** and **PoC Sponsor Manager**. Set PoC Sponsor's **Manager** attribute to PoC Sponsor Manager; the sponsorship transfer task requires a populated manager attribute, and the email tasks notify the manager and co-sponsors.
+- If you use custom or SDK-built agents, complete [2.8 Create the agent blueprint with a365 setup](../chapter-02-third-party-custom-agents/README.md#28-create-the-agent-blueprint-with-a365-setup) so their blueprint and agent identities exist in your tenant.
+- Confirm that the **PoC Sponsor** and **PoC Sponsor Manager** accounts from [0.4.1 Create the PoC accounts](../chapter-00-prerequisites/README.md#041-create-the-poc-accounts) exist, and that the **Manager** attribute of PoC Sponsor is set to PoC Sponsor Manager. The sponsorship transfer task in 3.10 requires a populated manager attribute, and the email tasks notify the manager and co-sponsors.
 - Pick one non-production test agent that you can disable, mark as risky, and re-enable during the tests.
-- Access packages for agents are covered in [Chapter 6 – Conditional Access and Least Privilege](../chapter-06-conditional-access/README.md). This chapter only links to it.
+- Access packages for agents are covered in [6.6 Grant time-bound access with access packages](../chapter-06-conditional-access/README.md#66-grant-time-bound-access-with-access-packages). This chapter only links to it.
 
 ## 3.2 Understand the Agent ID object model
 **Documentation:** [Fundamental concepts in Microsoft Entra Agent ID](https://learn.microsoft.com/entra/agent-id/key-concepts) · [Owners, sponsors, and managers](https://learn.microsoft.com/entra/agent-id/agent-owners-sponsors-managers) · [Agent's user account](https://learn.microsoft.com/entra/agent-id/agent-users) · [View and filter agent identities in your tenant](https://learn.microsoft.com/entra/agent-id/agent-lists) · [Disable agent identities in your tenant](https://learn.microsoft.com/entra/agent-id/disable-agent-identities)
@@ -53,7 +53,7 @@ Notes:
 
 | Object | What it is | PoC relevance |
 |---|---|---|
-| **Agent identity blueprint** | Template and authentication foundation for one or more agent identities. Holds the credentials and acquires tokens on behalf of all agent identities created from it. Policies applied to a blueprint, such as Conditional Access, take effect for all its agent identities. | For example the **Microsoft Copilot Studio agent identity blueprint**, or a blueprint you created in Chapter 2. |
+| **Agent identity blueprint** | Template and authentication foundation for one or more agent identities. Holds the credentials and acquires tokens on behalf of all agent identities created from it. Policies applied to a blueprint, such as Conditional Access, take effect for all its agent identities. | For example the **Microsoft Copilot Studio agent identity blueprint**, or a blueprint you created in [2.8](../chapter-02-third-party-custom-agents/README.md#28-create-the-agent-blueprint-with-a365-setup). |
 | **Agent identity blueprint principal** | The object that records a blueprint's presence in a tenant, enables it to acquire tokens, and appears in audit logs. Listed under **Entra ID** > **Agents** > **Agent blueprints**. | Where you view linked agent identities, granted permissions, owners and sponsors, logs, and the **Disable** action for the blueprint. |
 | **Agent identity** | The primary identity an agent uses to authenticate and access resources. It has no credentials of its own; it authenticates using tokens issued by its blueprint. | This is what you govern in this chapter. |
 | **Agent's user account** (agent user) | Optional account paired 1:1 with an agent identity, used only when the agent must access systems that require a user object (mailbox, calendar, Teams, documents). It doesn't replace the agent identity; both must exist. | Shown in the sign-in logs **Agent type** filter as **Agent ID user**. |
@@ -81,7 +81,7 @@ When a group is a sponsor, all members of the group have sponsor rights. When yo
 Copilot Studio automatically creates a Microsoft Entra Agent ID for each new agent, and you can no longer opt out of automatic agent identity creation. When the first agent identity is created, Copilot Studio adds the **Microsoft Copilot Studio agent identity blueprint** (Blueprint ID `25664c89-cea5-4ab6-b924-a54fd8a19ae0`) and a corresponding blueprint principal to your tenant. All Copilot Studio agent identities are children of this blueprint. Agents created before the Entra Agent ID rollout continue to use app registrations until they're migrated.
 
 ### 3.3.1 Confirm a Copilot Studio agent has an agent identity
-Performed in Copilot Studio, then by **any Microsoft Entra user** in the Entra admin center.
+Performed in Copilot Studio, then by **any Microsoft Entra user** in the Microsoft Entra admin center.
 1. Open <https://copilotstudio.microsoft.com> and go to the **Settings** page for the PoC agent.
 2. Select **Advanced** and expand the **Metadata** section.
 3. Copy the GUID shown under **Entra Agent ID**.
@@ -263,7 +263,7 @@ DELETE https://graph.microsoft.com/v1.0/applications/{id}/microsoft.graph.agentI
 ## 3.7 Tag agents with custom security attributes (optional)
 **Documentation:** [Custom security attributes overview](https://learn.microsoft.com/entra/fundamentals/custom-security-attributes-overview) · [Add or deactivate custom security attribute definitions](https://learn.microsoft.com/entra/fundamentals/custom-security-attributes-add) · [Update agentIdentity (Microsoft Graph)](https://learn.microsoft.com/graph/api/agentidentity-update) · [List agentIdentity objects (Microsoft Graph)](https://learn.microsoft.com/graph/api/agentidentity-list) · [Manage custom security attributes for an application](https://learn.microsoft.com/entra/identity/enterprise-apps/custom-security-attributes-apps)
 
-Custom security attributes let you categorize agent identities with business-specific labels, and Conditional Access policies can target those attributes ([Chapter 6 – Conditional Access and Least Privilege](../chapter-06-conditional-access/README.md)).
+Custom security attributes let you categorize agent identities with business-specific labels, and Conditional Access policies can target those attributes (see [6.2.3 (Optional) Exclude approved agents with custom security attributes](../chapter-06-conditional-access/README.md#623-optional-exclude-approved-agents-with-custom-security-attributes)).
 
 Plan before you create: attribute set names and attribute names can't be renamed, attribute sets can't be deleted, and attribute definitions can only be deactivated, not deleted.
 
@@ -372,7 +372,7 @@ Prefer: include-unknown-enum-members
 The `Prefer: include-unknown-enum-members` header is required to receive the `agentIdentityBlueprintPrincipal` and `agentIDuser` values.
 
 **Check result**
-- The sign-in query returns records for the PoC agent identities, and the audit query returns events with an `agentType` other than `notAgentic`.
+- The sign-in query returns service principal sign-ins made by agent identities, and the audit query returns events with an `agentType` other than `notAgentic`.
 
 ## 3.9 Detect and respond with ID Protection
 **Documentation:** [ID Protection for agents](https://learn.microsoft.com/entra/id-protection/concept-risky-agents) · [riskyAgent resource type (Microsoft Graph beta)](https://learn.microsoft.com/graph/api/resources/riskyagent?view=graph-rest-beta) · [Manage agent identities in your organization](https://learn.microsoft.com/entra/agent-id/manage-agent-identities-admin)
@@ -390,7 +390,7 @@ ID Protection detects identity-based risks on agents that have agent identities.
 | Suspicious credential usage | `suspiciousCredentialUsage` |
 | Unfamiliar resource access | `unfamiliarResourceAccess` |
 
-Blocking risky agents with a Conditional Access policy on agent risk is configured in [Chapter 6 – Conditional Access and Least Privilege](../chapter-06-conditional-access/README.md).
+Blocking risky agents with a Conditional Access policy on agent risk is configured in [6.3 Block high-risk agent identities](../chapter-06-conditional-access/README.md#63-block-high-risk-agent-identities).
 
 ### 3.9.1 Review the Risky agents report
 Performed by **Security Reader**.
@@ -417,7 +417,7 @@ Incident sequence:
 1. **Detect** – review the Risky Agents report (3.9.1).
 2. **Respond** – **Confirm compromise** and/or **Disable** the agent.
 3. **Investigate** – review the risk detection details together with the agent's sign-in and audit logs (3.8). The agent's sponsor can determine whether the agent behavior is expected.
-4. **Recover** – false positive: dismiss the risk and re-enable the agent. True compromise: rotate credentials before re-enabling, or retire the agent identity (see [Chapter 5 – Agent Lifecycle and Audit](../chapter-05-lifecycle-audit/README.md)).
+4. **Recover** – false positive: dismiss the risk and re-enable the agent. True compromise: rotate credentials before re-enabling, or retire the agent (see [5.8 Delete, restore, and permanently delete agents](../chapter-05-lifecycle-audit/README.md#58-delete-restore-and-permanently-delete-agents)).
 
 Risk data can also be exported through diagnostic settings in Microsoft Entra ID to a Log Analytics workspace, a storage account, an event hub, or a SIEM solution.
 
@@ -447,13 +447,13 @@ Performed by **Lifecycle Workflows Administrator**.
 2. Create a new workflow based on the template **Agent sponsor job profile change**.
 3. On the **Basics** tab, enter a unique display name (for example `PoC – Agent sponsor mover`) and description, select your trigger, and select **Next**.
 4. On the **Configure scope** screen, select a scope that includes only the PoC test users, and select **Next**.
-5. On the **Tasks** page, keep **Send email to manager about sponsorship changes** and **Transfer agent sponsorships to manager**. The template also includes **Remove all access package assignments for user**; disable it if the PoC sponsor must keep their access packages. Select **Next**.
+5. On the **Tasks** page, keep **Send email to manager about sponsorship changes** and **Transfer agent sponsorships to manager**, and optionally add **Send email to co-sponsors about sponsor changes**. Disable **Remove all access package assignments for user** so that the on-demand run in 3.10.2 doesn't remove PoC Sponsor's access package assignments. Select **Next**.
 6. Review the workflow and select **Create**.
 
 To be run on demand, the workflow must be enabled.
 
 **Check result**
-- The workflow appears in the workflows list with the sponsor tasks enabled.
+- The workflow appears in the workflows list with the sponsor tasks enabled and **Remove all access package assignments for user** disabled.
 
 ### 3.10.2 Run the workflow on demand
 Performed by **Lifecycle Workflows Administrator**. Prerequisite: **PoC Sponsor** is a sponsor of the test agent (3.5.1) and has **PoC Sponsor Manager** as manager.
@@ -470,9 +470,9 @@ Performed by **Lifecycle Workflows Administrator**. Prerequisite: **PoC Sponsor*
 
 | Scope | Effect | Where |
 |---|---|---|
-| **Individual agent identity** | Blocks its access and token issuance; the agent identity and its metadata stay in the tenant. | Admin center (administrators; the **All agent identities** page supports multi-select disable) or My Account portal (owners and sponsors) |
+| **Individual agent identity** | Blocks its access and token issuance; the agent identity and its metadata stay in the tenant. | Microsoft Entra admin center (administrators; the **All agent identities** page supports multi-select disable) or My Account portal (owners and sponsors) |
 | **Blueprint** | Prevents new agent identities from being created from that blueprint and blocks existing ones. | Blueprint management page > **Disable** |
-| **Tenant-wide** | Conditional Access policies block authentication of all agent identities, agents' user accounts, or users signing into agents; creation of agent identities can optionally be blocked through product-specific controls. | Conditional Access ([Chapter 6](../chapter-06-conditional-access/README.md)) |
+| **Tenant-wide** | Conditional Access policies block authentication of all agent identities, agents' user accounts, or users signing into agents; creation of agent identities can optionally be blocked through product-specific controls. | Conditional Access (see [Chapter 6 – Conditional Access and Least Privilege](../chapter-06-conditional-access/README.md)) |
 
 Re-enabling a disabled agent identity at any scope restores access and token issuance.
 
@@ -491,7 +491,7 @@ Performed by **Agent ID Administrator** (or the agent's owner).
 
 ### 3.11.2 Disable a blueprint (only for a blueprint dedicated to the PoC)
 Performed by **Agent ID Administrator**.
-1. Go to **Entra ID** > **Agents** > **Agent blueprints** and select a blueprint used only by PoC test agents (for example one created in Chapter 2).
+1. Go to **Entra ID** > **Agents** > **Agent blueprints** and select a blueprint that only PoC test agents use and that no other test in progress depends on (for example a blueprint created in [2.8](../chapter-02-third-party-custom-agents/README.md#28-create-the-agent-blueprint-with-a365-setup)).
 2. Select **Disable** in the command bar of the blueprint's overview page. The confirmation dialog warns that existing agent identities created from this blueprint will no longer be able to authenticate. Confirm the action.
 3. Re-enable the blueprint after the test.
 
@@ -504,10 +504,12 @@ Performed by **Agent ID Administrator**.
 Performed by **reviewer** (any Microsoft Entra user).
 1. Open **Entra ID** > **Agents** > **Agent identities** with the columns from 3.4.1.
 2. For each in-scope PoC agent, open **Owners and Sponsors**.
-3. (Optional) Run the custom security attribute filter in 3.7.3 (requires the roles listed there).
+3. For each PoC blueprint, open **Owners and sponsors** as in 3.4.2.
+4. (Optional) Run the custom security attribute filter in 3.7.3 (requires the roles listed there).
 
 **Expected result**
 - Every in-scope agent has an agent identity linked to the expected blueprint, **Status** = Active, at least one sponsor, and the intended owner.
+- Every PoC blueprint has at least one sponsor.
 - (Optional) The attribute filter returns every PoC agent identity.
 
 ### 3.12.2 Test sponsor self-service disable
@@ -518,7 +520,7 @@ Performed by **PoC Sponsor**, then **the agent owner** or **Agent ID Administrat
 4. As the owner, select the agent in My Account and choose **Enable agent** (or, as Agent ID Administrator, re-enable it as in 3.11.1).
 
 **Expected result**
-- After step 2, the agent is disabled with the same effect as disabling it from the admin center: users can't access it and it isn't issued tokens. **Status** shows **Disabled** in the Entra admin center.
+- After step 2, the agent is disabled with the same effect as disabling it from the Microsoft Entra admin center: users can't access it and it isn't issued tokens. **Status** shows **Disabled** in the Microsoft Entra admin center.
 - The sponsor can't re-enable the agent; the owner or admin can, and **Status** returns to **Active**.
 
 ### 3.12.3 Test risk response
@@ -535,8 +537,7 @@ Content-Type: application/json
 ```
 
 2. As Security Reader, open the **Risky Agents** report and the **Agent detections** tab (3.9.1).
-3. If the Chapter 6 risk-based Conditional Access policy is enabled, run the Chapter 6 block test now.
-4. As Security Administrator, confirm the agent as safe:
+3. As Security Administrator, confirm the agent as safe:
 
 ```http
 POST https://graph.microsoft.com/beta/identityProtection/riskyAgents/confirmSafe
@@ -549,7 +550,9 @@ Content-Type: application/json
 
 **Expected result**
 - After step 1, the test agent is listed in the **Risky Agents** report with risk level **High**, and a **Confirmed compromised** detection exists for the agent.
-- After step 4, the risk level is **None**.
+- After step 3, the risk level is **None**.
+
+The end-to-end test that a Conditional Access policy blocks a confirmed-compromised agent is in [6.9 Test the risk-based block with the agent token flow (optional)](../chapter-06-conditional-access/README.md#69-test-the-risk-based-block-with-the-agent-token-flow-optional).
 
 ### 3.12.4 Test sponsor continuity
 Performed by **Lifecycle Workflows Administrator**, then **reviewer**.
@@ -562,13 +565,14 @@ Performed by **Lifecycle Workflows Administrator**, then **reviewer**.
 **Expected result**
 - The workflow history shows the sponsor tasks completed for PoC Sponsor.
 - PoC Sponsor Manager is now a sponsor of the test agent, and PoC Sponsor is no longer a sponsor.
-- PoC Sponsor Manager received the sponsorship change email; co-sponsors (if any) received the co-sponsor email.
+- PoC Sponsor Manager received the sponsorship change email. If you added **Send email to co-sponsors about sponsor changes** in 3.10.1, co-sponsors (if any) received the co-sponsor email.
 
 ## 3.13 Evidence
 - Export or screenshot of **Agent identities** with columns **Name**, **Status**, **Object ID**, **Blueprint App ID**, **Owners and Sponsors**, **Uses agent identity** for all PoC agents.
 - Screenshot of one PoC blueprint showing **Linked agent identities**, **Granted permissions**, and **Owners and sponsors**.
 - Copilot Studio **Settings** > **Advanced** > **Metadata** showing the **Entra Agent ID** of a PoC agent (and the Power Platform admin center **Action history** if you migrated an agent).
 - Screenshot of PoC Sponsor's My Account **Manage agents** page and the test agent in **Disabled** status after step 2 of 3.12.2.
+- Screenshot of the test agent identity with **Status** = **Disabled** and then **Active** (3.11.1).
 - (Optional) Graph responses for inheritable permissions before and after 3.6.2.
 - (Optional) Graph response of the attribute filter in 3.7.3.
 - Sign-in log export filtered by **Is Agent** = Yes, and audit log entries for the PoC agent identities.
@@ -601,9 +605,9 @@ Performed by **Lifecycle Workflows Administrator**, then **reviewer**.
 ## 3.15 Cleanup
 - Re-enable every agent identity and blueprint disabled during testing (owner or Agent ID Administrator).
 - Make sure the test agent's risk is cleared (confirm safe or dismiss risk).
-- Restore sponsors changed by the Lifecycle Workflows test: add PoC Sponsor back if needed and remove PoC Sponsor Manager if they shouldn't remain sponsor (3.5.1).
+- Restore sponsors changed by the Lifecycle Workflows test: add PoC Sponsor back if needed and remove PoC Sponsor Manager if they shouldn't remain sponsor (3.5.1). Remove owners and sponsors that you added only for the tests.
 - Delete the PoC Lifecycle workflow: **ID Governance** > **Lifecycle workflows** > **Workflows** > select the workflow > **Delete**, then confirm with **Delete** (Lifecycle Workflows Administrator). Deleted workflows are permanently removed after 30 days.
-- Remove inheritable permission entries added only for the PoC (`DELETE`, 3.6.3) and remove the related permission grants from the blueprint principal.
+- Remove inheritable permission entries added only for the PoC (`DELETE`, 3.6.3) and revoke the related permissions on the blueprint principal (**Granted permissions**, 3.4.2).
 - Remove attribute values from PoC agent identities by setting them to `null` (keep them if Chapter 6 attribute-based policies still use them):
 
 ```http

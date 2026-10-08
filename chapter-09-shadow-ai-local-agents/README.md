@@ -9,15 +9,15 @@
 - If Global Secure Access is enabled, the **Users**, **Most recent activity**, **Last scanned** and **Total traffic** fields are populated for the detected agent.
 - After **Block** > **Apply Policies** on a Shadow AI agent, the **Security policies** tile shows that a blocking Intune policy is applied, and the policy (for OpenClaw, **A365 - Block OpenClaw**) is found in Microsoft Intune.
 - After the policy applies to the test device, the common ways of running the blocked agent are blocked on that device.
-- After cleanup, the block is removed and the test tools are uninstalled.
+- After cleanup, the block is removed (for a Shadow AI agent, the **Security policies** tile no longer displays a blocking Intune policy), and the test tools are uninstalled.
 
 **Shadow AI and local agents at a glance**
 
 | | Shadow AI | Local agents |
 |---|---|---|
 | What it is | Consumer-facing AI applications and standalone agents deployed across the organization without IT visibility or approval, which can operate autonomously on user devices | Developer-controlled tools and extensions (IDE plugins, CLIs, code editors) intentionally integrated into development workflows with explicit configuration |
-| Admin center page | **Agents** > **Shadow AI** | **All Agents** > **Local Agents (Frontier)** |
-| Blocking mechanism | Microsoft Intune policy created from the admin center | Microsoft Intune policy created from the admin center; VS Code extension policy for agents that run as Visual Studio Code extensions |
+| Microsoft 365 admin center page | **Agents** > **Shadow AI** | **All Agents** > **Local Agents (Frontier)** |
+| Blocking mechanism | Microsoft Intune policy created from the Microsoft 365 admin center | Microsoft Intune policy created from the Microsoft 365 admin center; VS Code extension policy for agents that run as Visual Studio Code extensions |
 | Device scope | Managed Windows devices enrolled in Microsoft Intune | Managed Windows devices enrolled in Microsoft Intune |
 
 Local agents are intentionally chosen developer tools managed within known environments, while Shadow AI consists of unmanaged, autonomous applications deployed without organizational awareness. Both experiences are part of the Frontier preview program and are in public preview. Features, supported agents and behaviors might change before general availability.
@@ -29,21 +29,23 @@ Grant the read-only role first, give setup roles only to the people who make eac
 | Task | Least-privilege role | Section |
 |---|---|---|
 | Enable Agent 365 Frontier for the tenant | Global Administrator | 9.2.1 |
+| Confirm the Microsoft Defender for Endpoint discovery prerequisites on the test device | The customer's Defender for Endpoint administrator | 9.2.2 |
 | Review Intune-enrolled Windows test devices | Intune Administrator | 9.2.3 |
-| Enable Internet Access traffic forwarding and assign test users (optional) | Global Secure Access Administrator | 9.2.4 |
-| View the **Shadow AI (Frontier)** and **Local Agents (Frontier)** pages, and block agents from these pages | Any one of: Security Administrator, AI Administrator, Global Reader, Security Reader, Security Operator, Reports Reader, User Experience Success Manager, Intune Administrator | 9.3, 9.4 |
-| Review the block policy in Intune | Intune Administrator | 9.3.5, 9.5.5 |
-| Import the VS Code ADMX template and create the VS Code extension policy profile | Policy and Profile Manager (Intune built-in role) | 9.4.5 |
-| Sync the test device from Intune | Help Desk Operator or Endpoint Security Manager (Intune built-in roles) | 9.5.6 |
-| Validation / read-only review | Security Reader or Reports Reader | 9.5 |
+| Enable Internet Access traffic forwarding, assign test users, and remove the assignment at cleanup (optional) | Global Secure Access Administrator | 9.2.4, 9.8 |
+| View the **Shadow AI (Frontier)** and **Local Agents (Frontier)** pages, and block agents from these pages | Any one of: Security Administrator, AI Administrator, Global Reader, Security Reader, Security Operator, Reports Reader, User Experience Success Manager, Intune Administrator | 9.3, 9.4, 9.5.4 |
+| Review the block policy in Intune, and remove the block at cleanup | Intune Administrator | 9.3.5, 9.5.5, 9.8 |
+| Import the VS Code ADMX template, create the VS Code extension policy profile, and delete both at cleanup | Policy and Profile Manager (Intune built-in role) | 9.4.5, 9.5.5, 9.8 |
+| Sync the test device from Intune | Help Desk Operator or Endpoint Security Manager (Intune built-in roles) | 9.5.6, 9.8 |
+| Install and use the approved test tools on the test device | Standard test user (no admin role) | 9.5.2, 9.5.6 |
+| Validation / read-only review | Security Reader or Reports Reader | 9.5.3 |
 
 **Before you start:**
-- Complete [Chapter 0 – Prerequisites and PoC preparation](../chapter-00-prerequisites/README.md): PoC admin accounts, role assignments and the agreed propagation windows.
+- Complete [Chapter 0 – Prerequisites and PoC preparation](../chapter-00-prerequisites/README.md): PoC accounts and role assignments ([0.4](../chapter-00-prerequisites/README.md#04-prepare-accounts-groups-and-role-assignments)), the test device ([0.6](../chapter-00-prerequisites/README.md#06-prepare-test-agents-and-test-devices)) and the propagation times ([0.7](../chapter-00-prerequisites/README.md#07-plan-for-propagation-times)).
 - [Chapter 1 – Agent Discovery and Inventory](../chapter-01-agent-discovery/README.md) covers the overall agent inventory in the Microsoft 365 admin center.
-- [Chapter 8 – Threat Detection and Runtime Protection (Defender)](../chapter-08-threat-detection/README.md) covers Microsoft Defender protection for local agents.
+- [Chapter 8 – Threat Detection and Runtime Protection (Defender)](../chapter-08-threat-detection/README.md) covers the optional Defender for Endpoint runtime protection for local agents ([8.6](../chapter-08-threat-detection/README.md#86-turn-on-local-ai-agent-runtime-protection-in-defender-for-endpoint-optional)).
 - Prepare at least one dedicated Windows test device that's enrolled in Microsoft Intune and onboarded to Microsoft Defender for Endpoint, and one standard test user who signs in to it.
 - Get written approval from the customer's security team for the exact list of AI tools that you may install on the test device (see 9.5.1). Don't install any tool that isn't on the approved list.
-- Agree with the customer, before you test blocking, that a block created from the admin center creates a Microsoft Intune policy that automatically propagates to all managed Windows devices enrolled in Intune (see 9.3.4, 9.4.4 and 9.4.6).
+- Agree with the customer, before you test blocking, that a block created from the Microsoft 365 admin center creates a Microsoft Intune policy that automatically propagates to all managed Windows devices enrolled in Intune (see 9.3.4, 9.4.4 and 9.4.6).
 
 ## 9.2 Tenant and device prerequisites
 
@@ -53,7 +55,9 @@ This section covers configuration only. Both pages require the Frontier preview 
 
 ### 9.2.1 Opt in to the Frontier preview
 
-Performed by **Global Administrator**.
+Skip this task if Frontier was already enabled in [0.3.2](../chapter-00-prerequisites/README.md#032-enable-the-frontier-program-only-if-needed).
+
+Performed by **Global Administrator**. Only a Global Administrator can enable Agent 365 Frontier.
 1. Sign in to the Microsoft 365 admin center at `https://admin.cloud.microsoft`.
 2. Go to **Agents** > **Overview**.
 3. In the banner, select **Try now**, and then select **I agree** to accept the Agent 365 Terms of Service.
@@ -111,7 +115,7 @@ Enable Global Secure Access for the tenant and the enrolled devices to view more
 
 ## 9.3 Shadow AI
 
-**Documentation:** [Understand Shadow AI in Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/admin/manage/agent-shadow-ai) · [Assign device profiles in Microsoft Intune](https://learn.microsoft.com/intune/device-configuration/assign-device-profile) · [Understand Local Agents in Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/admin/manage/agent-local)
+**Documentation:** [Understand Shadow AI in Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/admin/manage/agent-shadow-ai) · [Assign device profiles in Microsoft Intune](https://learn.microsoft.com/intune/device-configuration/assign-device-profile) · [Understand Local Agents in Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/admin/manage/agent-local) · [Settings list for the Local AI Agent Baseline - OpenClaw security baseline in Intune](https://learn.microsoft.com/intune/device-security/security-baselines/ref-openclaw-settings)
 
 Shadow AI refers to consumer-facing AI applications and standalone agents deployed across the organization without IT visibility or approval. Unmanaged usage introduces risks such as data leakage, compliance violations, security vulnerabilities, and lack of auditability and governance. The **Shadow AI (Frontier)** page is a dedicated experience, separate from the **All agents** page, that focuses on unmanaged AI agents that require detection and governance.
 
@@ -179,10 +183,10 @@ After the Shadow AI agent is identified in your environment, you can block it to
 1. Open the details pane of a Shadow AI agent for which blocking is available (see 9.3.1).
 2. Select **Security policies**.
 3. Under **Security policies**, select **Block** > **Apply Policies**.
+4. Record the date and time of the block.
 
 **Check result**
 - The **Security policies** tile displays that a blocking Intune policy has been applied to prevent this agent from running.
-- Record the date and time of the block.
 
 ### 9.3.5 Review the block policy in Intune
 
@@ -276,17 +280,17 @@ Performed by any viewing role from 9.1 (for example **Security Reader**).
 
 Performed by any role from 9.1 that can view the page (for example **Intune Administrator**).
 
-After you identify the local AI agent in your environment, you can block it to prevent execution on managed devices. When you block a local AI agent, it blocks common ways of running it by creating a new Microsoft Intune policy that automatically propagates to **all managed Windows devices enrolled in Intune**. Depending on how Intune is configured in your organization, the policy update can take anywhere from 15 minutes up to 8 hours to apply. To review the policy in Intune, use 9.3.5.
+After you identify the local AI agent in your environment, you can block it to prevent execution on managed devices. When you block a local AI agent, it blocks common ways of running it by creating a new Microsoft Intune policy that automatically propagates to **all managed Windows devices enrolled in Intune**. Depending on how Intune is configured in your organization, the policy update can take anywhere from 15 minutes up to 8 hours to apply. To view the policy details, search Intune for the policy name **A365 - Block OpenClaw** (9.3.5).
 
 > Caution: Gemini CLI is a Node.js-based agent. Blocking it blocks all Node.js-based agents (see 9.4.6).
 
 1. Open the details pane of a local agent for which blocking is available (see 9.4.1).
 2. Select **Security policies**.
 3. Under **Security policies**, select **Block agent** > **Apply Policies**.
+4. Record the date and time of the block.
 
 **Check result**
-- **Block agent** > **Apply Policies** completes for the selected agent.
-- Record the date and time of the block.
+- **Block agent** > **Apply Policies** completes for the selected agent, and the Intune policy is found in Intune (9.3.5).
 
 ### 9.4.5 Block VS Code extension agents with a VS Code extension policy
 
@@ -305,12 +309,12 @@ The VS Code extension policy is the `AllowedExtensions` policy, which manages th
 7. In **Basics**, enter a name such as `PoC - VS Code - Block <extension>`, and then select **Next**.
 8. In **Configuration settings**, configure the `AllowedExtensions` policy with a value that blocks the test extension while allowing others, and then select **Next**:
 
-```json
-{
-  "*": true,
-  "<publisher>.<extension>": false
-}
-```
+   ```json
+   {
+     "*": true,
+     "<publisher>.<extension>": false
+   }
+   ```
 
 9. In **Assignments**, select the PoC test group that contains the test device or test user, and then select **Next**.
 10. In **Review + create**, select **Create**.
@@ -318,8 +322,8 @@ The VS Code extension policy is the `AllowedExtensions` policy, which manages th
 If there's a syntax error in the policy value, the `extensions.allowed` setting isn't applied. To check for errors, open the Command Palette in VS Code and run **Show Window Log**.
 
 **Check result**
-- The VS Code ADMX template is imported, and the policy profile is created and assigned to the PoC test group.
-- On the test device, the blocked extension is disabled in VS Code.
+- The VS Code ADMX template is imported, and the policy profile is created, shown in the profiles list and assigned to the PoC test group.
+- After the test device receives the policy (9.5.6), the blocked extension is disabled in VS Code.
 
 ### 9.4.6 Understand the Node.js shared run type
 
@@ -335,7 +339,7 @@ For the settings of this Intune policy, see [Settings list for the Local AI Agen
 
 ## 9.5 Test and validation
 
-Run these tests on a dedicated test device. Plan the block check (9.5.6) for at least 15 minutes and up to 8 hours after the block, because of the documented Intune policy update window.
+Run these tests on a dedicated test device. Plan the block check (9.5.6) for a block created from the Microsoft 365 admin center at least 15 minutes and up to 8 hours after the block, because of the documented Intune policy update window.
 
 ### 9.5.1 Agree the test scope and prepare the test device
 
@@ -343,7 +347,7 @@ Performed by the **PoC lead** together with the customer's security team.
 1. Choose the test tools from the lists in 9.3.1 and 9.4.1, and get the customer's written approval for each one. A minimal set:
    - **Detection only:** one Shadow AI desktop app (for example, Claude Desktop or ChatGPT Desktop) and one local developer tool (for example, GitHub Copilot CLI), if the customer approves them.
    - **Detection and blocking:** one VS Code extension agent that the customer approves (for example, the VSCode GitHub Copilot Extension). Test Gemini CLI or OpenClaw only if the customer explicitly accepts the Node.js block described in 9.4.6 for all managed Windows devices enrolled in Intune.
-2. Confirm that the test device meets 9.2.2 and 9.2.3 (and 9.2.4 if usage metadata is in scope).
+2. Confirm that the test device meets 9.2.2 and 9.2.3 (and 9.2.4 if Global Secure Access metadata is in scope).
 3. Record the test device name, test user, approved tools and versions, and the agreed block window.
 
 **Expected result**
@@ -371,18 +375,20 @@ Performed by **Security Reader** or **Reports Reader**.
 
 ### 9.5.4 Apply the block
 
-Performed by any role from 9.1 that can view the page (for example **Intune Administrator**).
+Performed by any viewing role from 9.1 (for example **Intune Administrator**) for 9.3.4 and 9.4.4, and by **Policy and Profile Manager** for 9.4.5.
 1. Confirm that the customer accepts the scope of the block: all managed Windows devices enrolled in Intune, and the Node.js shared run type if a Node.js-based agent is in scope.
 2. For a Shadow AI test tool for which blocking is available, complete 9.3.4. For a local agent test tool for which blocking is available, complete 9.4.4. For a VS Code extension agent, complete 9.4.5.
 3. Record the date and time of the block.
 
 **Expected result**
 - For a Shadow AI agent, the **Security policies** tile displays that a blocking Intune policy has been applied.
+- For a local agent, **Block agent** > **Apply Policies** completes.
+- For a VS Code extension agent, the VS Code policy profile is created and assigned to the PoC test group.
 
 ### 9.5.5 Confirm the policy in Intune
 
 Performed by **Intune Administrator** (block policy) or **Policy and Profile Manager** (VS Code policy profile).
-1. For a block applied from the admin center, complete 9.3.5.
+1. For a block applied from the Microsoft 365 admin center, complete 9.3.5.
 2. For a VS Code extension policy, go to **Devices** > **Manage devices** > **Configuration** and confirm that the profile from 9.4.5 is in the profiles list.
 
 **Expected result**
@@ -391,25 +397,26 @@ Performed by **Intune Administrator** (block policy) or **Policy and Profile Man
 ### 9.5.6 Confirm the block on the test device
 
 Performed by **Help Desk Operator** or **Endpoint Security Manager** (device sync) and the **standard test user** (device test).
-1. In the Intune admin center, select **Devices** > **All devices**, and select the test device.
-2. At the top of the device overview pane, select **Sync**, and then select **Yes** to confirm. Track progress on the **Device sync status** tab.
+1. In the Microsoft Intune admin center, select **Devices** > **All devices**, and select the test device.
+2. At the top of the device overview pane, select **Sync**, and then select **Yes** to confirm. To track progress, select the **Device sync status** tab (this tab requires the **Preview new device view** toggle at the top right of the Intune admin center to be on).
 3. On the test device, try to run the blocked tool again in the same way as in 9.5.2.
-4. For a VS Code extension block, open VS Code and review the extension in the Extensions view.
+4. For a VS Code extension block, open Visual Studio Code and review the allowed extension list.
 
 **Expected result**
-- After the policy applies (15 minutes up to 8 hours, depending on Intune configuration), the common ways of running the blocked agent are blocked on the test device.
-- For a VS Code extension block, the blocked extension is disabled.
+- For a block created from the Microsoft 365 admin center, after the Intune policy applies (15 minutes up to 8 hours, depending on Intune configuration), the common ways of running the blocked agent are blocked on the test device.
+- For a VS Code extension block, the blocked extension is disabled and the blocked VS Code extension agent is shown under the allowed extension list.
 
 ## 9.6 Evidence
 
 - Screenshot of the **Shadow AI (Frontier)** page and the **Local Agents (Frontier)** page with the list of known agents.
 - Screenshot of the details pane (**Details**, **Detections**, **Security policies**, **Total traffic**) for each detected test tool.
 - Screenshot of the **Detected devices** tab with the test device and **Last Seen**.
-- Screenshot of the **Security policies** tile after **Block** > **Apply Policies**, with the date and time of the block.
+- Screenshot of the **Security policies** tile after **Block** > **Apply Policies** (Shadow AI), or of the completed **Block agent** > **Apply Policies** action (local agents), with the date and time of the block.
 - Screenshot of the block policy details in Intune, and of the VS Code policy profile if used.
 - Screenshot of the Intune **Device sync status** tab for the test device.
 - Screenshot from the test device that shows the blocked tool or the disabled VS Code extension.
-- The signed-off list of approved test tools (9.5.1) and the cleanup confirmation (9.8).
+- The signed-off list of approved test tools (9.5.1).
+- Screenshot of the **Security policies** tile after cleanup, and confirmation that the test tools are uninstalled (9.8).
 
 ## 9.7 Troubleshooting
 
@@ -426,12 +433,19 @@ Performed by **Help Desk Operator** or **Endpoint Security Manager** (device syn
 
 ## 9.8 Cleanup
 
-- Remove the block for the test agent. Removing a block on any Node.js-based agent removes the Node.js block for all other Node.js-based agents. The block is a Microsoft Intune policy that you can find in Intune by its name (for example, **A365 - Block OpenClaw**).
-- Delete the PoC VS Code policy profile, and then delete the imported VS Code ADMX template from the **Import ADMX** tab if it was imported only for the PoC (delete the profiles that use an imported ADMX file before you delete the file).
-- Sync the test device (9.5.6).
-- Uninstall all test tools from the test device, and remove any accounts or keys created for them.
-- If Global Secure Access was enabled only for the PoC, remove the test users from the Internet Access profile assignment, and uninstall the client from the test device.
-- Remove the temporary PoC role assignments from 9.1.
+Performed by the roles listed in 9.1 for each step (Intune Administrator, Policy and Profile Manager, Help Desk Operator or Endpoint Security Manager, Global Secure Access Administrator, and the standard test user on the test device).
+
+1. Remove the block for the test agent. The block is a Microsoft Intune policy that you can find in Intune by its name (for example, **A365 - Block OpenClaw**, see 9.3.5). Removing a block on any Node.js-based agent removes the Node.js block for all other Node.js-based agents.
+2. Delete the PoC VS Code policy profile. Then, if the VS Code ADMX template was imported only for the PoC, delete it from the **Import ADMX** tab. Delete the profiles that use an imported ADMX file before you delete the file.
+3. Sync the test device (9.5.6).
+4. Uninstall all test tools from the test device, and remove any accounts or keys created for them.
+5. If Global Secure Access was enabled only for the PoC, remove the test users from the Internet Access profile assignment (9.2.4), and uninstall the client from the test device.
+6. Remove the temporary PoC role assignments from 9.1.
+
+**Check result**
+- The block is removed (for a Shadow AI agent, the **Security policies** tile of the test agent no longer displays a blocking Intune policy).
+- The PoC VS Code policy profile is no longer in the profiles list.
+- The test tools are uninstalled from the test device.
 
 ---
 Previous: [Chapter 8 – Threat Detection and Runtime Protection (Defender)](../chapter-08-threat-detection/README.md) · Next: [Runbook overview](../README.md)

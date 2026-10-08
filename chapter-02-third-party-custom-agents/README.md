@@ -24,21 +24,21 @@ Grant the read-only roles first; assign setup roles only to the person who makes
 | Google Vertex AI: create the service account and JSON key, grant the Vertex AI permissions and observability roles, configure Google Cloud telemetry | Platform administrator (Google Cloud) | 2.5 |
 | Other supported platforms: create source-platform credentials, grant source-platform permissions, enable source telemetry | Platform administrator (source platform) | 2.6 |
 | Configure API permissions and consent on a tenant-owned **Agent 365 CLI** client app (only when the Microsoft-managed app isn't available) | Application Administrator (or Cloud Application Administrator) | 2.7.3 |
-| Run `a365 setup all` (blueprint, inheritable permissions, agent identity, agent registration) | Agent ID Developer plus Contributor on the Azure subscription | 2.8 |
+| Run `a365 setup all` (blueprint, inheritable permissions, agent identity, agent registration) and `a365 setup blueprint` (messaging endpoint) | Agent ID Developer plus Contributor on the Azure subscription | 2.8, 2.9.4 |
 | Grant OAuth2 permissions (admin consent) for the blueprint; run `a365 setup permissions` subcommands | Global Administrator | 2.8.4, 2.8.6 |
 | Grant service-to-service (S2S) agent identity grants (`--authmode s2s` or `both`) | Application Administrator or Global Administrator | 2.8.2 |
 | Deploy the agent code to Azure | Contributor on the Azure subscription | 2.9 |
 | Upload the published `manifest.zip` in the Microsoft 365 admin center | Global Administrator | 2.10.2 |
 | Delete PoC agents from the registry | AI Administrator | 2.15 |
 | Remove blueprints and Azure resources with `a365 cleanup` | Global Administrator plus Contributor on the Azure subscription | 2.15 |
-| Validation / read-only review | AI Reader (registry); any Microsoft Entra user (agent identities list); Directory Readers (`a365 query-entra`); **Security operations** > **Security data** > **Security data basics (read)** in Defender unified RBAC (advanced hunting) | 2.8.5, 2.12 |
+| Validation / read-only review | AI Reader (registry); any Microsoft Entra user (agent identities and blueprints lists); Directory Readers (`a365 query-entra`); **Security operations** > **Security data** > **Security data basics (read)** in Defender unified RBAC (advanced hunting) | 2.8.5, 2.12 |
 
 Notes:
 - Agent ID Developer and Agent ID Administrator can complete every `a365 setup all` step except the OAuth2 permission grants (admin consent), which require a Global Administrator. When setup completes, the CLI prints the next steps for the Global Administrator (2.8.4).
 - For connected platforms, the AI Administrator creates and manages the connection in the Microsoft 365 admin center; the platform administrator creates the source-platform credentials, grants the required permissions, and enables platform-side telemetry when applicable.
 
 **Before you start:**
-- Complete [Chapter 0 – Prerequisites and PoC preparation](../chapter-00-prerequisites/README.md) (test admin accounts, reviewer accounts, Frontier preview opt-in if you test third-party observability).
+- Complete [Chapter 0 – Prerequisites and PoC preparation](../chapter-00-prerequisites/README.md) (test admin and reviewer accounts in 0.4.1, and the Frontier program in 0.3.2 if you test third-party observability).
 - Complete [Chapter 1 – Agent Discovery and Inventory](../chapter-01-agent-discovery/README.md) and export the registry before you start, so you can show what this chapter adds.
 - For sections 2.2 to 2.6: a non-production account on the source platform with at least one test agent, and a platform administrator.
 - For sections 2.7 to 2.11: .NET 8.0 or later, the Azure CLI, an Azure subscription in the same tenant, a test agent project (you can start from the samples in [`samples/sdk/`](samples/sdk/README.md)), and a Global Administrator available to complete consent.
@@ -303,8 +303,11 @@ Performed by **AI Administrator**.
 
 Performed by **platform administrator** (Databricks) and **AI Administrator** (connection).
 
-1. To rotate access, rotate the service principal secret in Databricks, and then update the connected platform connection with the new secret.
-2. To revoke access, disable the service principal or remove its workspace permissions.
+1. To rotate access, the platform administrator rotates the service principal secret in Databricks. The AI Administrator then updates the Databricks Genie connection with the new secret and validates the credentials.
+2. To revoke access, the platform administrator disables the service principal or removes its workspace permissions.
+
+**Check result**
+- After rotation, the connection validates with the new secret. After revocation, the service principal is disabled or has no workspace permissions.
 
 ## 2.5 Example: connect Google Vertex AI
 **Documentation:** [Connect Google Vertex AI to Microsoft Agent 365](https://learn.microsoft.com/microsoft-agent-365/admin/connected-platforms-google-vertex-ai) · [Third-party agent observability (Frontier)](https://learn.microsoft.com/microsoft-agent-365/admin/third-party-agent-observability) · [Troubleshoot connected platforms](https://learn.microsoft.com/microsoft-agent-365/admin/troubleshoot-connected-platforms)
@@ -431,6 +434,8 @@ The Agent 365 SDK isn't an alternative to your agent framework. Build the agent 
 
 ### 2.7.2 Install the Agent 365 CLI and sign in to Azure
 
+Performed by the **developer**.
+
 1. Install .NET 8.0 or later and the Azure CLI.
 2. Install the Agent 365 CLI as a global .NET tool, or update it if it's already installed:
 
@@ -446,7 +451,7 @@ The Agent 365 SDK isn't an alternative to your agent framework. Build the agent 
    a365 --version
    ```
 
-4. Sign in to Azure and select the subscription in the tenant where you onboard the agent. The Agent 365 CLI makes its Microsoft Entra and Microsoft Graph calls as the account signed in to the Azure CLI, so sign in with the account that holds the roles in 2.1:
+4. Sign in to Azure with the account that holds the roles in 2.1, and select the subscription in the tenant where you onboard the agent. The CLI detects the tenant from the active Azure CLI account, and setup fails with authentication errors if you aren't signed in:
 
    ```azurecli
    az login
@@ -456,7 +461,7 @@ The Agent 365 SDK isn't an alternative to your agent framework. Build the agent 
    ```
 
 **Check result**
-- `a365 --version` returns a version and `az account show` returns the PoC tenant, subscription and the expected account.
+- `a365 --version` returns a version, and `az account show` returns the PoC tenant and subscription.
 
 ### 2.7.3 Confirm the CLI client application
 
@@ -550,8 +555,8 @@ When you run `a365 setup all` without Global Administrator, the CLI completes al
 
 | Step | Who | Action |
 |---|---|---|
-| 1 | Developer | Run `a365 setup all`. The CLI prints the next steps, including a consent URL for a Global Administrator to open. |
-| 2 | Developer | Share the consent URL from the CLI output with the Global Administrator. |
+| 1 | **Agent ID Developer** | Run `a365 setup all`. The CLI prints the next steps, including a consent URL for a Global Administrator to open. |
+| 2 | **Agent ID Developer** | Share the consent URL from the CLI output with the Global Administrator. |
 | 3 | **Global Administrator** | Open the consent URL in a browser signed in as Global Administrator and grant the requested permissions. |
 
 **Check result**
@@ -618,11 +623,14 @@ Skip this section if the agent is already deployed to a cloud. If it's deployed 
 
 ### 2.9.1 Prepare the deployment
 
+Performed by the **developer**.
+
 Confirm that you have:
 - An Azure subscription with contributor access.
+- An Azure Web App to deploy to. `a365 setup all` with an `a365.config.json` file creates the resource group, App Service plan, and Web App if they don't already exist (2.8.2). Config-free setup (`--agent-name`) doesn't create Azure hosting resources.
 - Working agent code with a valid and reachable messaging endpoint, tested locally (and optionally tested with Microsoft 365 using Dev Tunnels).
 - A valid agent blueprint from 2.8.
-- Up-to-date configuration files `a365.config.json`, `a365.generated.config.json`, and the config file in the code (for example, `.env`).
+- Up-to-date configuration files `a365.config.json` (if used), `a365.generated.config.json`, and the config file in the code (for example, `.env`).
 - The Azure CLI installed and authenticated.
 
 ### 2.9.2 Deploy the code and store secrets safely
@@ -664,12 +672,14 @@ Performed by the **developer**.
 
 Performed by **Agent ID Developer**. Needed only when the messaging endpoint was deferred during `a365 setup all --m365`, or when it changes.
 
-```powershell
-a365 setup blueprint --endpoint-only `
-  --messaging-endpoint https://your-app.azurewebsites.net/api/messages
-```
+1. Register the messaging endpoint for the existing blueprint:
 
-To delete the existing messaging endpoint and register a new one, use `a365 setup blueprint --update-endpoint <url>`.
+   ```powershell
+   a365 setup blueprint --agent-name "PoC Custom" --endpoint-only `
+     --messaging-endpoint https://your-app.azurewebsites.net/api/messages
+   ```
+
+2. To delete the existing messaging endpoint and register a new one instead, run `a365 setup blueprint --agent-name "PoC Custom" --update-endpoint <url>`.
 
 ## 2.10 Publish the agent and verify it in the registry
 **Documentation:** [Publish agent to Microsoft admin center](https://learn.microsoft.com/microsoft-agent-365/developer/publish) · [Agent 365 CLI publish command reference](https://learn.microsoft.com/microsoft-agent-365/developer/reference/cli/publish) · [Upload Microsoft Copilot custom agents](https://learn.microsoft.com/microsoft-365/copilot/agent-essentials/agent-lifecycle/agent-upload-agents)
@@ -678,7 +688,7 @@ To delete the existing messaging endpoint and register a new one, use `a365 setu
 
 Performed by the **developer**.
 
-1. Confirm that the agent blueprint exists (2.8), the agent was tested locally, and `a365.config.json` and `a365.generated.config.json` are up to date. For agents provisioned with `--agent-name`, make sure `a365.generated.config.json` exists in your working directory, because the command reads the blueprint ID from this file.
+1. Confirm that the agent blueprint exists (2.8), the agent was tested locally, and `a365.config.json` (if used) and `a365.generated.config.json` are up to date. For agents provisioned with `--agent-name`, make sure `a365.generated.config.json` exists in your working directory, because the command reads the blueprint ID from this file.
 2. Run the publish command (`a365 publish -h` shows all options):
 
    ```powershell
@@ -719,10 +729,10 @@ Performed by **Global Administrator**.
 
 Performed by **AI Reader**.
 
-1. After uploading, allow 5 to 10 minutes for the agent to appear in the admin center and Teams.
+1. After uploading, allow 5 to 10 minutes for the agent to appear in the Microsoft 365 admin center and Teams.
 2. Go to **Agents** > **All agents** and confirm that your agent appears in the list.
 3. Check **Name** (from `manifest.json`), **Version**, **Publisher** (your organization name), and **Availability**.
-4. Find the agent identity that `a365 setup all` registered (**PoC Custom Agent**), open it, and confirm that its identity and registration details match `a365.generated.config.json`.
+4. In **Agents** > **All agents**, find the agent identity that `a365 setup all` registered (**PoC Custom Agent**), open it, and confirm that its identity and registration details match `a365.generated.config.json`.
 
 **Check result**
 - The custom agent is listed with the expected name, version, publisher, and availability, and its identity details match the generated configuration.
@@ -759,15 +769,17 @@ Performed by the **developer**.
 
 ### 2.12.1 Test: third-party agents appear in the registry
 
-Performed by **AI Reader**.
+Performed by **AI Administrator** (connection status) and **AI Reader** (registry).
 
-1. Open https://admin.cloud.microsoft > **Agents** > **All agents** > **Registry**.
-2. Use the **Platform** filter to show the agents of the connected platform.
-3. Confirm that every expected test agent is listed.
-4. Open each agent and review its details.
-5. Select **Export** to export the agents to a CSV file.
+1. In the Microsoft 365 admin center, select **Agents** > **All agents**, and in the **Connected platforms** web part select **Manage**. Select each PoC connection and confirm the latest synchronization status, the total number of synchronized agents, and that no synchronization errors are listed.
+2. Open **Agents** > **All agents** > **Registry**.
+3. Use the **Platform** filter to show the agents of the connected platform.
+4. Confirm that every expected test agent is listed.
+5. Open each agent and review its details.
+6. Select **Export** to export the agents to a CSV file.
 
 **Expected result**
+- Each connection shows the expected number of synchronized agents and no synchronization errors.
 - Every expected third-party agent is listed with its metadata.
 
 ### 2.12.2 Test: Databricks Genie agents appear in the registry after sync
@@ -806,19 +818,20 @@ Performed by **platform administrator** (run the agent) and **AI Reader** (revie
 
 ### 2.12.5 Test: the custom agent appears with its blueprint and agent identity
 
-Performed by **AI Reader**, any Microsoft Entra user, and **Directory Readers**.
+Performed by the **developer** (configuration file), **AI Reader**, any Microsoft Entra user, and **Directory Readers**.
 
-1. In the Microsoft 365 admin center, open **Agents** > **All agents** and find **PoC Custom Agent** and the published agent (2.10.3).
-2. In the Microsoft Entra admin center, browse to **Entra ID** > **Agents** > **Agent identities**, add the **Blueprint App ID** filter with the `agentBlueprintId`, and confirm that the agent identity is listed.
-3. Browse to **Entra ID** > **Agents** > **Agent blueprints**, open the blueprint, and confirm that **Linked agent identities** lists the agent identity.
-4. Run `a365 query-entra inheritance --agent-name "PoC Custom"` and confirm `Effective inheritance: OK` for each resource the agent uses. A resource shows `NONE` until permissions for it are granted on the blueprint service principal (2.8.4, 2.8.6).
+1. Open `a365.generated.config.json` and confirm that `completed` is `true` and note the `agentBlueprintId`.
+2. In the Microsoft 365 admin center, open **Agents** > **All agents** and find **PoC Custom Agent** and the published agent (2.10.3).
+3. In the Microsoft Entra admin center, browse to **Entra ID** > **Agents** > **Agent identities**, add the **Blueprint App ID** filter with the `agentBlueprintId`, and confirm that the agent identity is listed.
+4. Browse to **Entra ID** > **Agents** > **Agent blueprints**, open the blueprint, and confirm that **Linked agent identities** lists the agent identity.
+5. Run `a365 query-entra inheritance --agent-name "PoC Custom"` and confirm `Effective inheritance: OK` for each resource the agent uses. A resource shows `NONE` until permissions for it are granted on the blueprint service principal (2.8.4, 2.8.6).
 
 **Expected result**
-- The custom agent is listed in the admin center, and its agent identity is linked to the PoC blueprint.
+- `completed` is `true`, the custom agent and the published agent are listed in the Microsoft 365 admin center, and the agent identity is linked to the PoC blueprint with the same Blueprint App ID.
 
 ### 2.12.6 Test: custom agent activity is observable
 
-Performed by a **standard test user** (send requests) and a user with **Security data basics (read)** (review). Requires 2.11.1 and the Microsoft 365 connector in Microsoft Defender ([8.3 Connect the Microsoft 365 connector](../chapter-08-threat-detection/README.md#83-connect-the-microsoft-365-connector)). Without the connector, `CloudAppEvents` returns no rows.
+Performed by the **developer** (send requests) and a user with **Security data basics (read)** (review). Requires 2.11.1 and the Microsoft 365 connector in Microsoft Defender ([8.3 Connect the Microsoft 365 connector](../chapter-08-threat-detection/README.md#83-connect-the-microsoft-365-connector)). Without the connector, `CloudAppEvents` returns no rows.
 
 1. Send a few requests to the custom agent.
 2. In the Microsoft Defender portal (https://security.microsoft.com), open [advanced hunting](https://learn.microsoft.com/defender-xdr/advanced-hunting-overview) and run:
@@ -838,7 +851,7 @@ Performed by a **standard test user** (send requests) and a user with **Security
 
 ## 2.13 Evidence
 
-- Screenshot of the **Connected platforms** page with the connection details (provider, scope, last run date, latest synchronization status, number of synchronized agents).
+- Screenshot of the **Connected platforms** page with the details of each PoC connection (Amazon Bedrock, Databricks Genie, Google Vertex AI, or other): provider, scope, last run date, latest synchronization status, number of synchronized agents.
 - Screenshot of the synchronization results and errors, if any.
 - The list of source-platform permissions granted to the connection credentials.
 - Registry export (CSV) and a screenshot of the registry filtered by platform, showing the synchronized agents.
@@ -876,7 +889,7 @@ Performed by a **standard test user** (send requests) and a user with **Security
 | Authentication fails with `AADSTS70007` | Older CLI version | Run `dotnet tool update --global Microsoft.Agents.A365.DevTools.Cli` and retry. |
 | Setup completes but lists outstanding consent actions | OAuth2 grants require a Global Administrator | Have a Global Administrator open every consent URL printed by the CLI and grant the requested permissions. |
 | `a365 query-entra inheritance` reports `Effective inheritance: NONE` | No grants on the blueprint service principal; most commonly a missing `wids` optional claim on the client app | Run `a365 setup requirements` to detect and repair the claim, then run `a365 setup permissions` as Global Administrator. |
-| The blueprint or identity exists, but the agent isn't in **All Agents** | Agent registration failure | Review the setup summary, resolve the error, then run `a365 setup all --agent-name "PoC Custom" --agent-registration-only`. |
+| The blueprint or identity exists, but the agent isn't in **All agents** | Agent registration failure | Review the setup summary, resolve the error, then run `a365 setup all --agent-name "PoC Custom" --agent-registration-only`. |
 | An existing blueprint isn't accepted by the platform | Blueprint created before `managerApplications` was required | Delete it and run `a365 setup all` again, or patch it via the Graph API. |
 | `a365 publish` reports `Agent blueprint ID not found` | Blueprint setup isn't complete | Run `a365 setup` to complete blueprint setup. |
 | `a365 publish` reports `Permissions missing` | Blueprint permissions not configured | Rerun setup with the `a365 setup permissions` command. |
@@ -888,24 +901,26 @@ Performed by a **standard test user** (send requests) and a user with **Security
 
 ## 2.15 Cleanup
 
-Connected platforms:
-- **AI Administrator** and **platform administrator:** Before removing a connection, confirm which agents and management actions depend on it, revoke or rotate the source credentials as required by your organization's security policy, remove the connection in the Microsoft 365 admin center, and confirm how the provider handles synchronized agent records after connection removal.
-- If delete permissions were granted on the source platform (for example `bedrock:DeleteAgent`), Agent 365 can remove the corresponding agent when an administrator explicitly performs that action.
-- **Databricks Genie** (2.4): The **AI Administrator** removes the Databricks Genie connection in the Microsoft 365 admin center. The **platform administrator** revokes access by disabling the service principal or removing its workspace permissions.
-- **Google Vertex AI** (2.5): The **AI Administrator** removes the Google Vertex AI connection in the Microsoft 365 admin center. The **platform administrator** revokes or rotates the service-account credentials as required by your organization's security policy.
-- **Platform administrator:** For other platforms, follow the revoke steps in the platform article where documented (for example, delete the Oracle API key).
+Connected platforms (for each PoC connection):
+1. **AI Administrator** and **platform administrator:** Confirm which agents and management actions depend on the connection, and confirm how the provider handles synchronized agent records after connection removal. If delete permissions were granted on the source platform (for example `bedrock:DeleteAgent`), Agent 365 can remove the corresponding agent when an administrator explicitly performs that action.
+2. **AI Administrator:** Remove the connection in the Microsoft 365 admin center (**Agents** > **All agents** > **Connected platforms** > **Manage**).
+3. **Platform administrator:** Revoke the source credentials:
+   - Amazon Bedrock (2.3): revoke or rotate the AWS access key as required by your organization's security policy.
+   - Databricks Genie (2.4): disable the service principal or remove its workspace permissions.
+   - Google Vertex AI (2.5): revoke or rotate the service-account credentials as required by your organization's security policy.
+   - Other platforms (2.6): follow the revoke steps in the platform article where documented (for example, delete the Oracle API key); otherwise revoke or rotate the credentials as required by your organization's security policy.
 
 Custom agents:
-- **AI Administrator:** Delete the uploaded PoC agent from **Agents** > **All agents**. A deleted agent is soft deleted and can be restored within 30 days.
-- **Global Administrator** with **Contributor** on the Azure subscription: Preview and then remove the blueprint, agent instance, and Azure resources:
+1. **AI Administrator:** Delete the uploaded PoC agent from **Agents** > **All agents**. A deleted agent is soft deleted and can be restored within 30 days.
+2. **Global Administrator** with **Contributor** on the Azure subscription: Preview and then remove the blueprint, agent instance, and Azure resources:
 
-  ```powershell
-  a365 cleanup --agent-name "PoC Custom" --dry-run
-  a365 cleanup --agent-name "PoC Custom"
-  ```
+   ```powershell
+   a365 cleanup --agent-name "PoC Custom" --dry-run
+   a365 cleanup --agent-name "PoC Custom"
+   ```
 
-  For granular cleanup, use `a365 cleanup blueprint`, `a365 cleanup azure`, or `a365 cleanup instance`. `a365 cleanup blueprint` also deletes the blueprint's service principal and any agent instances linked to it; if the agent is registered in the Agent Registry, the corresponding registry entry might also be removed.
-- **Contributor:** If you created a resource group only for the PoC, delete it with `az group delete --name <your-resource-group>`. This command deletes all resources in the group.
+   For granular cleanup, use `a365 cleanup blueprint`, `a365 cleanup azure`, or `a365 cleanup instance`. `a365 cleanup blueprint` also deletes the blueprint's service principal and any agent instances linked to it; if the agent is registered in the Agent Registry, the corresponding registry entry might also be removed.
+3. **Contributor:** If you created a resource group only for the PoC, delete it with `az group delete --name <your-resource-group>`. This command deletes all resources in the group.
 
 ---
 Previous: [Chapter 1 – Agent Discovery and Inventory](../chapter-01-agent-discovery/README.md) · Next: [Chapter 3 – Agent Identity and Ownership](../chapter-03-identity-ownership/README.md)

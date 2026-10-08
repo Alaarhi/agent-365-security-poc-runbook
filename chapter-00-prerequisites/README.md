@@ -18,14 +18,14 @@ Every chapter starts with its own **Required permissions** table. The table belo
 | Chapter | Setup roles | Read-only / validation roles |
 |---|---|---|
 | 1 – Agent Discovery and Inventory | AI Administrator; Agent ID Administrator (Graph reads of agent identities); Foundry Project Manager (publish a Foundry agent); Application Developer and Privileged Role Administrator (app-only Graph access) | AI Reader or Global Reader; Security Reader; Reports Reader |
-| 2 – Third-Party and Custom Agents | AI Administrator (connected platforms); platform administrator of each source platform (AWS, Databricks, Google Cloud); Agent ID Developer plus Contributor on the Azure subscription (`a365 setup all`); Global Administrator (OAuth2 consent, package upload) | AI Reader; Directory Readers |
-| 3 – Agent Identity and Ownership | Agent ID Administrator; Attribute Definition Administrator; Attribute Assignment Administrator; Security Administrator (risk actions); Lifecycle Workflows Administrator; Power Platform Administrator (Copilot Studio migration) | Any Microsoft Entra user; Reports Reader; Security Reader; Attribute Assignment Reader |
-| 4 – Tools and MCP Server Governance | AI Administrator; Global Administrator (Tools Gateway, Agent 365 Tools service principal) | AI Reader or Global Reader; Security Reader |
+| 2 – Third-Party and Custom Agents | AI Administrator (connected platforms); platform administrator of each source platform (AWS, Databricks, Google Cloud); Agent ID Developer plus Contributor on the Azure subscription (`a365 setup`); Application Administrator (service-to-service grants); Global Administrator (OAuth2 consent, package upload, `a365 cleanup`) | AI Reader; Directory Readers; Defender **Security data basics (read)** |
+| 3 – Agent Identity and Ownership | Agent ID Administrator; Agent ID Developer (inheritable permissions); Attribute Definition Administrator; Attribute Assignment Administrator; Security Administrator (risk actions); Lifecycle Workflows Administrator; Power Platform Administrator (Copilot Studio migration) | Any Microsoft Entra user; Reports Reader; Security Reader; Attribute Assignment Reader |
+| 4 – Tools and MCP Server Governance | AI Administrator; Global Administrator (Tools Gateway, Agent 365 Tools service principal, `grant-agents-access`); developer account (BYO MCP server registration and evaluation) | AI Reader or Global Reader; Security Reader |
 | 5 – Agent Lifecycle and Audit | AI Administrator; Azure AI Owner (Foundry start/stop); Agent ID Administrator (optional Entra disable) | AI Reader or Global Reader; Audit Reader; Reports Reader; Security Reader |
-| 6 – Conditional Access and Least Privilege | Conditional Access Administrator; Security Administrator; Identity Governance Administrator; Groups Administrator; attribute roles (optional); Global Administrator with Attribute Assignment Administrator (policy templates) | Global Reader; Reports Reader; Security Reader |
+| 6 – Conditional Access and Least Privilege | Conditional Access Administrator; Security Administrator; Identity Governance Administrator; Agent ID Administrator (lab agent identities); Groups Administrator; attribute roles (optional); Global Administrator with Attribute Assignment Administrator (policy templates) | Global Reader; Reports Reader; Security Reader |
 | 7 – Sensitive Data Protection (Purview) | Data Security AI Admins or AI Administrator; Information Protection Admins; Communication Compliance Administrators; Insider Risk Management Admins; AI Administrator (agent approval) | Global Reader; Information Protection Analysts; Communication Compliance Investigators or Analysts |
-| 8 – Threat Detection and Runtime Protection (Defender) | Security Administrator; Power Platform Administrator; Security Operator; AI Administrator (block from registry); Owner or Contributor on the Azure subscription (Defender for Cloud AI services plan, optional) | Security Reader |
-| 9 – Shadow AI and Local Agents | Global Administrator (Frontier); Intune Administrator; Policy and Profile Manager; Global Secure Access Administrator (optional) | Security Reader or Reports Reader |
+| 8 – Threat Detection and Runtime Protection (Defender) | Security Administrator; Power Platform Administrator; Security Operator; AI Administrator (block from registry); Azure Bot Service Contributor and Foundry User (publish the Foundry test agent); Owner or Contributor on the Azure subscription (Defender for Cloud AI services plan, optional); Policy and Profile Manager (optional local runtime protection) | Security Reader |
+| 9 – Shadow AI and Local Agents | Global Administrator (Frontier); Intune Administrator; Policy and Profile Manager; Help Desk Operator or Endpoint Security Manager (device sync); Global Secure Access Administrator (optional) | Security Reader or Reports Reader |
 
 Two rules that save PoC time:
 1. Assign roles as **Active** for the PoC window, so an admin isn't stopped by an activation prompt in the middle of a task. Use Privileged Identity Management just-in-time activation only for Global Administrator.
@@ -99,10 +99,13 @@ Performed by **User Administrator**.
 | Account | Purpose | Used in chapters |
 |---|---|---|
 | Test admin | Makes the configuration changes. Holds only the setup roles for the in-scope chapters. | All |
-| Standard test user | Runs the agent tests. No admin role. | 1, 4, 5, 7, 8, 9 |
+| Standard test user | Runs the agent tests and acts as a sponsor in the access package test. No admin role. | 3, 4, 5, 6, 8, 9 |
 | Reviewer / auditor | Views evidence without making changes. Holds only the read-only roles. | All |
 | Second test user | User outside the plugin pilot group. No admin role. | 4 |
-| Intended non-owner account | Discovers and installs the published Copilot Studio agent. No admin role. | 7 |
+| Maker account | Builds the Microsoft-native test agents (Copilot Studio, Agent Builder, Foundry) and the Chapter 7 SharePoint site. Permission to create agents in the PoC Copilot Studio environment and Foundry project. | 1, 5, 7, 8 |
+| Developer account | Builds and registers custom agents and MCP servers with the Agent 365 CLI. | 2, 4 |
+| Authorized and unauthorized test users | Chapter 7 acceptance tests: one user inside and one user outside the sharing scope of the PoC site and agents. No admin role. | 7 |
+| Intended non-owner account | Discovers and installs the published Copilot Studio agent. Can be the authorized test user if it didn't create the agents. No admin role. | 7 |
 | PoC Sponsor and PoC Sponsor Manager | Sponsor continuity test with Lifecycle Workflows. The **Manager** attribute of PoC Sponsor is set to PoC Sponsor Manager. | 3 |
 | PoC approver | Approves access package requests. No admin role. | 6 |
 | Controlled recipient mailbox | Receives the test email from the Copilot Studio email agent. Never use a real personal address. | 7 |
@@ -129,12 +132,12 @@ Performed by **Privileged Role Administrator** (Microsoft Entra roles) and a mem
 
 | Portal | URL | Used in chapters |
 |---|---|---|
-| Microsoft 365 admin center | <https://admin.cloud.microsoft> | 1, 2, 4, 5, 7, 8, 9 |
-| Microsoft Entra admin center | <https://entra.microsoft.com> | 2, 3, 6 |
+| Microsoft 365 admin center | <https://admin.cloud.microsoft> | 1, 2, 4, 5, 6, 7, 8, 9 |
+| Microsoft Entra admin center | <https://entra.microsoft.com> | 1, 2, 3, 5, 6, 9 |
 | Microsoft Purview portal | <https://purview.microsoft.com> | 5, 7 |
-| Microsoft Defender portal | <https://security.microsoft.com> | 1, 4, 5, 8 |
-| Power Platform admin center | <https://admin.powerplatform.microsoft.com> | 3, 8 |
-| Copilot Studio | <https://copilotstudio.microsoft.com> | 1, 4, 7, 8 |
+| Microsoft Defender portal | <https://security.microsoft.com> | 1, 2, 4, 5, 8, 9 |
+| Power Platform admin center | <https://admin.powerplatform.microsoft.com> | 3, 4, 8 |
+| Copilot Studio | <https://copilotstudio.microsoft.com> | 1, 3, 4, 5, 7, 8 |
 | Microsoft Intune admin center | <https://intune.microsoft.com> | 8, 9 |
 | Azure portal | <https://portal.azure.com> | 2, 4, 8 |
 
@@ -162,11 +165,11 @@ Performed by the **maker** or the **developer**, as described in the linked sect
 
 | Test asset | How to build it | Used in |
 |---|---|---|
-| Microsoft-native test agents (Copilot Studio, Agent Builder, Microsoft Foundry) | [1.2 Discover Microsoft-native agents](../chapter-01-agent-discovery/README.md#12-discover-microsoft-native-agents) | 1, 3, 5 |
+| Microsoft-native test agents (Copilot Studio, Microsoft Foundry) | [1.2 Discover Microsoft-native agents](../chapter-01-agent-discovery/README.md#12-discover-microsoft-native-agents) | 1, 3, 5 |
 | SharePoint communication site with the synthetic Word and Excel files labelled **Confidential** | [7.4 SharePoint communication site and PoC files](../chapter-07-sensitive-data-protection/README.md#74-sharepoint-communication-site-and-poc-files) | 7 |
 | Microsoft 365 Copilot knowledge agent | [7.5 Microsoft 365 Copilot knowledge agent](../chapter-07-sensitive-data-protection/README.md#75-microsoft-365-copilot-knowledge-agent) | 7 |
 | Copilot Studio email agent, published and approved | [7.6 Copilot Studio email agent and publication](../chapter-07-sensitive-data-protection/README.md#76-copilot-studio-email-agent-and-publication) | 7 |
-| Copilot Studio test agent for runtime protection, and (optional) a published Microsoft Foundry test agent | [Chapter 8, Before you start](../chapter-08-threat-detection/README.md#81-required-permissions) | 8 |
+| Copilot Studio test agent for runtime protection: the Chapter 7 email agent, and (optional) the published Microsoft Foundry test agent from 1.2.2 | [Chapter 8, Before you start](../chapter-08-threat-detection/README.md#81-required-permissions) | 8 |
 | A member-submitted test agent in **Agents** > **All agents** > **Requests** with status **Pending review** (policy template test) | [6.7 Apply Conditional Access and custom security attributes at publish time](../chapter-06-conditional-access/README.md#67-apply-conditional-access-and-custom-security-attributes-at-publish-time-policy-templates) | 6 |
 | `PoC-Lifecycle-Agent`: a shared Agent Builder or Copilot Studio agent you may permanently delete | [Chapter 5, Before you start](../chapter-05-lifecycle-audit/README.md#51-required-permissions) | 5 |
 | Test agent on a supported third-party platform (for example an Amazon Bedrock agent, a Databricks Genie space, or a Google Vertex AI agent), in a non-production account | [2.2 Connect a third-party agent platform](../chapter-02-third-party-custom-agents/README.md#22-connect-a-third-party-agent-platform) | 2 |
@@ -204,6 +207,7 @@ Confirm before the first joint test session. Skip items for chapters that are ou
 - [ ] Purview Audit is recording (0.5).
 - [ ] Test agents and test devices exist (0.6).
 - [ ] Defender and Power Platform administrators are available for the Chapter 8 setup.
+- [ ] The Microsoft 365 connector is connected in Microsoft Defender (8.3) if agent activity in `CloudAppEvents` is in scope (2.12.6, 5.9, 8.9).
 - [ ] Propagation times are built into the schedule (0.7).
 
 ---

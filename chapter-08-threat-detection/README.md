@@ -12,6 +12,7 @@
 - The test agent appears under **Agents at risk** in the Agent 365 registry, and its **Risk details** pane lists **Microsoft Defender** as a source.
 - An AI Administrator blocks the test agent from the registry, and the test user can no longer use it.
 - (Optional) A custom detection rule built on agent activity runs and lists a triggered alert.
+- (Optional, local agents in scope) The Microsoft demonstration prompt in 8.6.3 raises a **Suspicious AI prompt injection** alert in the Defender portal.
 - (Optional, Foundry in scope) **AI services** is **On** in Defender for Cloud for the PoC subscription, and the Foundry test scenarios in 8.10.7 produce AI alerts in Defender for Cloud **Security alerts** and in the Defender portal alert queue.
 
 ## 8.1 Required permissions
@@ -22,9 +23,10 @@ Grant the read-only role first; assign setup roles only to the person who makes 
 |---|---|---|
 | Enable Security for AI, connect the Microsoft 365 connector, turn on Copilot Studio real-time protection, save the App ID | Security Administrator | 8.2, 8.3, 8.4.1, 8.4.4 |
 | Manage real-time protection rules and prompt evidence collection | Security Administrator | 8.4.5 |
-| Register the Microsoft Entra application and its federated identity credential | A user with permissions to create application registrations in your Microsoft Entra tenant | 8.4.2 |
+| Register the Microsoft Entra application and its federated identity credential, and delete it at cleanup | A user with permissions to create application registrations in your Microsoft Entra tenant | 8.4.2, 8.13 |
 | Configure and disconnect threat detection for the Power Platform environment | Power Platform Administrator | 8.4.3, 8.13 |
 | (Optional) Enable or disable the Defender for Cloud **AI services** plan and its components | Owner or Contributor on the Azure subscription | 8.5.1, 8.5.2, 8.13 |
+| (Optional) Publish the Foundry test agent to Microsoft 365 Copilot and Teams | Azure Bot Service Contributor (or Contributor or Owner) on the resource group, and Foundry User on the Foundry project | 8.10.7 |
 | (Optional) View Defender for Cloud alerts in the Azure portal | Security Reader (Azure role in Defender for Cloud) | 8.5.3, 8.10.7 |
 | (Optional) View Defender for Cloud alerts in the Defender portal | Microsoft Defender XDR Unified RBAC role for Defender for Cloud, or Global Administrator or Security Administrator | 8.5.3, 8.10.7 |
 | (Optional) Deploy local AI agent runtime protection from the Defender portal | Permission to manage endpoint security policies in the Defender portal | 8.6.2 |
@@ -32,10 +34,12 @@ Grant the read-only role first; assign setup roles only to the person who makes 
 | View the Agent 365 registry, **Agents at risk**, and **Risk details** | AI Reader, Global Reader, or Security Reader | 8.7, 8.10.5 |
 | Open the Microsoft Defender deep link from **Risk details** | Global Reader, Security Reader, Security Administrator, or AI Administrator | 8.7.2 |
 | Block or unblock an agent in the registry | AI Administrator | 8.7.3, 8.10.6, 8.13 |
-| Manage alert status and classification | Security Operator | 8.10.4, 8.10.6 |
+| (Optional) Delete the Foundry test agent after the PoC | As listed in [5.1 Required permissions](../chapter-05-lifecycle-audit/README.md#51-required-permissions) | 8.13 |
+| Manage alert status and classification | Security Operator | 8.10.4, 8.10.6, 8.10.7, 8.13 |
 | Create, turn off, or delete custom detection rules | Security Administrator (or Security Operator, see note) | 8.9.5, 8.13 |
+| Add and remove the test document in the SharePoint knowledge source of the Copilot Studio test agent | PoC maker account (as in 7.4 and 7.6) | 8.10.1, 8.13 |
 | Run the test scenarios | Standard test user | 8.10.3, 8.10.7 |
-| Validation / read-only review: Advanced Hunting, alerts, Defender views opened from the registry | Security Reader | 8.8, 8.9, 8.10.4 |
+| Validation / read-only review: Advanced Hunting, alerts, Defender views opened from the registry | Security Reader | 8.6.3, 8.8, 8.9, 8.10.4 |
 
 Notes:
 - Security Operator can manage custom detections only when role-based access control (RBAC) is turned off in Microsoft Defender for Endpoint. If RBAC is turned on, the Security Operator also needs the **Manage Security Settings** permission in Defender for Endpoint.
@@ -44,8 +48,10 @@ Notes:
 **Before you start:**
 - Complete [Chapter 0 – Prerequisites and PoC preparation](../chapter-00-prerequisites/README.md): test admin, standard test user, reviewer account, and published PoC agents.
 - Complete [Chapter 1 – Agent Discovery and Inventory](../chapter-01-agent-discovery/README.md). Agent 365 must be onboarded in the tenant before you enable security for AI agents.
-- Prepare one non-production **Copilot Studio test agent** that you may block and unblock during the PoC. It must use generative orchestration (external threat detection is called only for agents that use generative orchestration). For the test scenarios, give it at least one tool and a knowledge source you control, and publish it to Microsoft 365 Copilot and Teams. Details are in 8.10.1.
-- (Optional, Foundry in scope) Publish a Microsoft Foundry test agent as described in [Chapter 1 – Agent Discovery and Inventory](../chapter-01-agent-discovery/README.md), and identify the Azure subscription that contains its Foundry resources (8.5).- Ownerless-agent governance (reassign ownership, Agent management rules, orphaned-agent runbook) is covered in [Chapter 5 – Agent Lifecycle and Audit](../chapter-05-lifecycle-audit/README.md). This chapter only links to it.
+- **Copilot Studio test agent:** use the Copilot Studio email agent from [7.6 Copilot Studio email agent and publication](../chapter-07-sensitive-data-protection/README.md#76-copilot-studio-email-agent-and-publication). It has a SharePoint knowledge source and the **Send an email (V2)** tool, and is published to Microsoft 365 Copilot and Teams. It must use generative orchestration, because external threat detection is only called on agents that use generative orchestration. Complete the Chapter 7 tests before you run 8.10, because 8.10.6 blocks this agent.
+- (Optional, Foundry in scope) Create and publish the Foundry test agent as described in [1.2.2 Create and publish a Foundry test agent](../chapter-01-agent-discovery/README.md#122-create-and-publish-a-foundry-test-agent), and identify the Azure subscription that contains its Foundry resources (8.5).
+- (Optional, local agents in scope) Prepare the Windows test device onboarded to Defender for Endpoint, as described in [9.2 Tenant and device prerequisites](../chapter-09-shadow-ai-local-agents/README.md#92-tenant-and-device-prerequisites), with a supported local AI agent installed (8.6).
+- Ownerless-agent governance (identify ownerless agents, reassign ownership, Agent management rules) is covered in [5.5 Govern ownerless agents](../chapter-05-lifecycle-audit/README.md#55-govern-ownerless-agents). This chapter only links to it.
 - Shadow AI and local agent discovery in the Microsoft 365 admin center are covered in [Chapter 9 – Shadow AI and Local Agents](../chapter-09-shadow-ai-local-agents/README.md). This chapter only covers the optional Defender for Endpoint runtime protection for local agents (8.6).
 - Detection and investigation of AI agent threats in Microsoft Defender is in public preview. Copilot Studio external threat detection and real-time protection for Copilot Studio agents are in preview.
 
@@ -325,6 +331,9 @@ Performed in an elevated PowerShell session (**Run as administrator**) on the te
 
 4. Close the PowerShell window and any terminal windows used to run agents. Then open a new terminal window before starting the agent.
 
+**Check result**
+- `Get-MpPreference` returns `Audit` for each method you enabled.
+
 ### 8.6.2 Deploy runtime protection with a policy
 Performed by an account with **permission to manage endpoint security policies** (Defender portal) or an Intune role such as **Policy and Profile Manager** (Intune).
 
@@ -359,12 +368,12 @@ Performed on the test device; alert review by **Security Reader**.
 ## 8.7 Review agent risk in the Agent 365 registry
 **Documentation:** [Agent Registry in Microsoft 365 admin center – Agent risks](https://learn.microsoft.com/microsoft-365/admin/manage/agent-registry#agent-risks) · [Governance and lifecycle actions for agents – Block or unblock agents](https://learn.microsoft.com/microsoft-365/admin/manage/agent-actions#block-or-unblock-agents) · [Agent management roles and permissions](https://learn.microsoft.com/microsoft-365/admin/manage/agent-roles-perms)
 
-Risk signals in the Agent Registry are a consolidated set of agent-related security detections from multiple security platforms. IT administrators can understand what is flagged without switching between portals or elevating their permissions to different security roles, and share the details with the security team for investigation and remediation. Risk signal counts might be up to an hour behind what the security portals show, and reflect active risk signals.
+Risk signals in the Agent Registry are a consolidated set of agent-related security detections from multiple security platforms. IT administrators can understand what is flagged without switching between portals or elevating their permissions to different security roles, and share the details with the security team for investigation and remediation. Risk signal counts might be up to an hour behind what the security portals show, and reflect active risk signals. The Registry baseline, including the **Agents at risk** tile, is recorded in [1.3.4 Review risk signals](../chapter-01-agent-discovery/README.md#134-review-risk-signals); this section focuses on investigating and containing a flagged agent.
 
 ### 8.7.1 Open Agents at risk
 Performed by **AI Reader**, **Global Reader**, or **Security Reader**.
 1. Sign in to the Microsoft 365 admin center at `https://admin.cloud.microsoft`.
-2. On the **Overview** page, review the **Agents at risk** card. It lists the three agents with the highest aggregated risk counts. Select **View agents** to open **All agents** > **Registry**, filtered and sorted by risk level.
+2. Go to **Agents** > **Overview** and review the **Agents at risk** card. It lists the three agents with the highest aggregated risk counts. Select **View agents** to open **All agents** > **Registry**, filtered and sorted by risk level.
 3. Alternatively, go to **Agents** > **All agents** > **Registry** and select the **Agents at risk** tile. It opens a prefiltered view of agents with one or more risk signals.
 4. Review the **Risks** column. It shows the aggregated count of risk signals for each agent.
 
@@ -382,7 +391,7 @@ Performed by **AI Reader**, **Global Reader**, or **Security Reader**.
 **Check result**
 - For one agent, you can show which platforms contributed its risk signals and open the corresponding portal.
 
-> Purview risk signals are configured in [Chapter 7 – Sensitive Data Protection (Purview)](../chapter-07-sensitive-data-protection/README.md), and Entra ID Protection for agents in [Chapter 3 – Agent Identity and Ownership](../chapter-03-identity-ownership/README.md). The Microsoft Purview IRM alerts deep link requires IRM Analyst or IRM Investigator; Global Administrator alone is insufficient.
+> Purview risk signals come from the Insider Risk Management agent policy verified in [7.8 Insider Risk Management verification](../chapter-07-sensitive-data-protection/README.md#78-insider-risk-management-verification). Entra ID Protection for agents is covered in [3.9 Detect and respond with ID Protection](../chapter-03-identity-ownership/README.md#39-detect-and-respond-with-id-protection). The Microsoft Purview IRM alerts deep link requires IRM Analyst or IRM Investigator; Global Administrator alone is insufficient.
 
 ### 8.7.3 Block a risky agent from the registry
 Performed by **AI Administrator**.
@@ -400,7 +409,7 @@ Blocking an agent restricts access to it across the organization, preventing any
 **Check result**
 - The agent details pane now offers **Unblock** for the agent.
 
-> Ownerless agents (Agents without owners, reassign ownership, Agent management rules) are handled in [Chapter 5 – Agent Lifecycle and Audit](../chapter-05-lifecycle-audit/README.md).
+> Ownerless agents are handled in [5.5 Govern ownerless agents](../chapter-05-lifecycle-audit/README.md#55-govern-ownerless-agents). Blocking and unblocking in the lifecycle context is covered in [5.3.1 Block or unblock an agent](../chapter-05-lifecycle-audit/README.md#531-block-or-unblock-an-agent).
 
 ## 8.8 Review the AI agent inventory in Defender
 **Documentation:** [Discover AI agents and assess security posture using Microsoft Defender](https://learn.microsoft.com/defender-xdr/security-for-ai/ai-agent-inventory) · [AI agent posture risk in Microsoft Defender](https://learn.microsoft.com/defender-xdr/security-for-ai/ai-agent-risk-assessment)
@@ -492,7 +501,7 @@ AgentsInfo
 **Expected result**
 - A clean environment can return no rows. Review any returned agent with its owner, and compare with the **Weak Instructions** risk indicator in 8.8.1.
 
-> To hunt for ownerless agents, use [Chapter 5 – Agent Lifecycle and Audit](../chapter-05-lifecycle-audit/README.md).
+> To find and govern ownerless agents, use [5.5 Govern ownerless agents](../chapter-05-lifecycle-audit/README.md#55-govern-ownerless-agents).
 
 ### 8.9.3 Trace agent activity in CloudAppEvents
 Performed by **Security Reader**.
@@ -599,19 +608,19 @@ This test proves the full chain: a risky action by the standard test user agains
 Microsoft Defender detects threats such as jailbreak attempts, indirect prompt injection (XPIA) attempts, malicious content propagation, secret and credential leakage, evasion techniques, large language model (LLM) reconnaissance, and suspicious user or IP access.
 
 ### 8.10.1 Prepare the test
-Performed by **Security Administrator** with the owner of the Copilot Studio test agent.
+Performed by **Security Administrator** with the **PoC maker account**.
 
 | # | Precondition | How to check |
 |---|---|---|
 | 1 | Security for AI is enabled; Microsoft 365 connector and Copilot Studio show **Connected** | 8.2.1, 8.3.1, 8.4.4 |
 | 2 | Threat detection is configured for the environment that hosts the test agent | 8.4.3 |
 | 3 | The test agent uses generative orchestration | In Copilot Studio (`https://copilotstudio.microsoft.com`), open the agent's **Settings** page; in the **Generative AI** section, check **Orchestration**. New agents use generative orchestration by default. |
-| 4 | The test agent has at least one tool and a knowledge source you control | Agent configuration in Copilot Studio |
-| 5 | The test agent is published to Microsoft 365 Copilot and Teams, and the standard test user can use it there | Test user opens the agent |
+| 4 | The test agent has a knowledge source and at least one tool: the SharePoint knowledge source and the **Send an email (V2)** tool of the 7.6 agent | Agent configuration in Copilot Studio (7.6.2, 7.6.3) |
+| 5 | The test agent is published to Microsoft 365 Copilot and Teams, and the standard test user can use it there | Test user opens the agent (7.9.6) |
 | 6 | The test agent appears in **Assets** > **AI agents** and in `AgentsInfo` | 8.8.1, 8.9.1 |
 | 7 | The **Default** real-time protection rule is listed; the optional custom block rule exists and is not enabled | 8.4.5 |
 | 8 | Baseline captured: risk level and risk indicators in Defender, **Risks** count in the registry | 8.8.2, 8.7.1 |
-| 9 | For scenario 1, the test document with the injected content is added to the agent's knowledge source | Agent knowledge in Copilot Studio |
+| 9 | For scenario 1, the PoC maker account has added an unlabeled test document with the injected content to the SharePoint site that the agent uses as knowledge (7.4) | The document is listed in the site library |
 
 > Custom agents created in Copilot Studio include built-in protection against user prompt-injection attacks (UPIA) and cross-domain prompt injection attacks (XPIA), and block these attacks at runtime. Record the agent's response for each scenario.
 
@@ -662,13 +671,13 @@ Performed by **AI Reader**, **Global Reader**, or **Security Reader**.
 1. Open **Agents** > **All agents** > **Registry** in the Microsoft 365 admin center. Risk signal counts might be up to an hour behind the security portals.
 2. Select the **Agents at risk** tile and confirm that the test agent is listed.
 3. Select its **Risks** count and confirm that **Microsoft Defender** appears under **Risk signals are sourced from**.
-4. Select **Microsoft Defender** to follow the deep link into the Defender portal.
+4. Select **Microsoft Defender** to follow the deep link into the Defender portal. The deep link requires Global Reader, Security Reader, Security Administrator, AI Administrator, or Global Administrator; AI Reader can't follow it.
 
 **Expected result**
 - IT sees what is flagged for the test agent from the Microsoft 365 admin center, without switching between portals or elevating to security roles.
 
 ### 8.10.6 Contain the agent and verify
-Performed by **AI Administrator** (block) and **standard test user** (verify).
+Performed by **AI Administrator** (block), **standard test user** (verify), and **Security Operator** (alert status).
 1. Block the test agent as described in 8.7.3. Record the time.
 2. As the standard test user, try to use the test agent in Microsoft 365 Copilot and in Teams.
 3. As Security Operator, set the alert status and classification, and record the containment time.
@@ -677,14 +686,15 @@ Performed by **AI Administrator** (block) and **standard test user** (verify).
 - Blocking restricts access to the agent across the organization, preventing any user from using it; the test user can't use the agent in Microsoft Copilot or Teams.
 - The time from the first alert to the block is the PoC containment metric.
 
-> For identity-level containment of an agent with a Microsoft Entra agent identity, see [Chapter 3 – Agent Identity and Ownership](../chapter-03-identity-ownership/README.md).
+> For identity-level containment of an agent with a Microsoft Entra agent identity, see [3.11.1 Disable and re-enable an individual agent identity](../chapter-03-identity-ownership/README.md#3111-disable-and-re-enable-an-individual-agent-identity).
 
 ### 8.10.7 Run the Foundry test agent scenarios (optional)
-Performed by **standard test user**; alert review by **Security Reader** (Azure role in Defender for Cloud) and by a user who can view Defender for Cloud alerts in the Defender portal (8.1).
+Performed by **standard test user** (scenarios), **Security Reader** (Azure role in Defender for Cloud) and a user who can view Defender for Cloud alerts in the Defender portal (alert review, see 8.1), and **Security Operator** (alert status).
 
 Preconditions:
 - **AI services** is **On** for the subscription that contains the Foundry test agent's resources (8.5.1), and user prompt evidence is set as agreed (8.5.2).
-- The Foundry test agent is published. Threat detection is supported only for published Foundry agents; agents used only in a playground environment aren't supported.
+- The Foundry test agent from 1.2.2 is published. Threat detection is supported only for published Foundry agents; agents used only in a playground environment aren't supported.
+- So that the standard test user can chat with it, the Foundry test agent is also published to Microsoft 365 Copilot and Teams as described in [Publish agents to Microsoft Copilot and Microsoft Teams in the Foundry portal](https://learn.microsoft.com/azure/foundry/agents/how-to/publish-copilot). With the **Just you** scope, share the agent link with the standard test user; with **People in your organization**, an administrator approves the request in the Microsoft 365 admin center.
 - The Foundry test agent appears in **Assets** > **AI agents** > **Agents** (8.8.1).
 
 The PoC team provides the prompts. Use only the Foundry test agent, the standard test user, and test data.
@@ -696,7 +706,7 @@ The PoC team provides the prompts. Use only the Foundry test agent, the standard
 | F3 | Indirect prompt injection via grounding data | `<to be added>` | Alert listed on the Foundry test agent's **Incidents and alerts** tab in the Defender portal |
 | F4 | Benign control prompt | `<to be added>` | The agent responds normally |
 
-1. As the standard test user, run each scenario in a new conversation with the Foundry test agent. Record the time, the scenario number, and the agent's response.
+1. As the standard test user, open the Foundry test agent in Microsoft 365 Copilot or Teams and run each scenario in a new conversation. Record the time, the scenario number, and the agent's response.
 2. In the Azure portal, go to **Microsoft Defender for Cloud** > **Security alerts**, select the alert, and select **View full details**.
 3. In the Microsoft Defender portal, open the alert queue, filter by **alert subscription ID**, and open the incident that contains the alert.
 4. Go to **Assets** > **AI agents** > **Agents**, select the Foundry test agent, select **Open Agent page**, and review **Incidents and alerts**.
@@ -739,7 +749,7 @@ The PoC team provides the prompts. Use only the Foundry test agent, the standard
 | Tool runs although the threat detection system didn't answer | No decision within one second; default error behavior is **Allow the agent to respond** | Review **Set error behavior** (8.4.3). |
 | Blocking pass produces no alert | Near-real-time alerts aren't generated for an agent covered by a blocking rule | Query `BehaviorInfo` (8.9.4) for the block events. |
 | `CloudAppEvents` returns no agent rows | The **Microsoft 365 activities** component isn't selected, or the agent hasn't been used | Check 8.3, use the agent as the test user, and rerun 8.9.3. |
-| Queries fail on `AIAgentsInfo`, `AgentName`, or `EntraAgentId` | Table and column names | Use `AgentsInfo`, `Name`, `EntraAgentID` and `EntraBlueprintID`. Run `AgentsInfo | getschema` to list the columns in your tenant. |
+| Queries fail on `AIAgentsInfo`, `AgentName`, or `EntraAgentId` | Table and column names | Use `AgentsInfo`, `Name`, `EntraAgentID` and `EntraBlueprintID`. Run `AgentsInfo \| getschema` to list the columns in your tenant. |
 | **Risks** count in the registry is still zero after an alert | Risk signal counts might be up to an hour behind the security portals | Wait and refresh. |
 | You can't block an agent | Signed in with a role that can view but not manage agents (Global Reader, AI Reader, Security Administrator, Security Reader) | Use AI Administrator. |
 | Custom detection can't be created | Read-only role, or Security Operator without **Manage Security Settings** when Defender for Endpoint RBAC is on | Use Security Administrator, or assign the permission. |
@@ -752,14 +762,15 @@ The PoC team provides the prompts. Use only the Foundry test agent, the standard
 | Image or audio content in a prompt isn't analyzed | Defender for Cloud supports text tokens only | Use text prompts for the Foundry scenarios. |
 
 ## 8.13 Cleanup
-- Unblock the test agent (8.7.3), unless the customer wants it to stay blocked.
+- Unblock the Copilot Studio test agent (8.7.3), unless the customer wants it to stay blocked.
 - Turn off or delete the custom detection rule: **Hunting** > **Custom detection rules** > select `A365 PoC - test agent tool execution` > **Turn off** or **Delete**.
 - Disable or delete the custom real-time protection rule: **Settings** > **Security for AI** > **Policies & rules** > **Real-time protection** > select `A365 PoC - block test agent` > **Disable** or **Delete**.
-- Remove the test document with injected content from the agent's knowledge source.
-- Set the status and classification of the test alerts.
-- (Optional) If the integration isn't kept after the PoC, the Power Platform Administrator disconnects it: **Security** > **Threat detection** > **Additional threat detection** > select the environment > **Set up** > unselect **Allow Copilot Studio to share data with your selected provider** > **Save**.
-- (Optional) On local test devices, set `AiAgentProtection` and `AiAgentNetworkInspection` to `Disabled`, or unassign the runtime protection policy.
+- Remove the test document with injected content from the SharePoint site (PoC maker account).
+- Set the status and classification of the test alerts (Security Operator).
+- (Optional) If the integration isn't kept after the PoC, the Power Platform Administrator disconnects it: **Security** > **Threat detection** > **Additional threat detection** > select the environment > **Set up** > unselect **Allow Copilot Studio to share data with your selected provider** > **Save**. Then delete the Microsoft Entra application registered in 8.4.2.
+- (Optional) On local test devices, set `AiAgentProtection` and `AiAgentNetworkInspection` to `Disabled`, or unassign the runtime protection policy (8.6.2).
 - (Optional) If the **AI services** plan was enabled only for the PoC, an Owner or Contributor goes to **Microsoft Defender for Cloud** > **Environment settings** > the subscription > **Defender plans** and toggles **AI services** to **Off**.
+- (Optional) If the Foundry test agent isn't kept after the PoC, block it (8.7.3) or delete it as described in [5.8.1 Delete an agent (soft delete)](../chapter-05-lifecycle-audit/README.md#581-delete-an-agent-soft-delete).
 - Keep Security for AI enabled and the Microsoft 365 connector connected; other chapters rely on them.
 
 ---

@@ -7,7 +7,7 @@
 - The Tools registry in the Microsoft 365 admin center lists plugins, skills, MCP servers, and connectors with their status, type, and publisher.
 - A test bring-your-own (BYO) MCP server registered with the Agent 365 CLI appears as a request on the **Requests (preview)** tab, and is listed as **Available** in the registry only after an administrator approves it and grants consent.
 - After the test MCP server is blocked, a test agent in Copilot Studio can no longer invoke it; after it is unblocked, the agent can invoke it again.
-- A plugin scoped to a pilot group appears to a non-member as blocked by organizational policy with **Request access**, and the request appears on the **Requests** tab for approval or rejection.
+- A plugin scoped to a pilot group is available to the group member, appears to a non-member as blocked by organizational policy with **Request access**, and the request appears on the **Requests** tab for approval or rejection.
 - Microsoft Defender advanced hunting returns tool-invocation records for the test MCP server.
 - (Optional) MCP servers registered in a connected Azure API Management, Azure AI Gateway, or LiteLLM gateway appear in the registry under the **AI gateway** source without per-server registration.
 
@@ -17,20 +17,21 @@ Grant the read-only role to reviewers first, give the setup roles only to the pe
 
 | Task | Least-privilege role | Section |
 |---|---|---|
-| View the Tools registry, plugins, and settings (read-only) | AI Reader or Global Reader | 4.2 |
-| Set plugin availability, upload, install, uninstall, delete, or block plugins and skills; review plugin access requests | AI Administrator | 4.3 |
-| Review and approve MCP server requests and grant tenant-wide consent; block, unblock, or delete MCP servers; manage individual tools | AI Administrator (Global Administrator also meets both requirements) | 4.4, 4.6.4 |
-| Connect a Tools Gateway, grant the one-time tenant-wide consent, and govern discovered servers | Global Administrator | 4.5 |
+| View the Tools registry, plugins, connectors, and settings (read-only) | AI Reader or Global Reader | 4.2 |
+| Block or unblock tools; set plugin availability; upload, install, uninstall, delete, or block plugins and skills; review plugin access requests | AI Administrator | 4.2.2, 4.3, 4.7.3, 4.7.4 |
+| Review and approve MCP server requests and grant tenant-wide consent; block, unblock, or delete MCP servers; manage individual tools | AI Administrator (Global Administrator also meets both requirements) | 4.4, 4.6.4, 4.7.1, 4.7.2, 4.7.5, 4.10 |
+| Connect a Tools Gateway, grant the one-time tenant-wide consent, and govern discovered servers | Global Administrator | 4.5, 4.7.5 |
 | Provision the Agent 365 Tools service principal (one-time per tenant) | Global Administrator | 4.6.1 |
-| Evaluate MCP tool-definition quality with the Agent 365 CLI | No admin role required | 4.6.3 |
+| Register a BYO MCP server with the Agent 365 CLI, and use the approved server in a supported client | Developer | 4.6.1, 4.6.2, 4.6.5, 4.7.1, 4.7.2 |
+| Evaluate MCP tool-definition quality with the Agent 365 CLI | Developer (no admin role required) | 4.6.3 |
 | Grant a BYO MCP server's permission to agent identities that are missing it (`a365 develop-mcp grant-agents-access`; needs a CLI version later than 1.1.221) | Global Administrator | 4.9 |
+| Discover plugins and request access in the Copilot channel | Standard test user and second test user (no admin role) | 4.7.3, 4.7.4 |
 | Validation / read-only review of MCP activity in advanced hunting | Security Reader | 4.6.6, 4.7.6 |
 
 **Before you start:**
-- Complete [Chapter 0 – Prerequisites and PoC preparation](../chapter-00-prerequisites/README.md): PoC tenant, admin accounts, and two standard test users (one inside and one outside the pilot group).
-- Create a Microsoft Entra security group for the PoC, for example `A365-PoC-Plugin-Pilot`, and add only the first test user to it.
-- Identify one plugin to restrict in 4.3.2. Use a plugin your organization uploaded (packaged as described in [Build plugins for Copilot Cowork](https://learn.microsoft.com/microsoft-365/copilot/cowork/cowork-plugin-development)) if you also want to test **Delete**. Delete isn't available for plugins from the Microsoft 365 Store.
-- Prepare a test remote MCP server that you own, with a publicly reachable HTTPS endpoint (for example, `https://<your-host>/mcp`) and one of the supported authentication types (NoAuth, APIKey, ExternalOAuth, or EntraOAuth). Don't use a production server. During preview, you can't republish new versions of a registered server.
+- Complete [Chapter 0 – Prerequisites and PoC preparation](../chapter-00-prerequisites/README.md). This chapter uses the **standard test user** and the **second test user** from [0.4.1 Create the PoC accounts](../chapter-00-prerequisites/README.md#041-create-the-poc-accounts), and the `A365-PoC-Plugin-Pilot` group (standard test user only) from [0.4.2 Create the PoC groups](../chapter-00-prerequisites/README.md#042-create-the-poc-groups).
+- Identify one plugin to restrict in 4.3.2. To also test **Delete**, use a plugin that your organization uploaded (packaged as described in [Build plugins for Copilot Cowork](https://learn.microsoft.com/microsoft-365/copilot/cowork/cowork-plugin-development)); if you upload it yourself, complete 4.3.4 before 4.3.2. Delete isn't available for plugins from the Microsoft 365 Store.
+- Prepare a test remote MCP server that you own, with a publicly accessible HTTPS endpoint (for example, `https://<your-host>/mcp`) and one of the supported authentication types (`NoAuth`, `APIKey`, `ExternalOAuth`, or `EntraOAuth`). Don't use a production server. During preview, you can't republish new versions of a registered server.
 - Prepare a Copilot Studio environment and a test custom agent that you can add tools to.
 - (Optional, for 4.5) An Azure API Management or Azure AI Gateway instance with at least one MCP server registered in it, or a LiteLLM gateway with its URL and API key.
 - Confirm that Microsoft Defender advanced hunting is available to the security reviewer. See [Chapter 8 – Threat Detection and Runtime Protection (Defender)](../chapter-08-threat-detection/README.md).
@@ -85,7 +86,7 @@ This view provides visibility into which Power Platform connectors agents use. I
 2. Select **Connectors**.
 3. Review the list of Power Platform connectors used by agents in your organization.
 4. Select a connector to view the agents that use it. The connector's overview page shows the agents associated with the selected connector.
-5. To manage the connector's policy, select **View in Power Platform** on the connector's overview page. In the Power Platform admin center (`https://admin.powerplatform.microsoft.com`), you can block, allow, and govern the connector's use. See [Advanced connector policies](https://learn.microsoft.com/power-platform/admin/advanced-connector-policies).
+5. Note the **View in Power Platform** option on the connector's overview page. It opens the Power Platform admin center (`https://admin.powerplatform.microsoft.com`), where the connector's use is blocked, allowed, and governed (see [Advanced connector policies](https://learn.microsoft.com/power-platform/admin/advanced-connector-policies)). This chapter doesn't change connector policies.
 
 **Check result**
 - At least one connector shows the agents that use it.
@@ -98,11 +99,12 @@ Plugins are primarily available to end users in the Copilot channel. Managing a 
 ### 4.3.1 Set organization-level plugin availability by publisher category
 Performed by **AI Administrator**.
 1. In the Microsoft 365 admin center, select **Agents** > **Settings** > **Agent and plugin access**.
-2. Under the installation settings, choose which publisher categories users can access: **Microsoft**, **your organization**, or **certified external publishers**.
-3. Select a category to allow users to discover and install plugins from that publisher type. To block all third-party plugins, clear **certified external publishers**.
+2. Record the publisher categories that are currently selected, so that you can restore them in 4.10.
+3. Under the installation settings, choose which publisher categories users can access: **Microsoft**, **your organization**, or **certified external publishers**.
+4. Select a category to allow users to discover and install plugins from that publisher type. To block all third-party plugins, clear **certified external publishers**.
 
 **Check result**
-- Plugins from a category that isn't selected remain discoverable but display "This plugin is blocked by your organization's policy." Eligible users can still select **Request access**.
+- Plugins from a category that isn't selected remain discoverable but display "This plugin is blocked by your organization's policy." Eligible users can still select **Request access**. This is tested in 4.7.4.
 
 ### 4.3.2 Restrict a plugin to specific users and groups
 Performed by **AI Administrator**.
@@ -120,6 +122,8 @@ Performed by **AI Administrator**.
 
 ### 4.3.3 Review plugin access requests
 Performed by **AI Administrator**.
+
+A plugin access request is created when a user selects **Request access** on a restricted plugin. The end-to-end flow is tested in 4.7.3.
 1. Select **Agents** > **Tools** > **Requests**.
 2. Select the plugin access request that you want to review.
 3. Review the request details, including the user and the requested plugin.
@@ -164,6 +168,8 @@ Uninstall a plugin or skill so that agents can't use it unless it's installed ag
 
 ### 4.3.6 Delete or block a plugin or skill
 Performed by **AI Administrator**.
+
+Perform these actions only on test plugins or skills.
 
 | Action | Effect | Applies to |
 |---|---|---|
@@ -306,7 +312,7 @@ Performed by **developer**, with **Global Administrator** for the service princi
    ```
 
 5. Confirm that the test MCP server has a publicly accessible endpoint and uses one of the supported authentication types: `NoAuth`, `APIKey` (header or query parameter), `ExternalOAuth`, or `EntraOAuth`.
-6. The registration command's `--tenant-id` option defaults to the current `az login` tenant. Pass `--tenant-id` to target the PoC tenant explicitly.
+6. Plan the target tenant for registration: the registration command's `--tenant-id` option defaults to the current `az login` tenant. Pass `--tenant-id` with the PoC tenant ID to target the PoC tenant explicitly.
 
 **Check result**
 - `a365 -h` displays the help information, and the service principal is provisioned.
@@ -318,66 +324,69 @@ Rules from the CLI reference:
 - The server name must start with `ext_` and be at most 20 characters, for example `ext_PocTest`.
 - Tool names must exactly match the names exposed by the remote MCP server. Mismatched names cause tool invocations to fail at runtime.
 - Command-line options override values in a JSON input file. Omitted required values are prompted for interactively.
-- If registration fails after the Microsoft Entra app registrations are created, they aren't rolled back automatically. Delete them before you retry.
+- If registration fails after the Microsoft Entra app registrations are created, they aren't rolled back automatically. Delete them manually in the Azure portal before you retry.
 
-Option A – register with command-line options. This example is for a server that requires no authentication (Bash line continuations, as shown on Learn):
+1. Register the server by using one of the following methods.
 
-```bash
-a365 develop-mcp register-external-mcp-server \
---server-name "ext_PocTest" \
---server-url "https://<your-host>/mcp" \
---publisher "Contoso" \
---description "PoC test MCP server" \
---auth-type "NoAuth" \
---tools "tool1,tool2"
-```
+   Option A – command-line options. This example is for a server that requires no authentication (Bash syntax):
 
-For a server that takes an API key in a header, replace the authentication options:
+   ```bash
+   a365 develop-mcp register-external-mcp-server \
+   --server-name "ext_PocTest" \
+   --server-url "https://<your-host>/mcp" \
+   --publisher "Contoso" \
+   --description "PoC test MCP server" \
+   --auth-type "NoAuth" \
+   --tools "tool1,tool2"
+   ```
 
-```bash
-a365 develop-mcp register-external-mcp-server \
---server-name "ext_PocTest" \
---server-url "https://<your-host>/mcp" \
---publisher "Contoso" \
---description "PoC test MCP server" \
---auth-type APIKey \
---api-key-location Header \
---api-key-name token \
---tools "tool1,tool2"
-```
+   For a server that takes an API key in a header, use these authentication options instead:
 
-For `EntraOAuth`, use `--auth-type EntraOAuth --remote-scopes "<scope>"`. For `ExternalOAuth`, also pass `--idp-authorization-url`, `--idp-token-url`, `--idp-scopes`, `--idp-client-id`, `--idp-client-secret`, and `--remote-scopes`, and after registration add the redirect URI that the CLI displays to your external identity provider application. See the [BYO MCP server article](https://learn.microsoft.com/microsoft-365/admin/manage/manage-byo-mcp-server#register-your-mcp-server) for complete examples of each type.
+   ```bash
+   a365 develop-mcp register-external-mcp-server \
+   --server-name "ext_PocTest" \
+   --server-url "https://<your-host>/mcp" \
+   --publisher "Contoso" \
+   --description "PoC test MCP server" \
+   --auth-type APIKey \
+   --api-key-location Header \
+   --api-key-name token \
+   --tools "tool1,tool2"
+   ```
 
-Option B – register from a JSON file. Create `ext-poctest.json` (structure from the Learn NoAuth example):
+   For `EntraOAuth`, use `--auth-type EntraOAuth --remote-scopes "<scope>"`. For `ExternalOAuth`, also pass `--idp-authorization-url`, `--idp-token-url`, `--idp-scopes`, `--idp-client-id`, `--idp-client-secret`, and `--remote-scopes`, and after registration add the redirect URI that the CLI displays to your external identity provider application. For complete examples of each type, see the [BYO MCP server article](https://learn.microsoft.com/microsoft-365/admin/manage/manage-byo-mcp-server#register-your-mcp-server).
 
-```json
-{
-  "serverName": "ext_PocTest",
-  "serverUrl": "https://<your-host>/mcp",
-  "authType": "NoAuth",
-  "description": "PoC test MCP server",
-  "publisherName": "Contoso",
-  "tools": [
-    {
-      "name": "tool1",
-      "description": "<what tool1 does>"
-    }
-  ],
-  "remoteScopes": null,
-  "externalOAuth": null,
-  "apiKey": null
-}
-```
+   Option B – JSON file. Create `ext-poctest.json` by using the structure of the Learn `NoAuth` example:
 
-Preview the actions with `--dry-run`, and then register:
+   ```json
+   {
+     "serverName": "ext_PocTest",
+     "serverUrl": "https://<your-host>/mcp",
+     "authType": "NoAuth",
+     "description": "PoC test MCP server",
+     "publisherName": "Contoso",
+     "tools": [
+       {
+         "name": "tool1",
+         "description": "<what tool1 does>"
+       }
+     ],
+     "remoteScopes": null,
+     "externalOAuth": null,
+     "apiKey": null
+   }
+   ```
 
-```powershell
-a365 develop-mcp register-external-mcp-server -f ./ext-poctest.json --dry-run
-a365 develop-mcp register-external-mcp-server -f ./ext-poctest.json
-```
+   Preview the actions with `--dry-run`, and then register:
+
+   ```powershell
+   a365 develop-mcp register-external-mcp-server -f ./ext-poctest.json --dry-run
+   a365 develop-mcp register-external-mcp-server -f ./ext-poctest.json
+   ```
+
+2. After successful registration, submit the MCP server for admin review in the Microsoft 365 admin center, and ask the AI Administrator to review it. Before the request is approved, run steps 1–2 of 4.7.1.
 
 **Check result**
-- The registration completes successfully. After successful registration, submit the MCP server for admin review in the Microsoft 365 admin center and ask your tenant administrator to approve it.
 - The registered server appears in the Microsoft 365 admin center on **Agents** > **Tools** > **Requests (preview)** for review and approval.
 
 ### 4.6.3 Evaluate tool-definition quality
@@ -391,20 +400,26 @@ Performed by **developer** (no admin role required).
    npm install -g @github/copilot
    ```
 
-2. Run the evaluation. For an authenticated server, supply the token through the environment variable instead of the command line:
+2. Run the evaluation against the test server:
+
+   ```powershell
+   a365 develop-mcp evaluate --server-url "https://<your-host>/mcp" --output-dir "./eval"
+   ```
+
+   If the server requires authentication, supply the bearer token through the `A365_MCP_AUTH_TOKEN` environment variable instead of the command line:
 
    ```powershell
    $env:A365_MCP_AUTH_TOKEN = "<bearer-token>"
-   a365 develop-mcp evaluate --server-url "https://my-mcp-server.contoso.com/mcp" --output-dir "./eval"
+   a365 develop-mcp evaluate --server-url "https://<your-host>/mcp" --output-dir "./eval"
    ```
 
-   To run only the deterministic checks and generate the checklist without a coding agent:
+   To skip AI scoring and generate the checklist only, so that you can score it with your own LLM:
 
    ```powershell
-   a365 develop-mcp evaluate --server-url "https://my-mcp-server.contoso.com/mcp" --eval-engine none
+   a365 develop-mcp evaluate --server-url "https://<your-host>/mcp" --eval-engine none
    ```
 
-3. Open `<server-name>_eval_report.html` from the output directory. Review the overall score (0-100), the maturity level, the per-tool scores (tool name, tool description, parameter name, parameter description, schema structure), and the prioritized action items.
+3. Open `<server-name>_eval_report.html` from the output directory (`./eval` in these examples; the current directory if you omit `--output-dir`). Review the overall score (0-100), the maturity level, the per-tool scores (tool name, tool description, parameter name, parameter description, schema structure), and the prioritized action items.
 
 **Check result**
 - The output directory contains `<server-name>_checklist.json`, `<server-name>_eval_report.html`, and `<server-name>_eval_report.json`.
@@ -412,6 +427,8 @@ Performed by **developer** (no admin role required).
 
 ### 4.6.4 Review, approve, and consent
 Performed by **AI Administrator**.
+
+Complete steps 1–2 of 4.7.1 before you approve the request.
 1. Follow 4.4.1 for the `ext_PocTest` request: review the server name, publisher, requester, request date, server information, and declared tools.
 2. Compare the declared tools with the evaluation report from 4.6.3.
 3. Select **Approve**, and then consent to the Microsoft Entra permissions that the server requires.
@@ -428,10 +445,12 @@ The governance controls that apply to a BYO MCP server are:
 | Delete | An administrator can delete a registered BYO MCP server that's no longer needed. |
 
 **Check result**
-- `ext_PocTest` is available in the organizational registry with status **Available**, and it becomes available to agent-building surfaces after consent is granted.
+- `ext_PocTest` has status **Available** in the organizational registry, and it becomes available to agent-building surfaces after consent is granted.
 
 ### 4.6.5 Use the approved server in Copilot Studio
 Performed by **developer**.
+
+After approval and consent, the server can take up to 30 minutes to appear in all Copilot Studio environments in the tenant.
 1. Go to Copilot Studio (`https://copilotstudio.microsoft.com`) in the test environment.
 2. Create a new custom agent, or open the test agent.
 3. Go to the **Tools** section and select **MCP Server**.
@@ -474,11 +493,11 @@ Performed by **Security Reader**.
 
 ### 4.7.1 Approved BYO MCP server appears in the registry only after approval
 Performed by **developer** and **AI Administrator**.
-1. After registration (4.6.2) and before approval, open **Agents** > **Tools** > **Requests (preview)** and confirm that `ext_PocTest` is pending.
-2. In Copilot Studio, confirm that `ext_PocTest` can't be selected as an MCP server yet.
-3. Approve the request and grant consent (4.6.4).
+1. After registration (4.6.2) and before approval (4.6.4), as AI Administrator, open **Agents** > **Tools** > **Requests (preview)** and confirm that the `ext_PocTest` request is listed.
+2. As the developer, in Copilot Studio, confirm that `ext_PocTest` isn't yet available to select as an MCP server.
+3. As AI Administrator, approve the request and grant consent (4.6.4).
 4. Open **Agents** > **Tools** > **Registry** and locate `ext_PocTest`.
-5. After up to 30 minutes, add the server to the test agent (4.6.5).
+5. As the developer, add the server to the test agent and invoke it (4.6.5).
 
 **Expected result**
 - Before approval and consent, the server is a request on the **Requests (preview)** tab and isn't available to agent-building surfaces.
@@ -496,35 +515,36 @@ Performed by **AI Administrator** and **developer**.
 - After unblocking, access to the server is restored and the MCP server returns the tool output again.
 
 ### 4.7.3 Plugin restricted to a group triggers Request access
-Performed by **AI Administrator**, **pilot test user**, and **standard test user** (not in the pilot group).
-1. Confirm that the plugin from 4.3.2 is set to **Specific users and groups** with `A365-PoC-Plugin-Pilot`.
-2. As the pilot test user, find the plugin in the Copilot channel.
-3. As the standard test user (not a member), find the same plugin in the Copilot channel, and select **Request access**.
+Performed by **AI Administrator**, **standard test user** (member of `A365-PoC-Plugin-Pilot`), and **second test user** (not a member).
+1. As AI Administrator, confirm that the plugin from 4.3.2 is set to **Specific users and groups** with `A365-PoC-Plugin-Pilot`.
+2. As the standard test user, find the plugin in the Copilot channel.
+3. As the second test user, find the same plugin in the Copilot channel, and select **Request access**.
 4. As AI Administrator, open **Agents** > **Tools** > **Requests**, select the request, review the user and the requested plugin, and select **Approve** (or **Reject** to test denial).
 
 **Expected result**
-- The non-member can still discover the plugin, which appears as blocked by organizational policy, and can select **Request access**.
+- The plugin is available to the standard test user, because it's available to the selected group.
+- The second test user can still discover the plugin, which appears as blocked by organizational policy, and can select **Request access**.
 - The request is sent to the Microsoft 365 admin center and is listed on the **Requests** tab with the user and the requested plugin.
 - **Approve** grants the user access; **Reject** denies the request.
 
 ### 4.7.4 (Optional) Organization-level publisher category block
-Performed by **AI Administrator** and **standard test user**.
-1. In **Agents** > **Settings** > **Agent and plugin access**, clear **certified external publishers** (4.3.1).
-2. As the standard test user, find a plugin from a certified external publisher.
-3. Restore the original setting.
+Performed by **AI Administrator** and **second test user**.
+1. As AI Administrator, in **Agents** > **Settings** > **Agent and plugin access**, clear **certified external publishers** (4.3.1).
+2. As the second test user, find a plugin from a certified external publisher in the Copilot channel.
+3. As AI Administrator, restore the publisher categories that you recorded in 4.3.1.
 
 **Expected result**
-- The plugin is still discoverable but shows "This plugin is blocked by your organization's policy."
+- The plugin is still discoverable but displays "This plugin is blocked by your organization's policy."
 
 ### 4.7.5 (Optional) Tool-level control and gateway discovery
-Performed by **Global Administrator**.
-1. If you connected a gateway (4.5), go to **Agents** > **Tools**, filter by source, select **AI gateway**, and confirm the server you noted in 4.5.1 is listed.
-2. Register a new MCP server in the gateway, and then refresh the Tools page.
-3. For a server whose **Tools** tab lists its tools, disable one tool (4.4.3) and invoke it from a test agent.
+Performed by **Global Administrator** (gateway) and **AI Administrator** (tool-level control).
+1. If you connected a gateway (4.5), as Global Administrator, go to **Agents** > **Tools**, filter the list by source, select **AI gateway**, and confirm that the server you noted in 4.5.1 is listed.
+2. Register another MCP server in the gateway, and then refresh the Tools page.
+3. As AI Administrator, for a server whose **Tools** tab lists its tools, disable one tool and select **Save** (4.4.3).
 
 **Expected result**
 - Gateway servers are listed under **AI gateway** without separate per-server consent, and the newly registered server is discovered during a subsequent refresh.
-- The tool policy is enforced at runtime by the Agent 365 Tooling Gateway, so the disabled tool can't be used while the other enabled tools on the same server remain available.
+- The disabled tool's toggle is **Disabled**. The policy applies wherever the tool is used and is enforced at runtime by the Agent 365 Tooling Gateway, while the other enabled tools on the same server remain available.
 
 ### 4.7.6 MCP invocations are visible in Defender
 Performed by **Security Reader**.
@@ -534,18 +554,19 @@ Performed by **Security Reader**.
 - The query returns details including agent name, MCP server name, and invocation metadata for the invocations made in 4.7.1 and 4.7.2.
 
 ## 4.8 Evidence
-- Screenshot of **Agents** > **Tools** > **Registry** showing the four tool types, with **Status** and **Publisher** filters applied.
+- Screenshot of **Agents** > **Tools** > **Registry** showing the tool categories, with the **Status** and **Publisher** filters applied (4.2.1, 4.2.2).
 - Screenshot of a connector's overview page showing the agents that use it (4.2.3).
-- Screenshot of **Agents** > **Settings** > **Agent and plugin access** showing the selected publisher categories.
-- Screenshot of the restricted plugin's **Users** setting (pilot group only).
-- Screenshot of the non-member's blocked plugin with **Request access**, and of the request on the **Requests** tab with its decision.
-- CLI output of the `register-external-mcp-server` command (with secrets removed) and the `ext_PocTest` request on the **Requests (preview)** tab.
-- The `<server-name>_eval_report.html` evaluation report.
-- Screenshot of `ext_PocTest` as **Available** in the registry, and of the Microsoft Entra consent prompt.
-- Screenshots of the Copilot Studio test conversation: successful invocation, invocation attempt while blocked, and successful invocation after unblock, with timestamps.
-- Advanced hunting query results exported to CSV.
-- (Optional) Screenshot of **Agents** > **Settings** > **Gateways** after connecting the gateway, and of the registry filtered by source **AI gateway**.
-- (Optional) Screenshot of an MCP server's **Tools** tab with a disabled tool.
+- Screenshot of **Agents** > **Settings** > **Agent and plugin access** showing the selected publisher categories (4.3.1).
+- Screenshot of the restricted plugin's **Users** setting with only `A365-PoC-Plugin-Pilot` selected (4.3.2).
+- CLI output of the `register-external-mcp-server` command, with secrets removed (4.6.2).
+- The `<server-name>_eval_report.html` evaluation report (4.6.3).
+- Screenshot of the `ext_PocTest` request on the **Requests (preview)** tab before approval (4.7.1).
+- Screenshot of `ext_PocTest` with status **Available** in the registry, and of the Microsoft Entra consent prompt (4.7.1).
+- Screenshots of the Copilot Studio test agent: successful invocation, the invocation attempt while the server is blocked with the server's **Blocked** status, and successful invocation after unblocking, with timestamps (4.7.1, 4.7.2).
+- Screenshots of the plugin available to the standard test user, the plugin blocked by organizational policy with **Request access** for the second test user, and the request on the **Requests** tab with its decision (4.7.3).
+- (Optional) Screenshot of the "This plugin is blocked by your organization's policy." message (4.7.4).
+- (Optional) Screenshot of **Agents** > **Settings** > **Gateways** after connecting the gateway, the registry filtered by source **AI gateway**, and an MCP server's **Tools** tab with a disabled tool (4.7.5).
+- Advanced hunting query results exported to CSV (4.7.6).
 
 ## 4.9 Troubleshooting
 | Symptom | Likely cause | Fix |
@@ -569,13 +590,14 @@ Performed by **Security Reader**.
 | Allow or block options for tooling and MCP servers aren't available | The capability might not be available in your region yet | See [Agent 365 tooling servers overview](https://learn.microsoft.com/microsoft-agent-365/tooling-servers-overview). |
 
 ## 4.10 Cleanup
-- Delete the BYO test server: **Agents** > **Tools** > **Registry** > select `ext_PocTest` > **Delete** > confirm **Delete**. Deleting removes it from the registry, and agents can no longer invoke it.
-- Remove `ext_PocTest` from the Copilot Studio test agent, or delete the test agent.
-- Restore the restricted plugin's **Users** setting and any publisher categories you changed in **Agent and plugin access**.
-- Unblock, uninstall, or delete any test plugins or skills you blocked or uploaded.
-- Re-enable any tools you disabled on an MCP server's **Tools** tab.
-- Delete the local evaluation output files (`<server-name>_checklist.json`, `<server-name>_eval_report.html`, `<server-name>_eval_report.json`) from the `--output-dir` folder, and clear `A365_MCP_AUTH_TOKEN` from the shell.
-- Remove the PoC role assignments and the `A365-PoC-Plugin-Pilot` group when the PoC ends.
+- As the developer, remove `ext_PocTest` from the Copilot Studio test agent, or delete the test agent if you created it for this chapter.
+- As AI Administrator, delete the BYO test server: **Agents** > **Tools** > **Registry** > select `ext_PocTest` > **Delete** > confirm **Delete**. Deleting removes it from the registry, and agents can no longer invoke it.
+- As AI Administrator, restore the restricted plugin's **Users** setting, and restore the publisher categories that you recorded in 4.3.1.
+- As AI Administrator, unblock, uninstall, or delete any test plugins or skills that you blocked, installed, or uploaded in 4.3.
+- As AI Administrator, re-enable any tools that you disabled on an MCP server's **Tools** tab (4.4.3, 4.7.5).
+- (Optional) Remove the MCP server that you registered in the gateway for 4.7.5 by using the gateway's own management tools.
+- As the developer, delete `ext-poctest.json` and the local evaluation output files (`<server-name>_checklist.json`, `<server-name>_eval_report.html`, `<server-name>_eval_report.json`) from the output directory, and clear `A365_MCP_AUTH_TOKEN` from the shell.
+- When the PoC ends, remove the role assignments granted for this chapter.
 
 ---
 Previous: [Chapter 3 – Agent Identity and Ownership](../chapter-03-identity-ownership/README.md) · Next: [Chapter 5 – Agent Lifecycle and Audit](../chapter-05-lifecycle-audit/README.md)

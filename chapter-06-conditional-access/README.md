@@ -17,43 +17,47 @@ Grant the read-only roles first. Grant setup roles only to the people who make t
 
 | Task | Least-privilege role | Section |
 |---|---|---|
-| Create, edit, and enable Conditional Access policies for agent identities and agent users | Conditional Access Administrator | 6.2, 6.3, 6.4 |
+| Create the three lab agent identities from the lab blueprint | Agent ID Administrator | Before you start |
+| Review agent sign-ins and Conditional Access results in the sign-in logs | Reports Reader | 6.2.1, 6.2.4, 6.8.1, 6.8.3, 6.9.4 |
+| Create, edit, and enable Conditional Access policies for agent identities and agent users | Conditional Access Administrator | 6.2, 6.3, 6.4, 6.12 |
 | Select custom security attributes in a Conditional Access policy | Conditional Access Administrator and Attribute Definition Reader | 6.2.3 |
-| Create attribute definitions / assign attribute values to agent identities | Attribute Definition Administrator / Attribute Assignment Administrator | 6.2.3 |
+| Create attribute definitions / assign or remove attribute values on agent identities | Attribute Definition Administrator / Attribute Assignment Administrator | 6.2.3, 6.12 |
+| Delete the PoC group after the tests | Groups Administrator | 6.12 |
 | View the Risky agents report and agent risk detections | Security Reader | 6.5.1 |
-| Confirm compromise, confirm safe, or dismiss risk (admin center or Microsoft Graph) | Security Administrator | 6.5.2, 6.9 |
-| Configure diagnostic settings to export risk and sign-in data | Security Administrator | 6.5.3 |
-| Create the PoC security group | Groups Administrator | 6.6.1 |
-| Create catalogs, access packages, and policies, and assign or remove access | Identity Governance Administrator | 6.6 |
+| Confirm compromise, confirm safe, or dismiss risk (Microsoft Entra admin center or Microsoft Graph) | Security Administrator | 6.5.2, 6.9.2, 6.9.5 |
+| Configure diagnostic settings to export risk and sign-in data (optional) | Security Administrator | 6.5.3, 6.12 |
+| Query the exported data in the Log Analytics workspace (optional) | Permission to access data in the Log Analytics workspace | 6.5.3 |
+| Create catalogs, access packages, and policies, and assign or remove access | Identity Governance Administrator | 6.6, 6.8.2, 6.12 |
 | Add API permissions or directory roles as resource roles (optional) | Global Administrator | 6.6.2 |
 | Request an access package for an agent in My Access | Owner or sponsor of the agent identity (no admin role) | 6.6.3 |
 | Approve access package requests | Approver named in the policy (no admin role) | 6.6.3 |
 | Create a Conditional Access policy that a template can select | Conditional Access Administrator | 6.7.1 |
-| Create a custom policy template with Conditional Access and custom security attribute policies, and apply it when publishing an agent | Global Administrator with Attribute Assignment Administrator | 6.7.2, 6.7.3 |
-| Verify custom security attribute values on the published agent | Attribute Assignment Reader | 6.8.3 |
-| Run the community reference script (optional) | Owner of the lab agent identity blueprint | 6.9 |
-| Validation / read-only review | Global Reader (policies and access packages), Reports Reader (sign-in logs), Security Reader (risky agents) | 6.8, 6.9 |
+| Create a custom policy template with Conditional Access and custom security attribute policies, and apply it when publishing an agent | Global Administrator with Attribute Assignment Administrator | 6.7.2, 6.7.3, 6.12 |
+| Verify custom security attribute values on the published agent | Agent ID Administrator together with Attribute Assignment Reader | 6.8.3 |
+| Run the community reference script (optional) and remove the lab client secret | Owner of the lab agent identity blueprint | 6.9.1, 6.9.3, 6.12 |
+| Delete the lab agent identity blueprint and its agent identities | Cloud Application Administrator (or the owner of the blueprint) | 6.12 |
+| Validation / read-only review | Global Reader (policies, access packages, group members), Reports Reader (sign-in logs), Security Reader (risky agents) | 6.6.4, 6.8, 6.9, 6.10 |
 
 Notes:
 - By default, Global Administrator and other administrator roles can't read, define, or assign custom security attributes. Assign the attribute roles explicitly.
 - To keep the PoC least-privileged, the core path in 6.6 uses only a security group, because adding OAuth API permissions or directory roles to an access package marks the catalog as privileged and requires a Global Administrator.
-- In policy templates, the Global Administrator and the AI Administrator both need **Attribute Assignment Administrator** for custom security attribute policies. The AI Administrator can create and apply access packages, but doesn't have enough privileges for Conditional Access and custom security attributes.
+- The role requirements for policy templates are described in 6.7.
 
 **Before you start:**
-- Complete [Chapter 0 – Prerequisites and PoC preparation](../chapter-00-prerequisites/README.md). You need the admin test accounts, a standard test user, and a reviewer account.
+- Complete [Chapter 0 – Prerequisites and PoC preparation](../chapter-00-prerequisites/README.md). You need the test admin, the standard test user, the reviewer, and the PoC approver accounts (0.4.1).
 - Complete [Chapter 1 – Agent Discovery and Inventory](../chapter-01-agent-discovery/README.md) so you know which agents exist and which ones must keep working.
-- Complete [Chapter 3 – Agent Identity and Ownership](../chapter-03-identity-ownership/README.md). Sponsors must be assigned (3.5), and you need the sign-in log filters (3.8) and the Risky agents report (3.9). Sponsor transitions with Lifecycle Workflows are now in [3.10 Keep sponsorship continuous with Lifecycle Workflows](../chapter-03-identity-ownership/README.md#310-keep-sponsorship-continuous-with-lifecycle-workflows).
-- Prepare three agent identities that use the autonomous (app-only) flow, and record each one's ID. For agent identities, the object ID and app ID are always the same value. For the optional token-flow test (6.9), create all three from one lab agent identity blueprint that has a client secret you control. You can build these with [Chapter 2 – Third-Party and Custom Agents](../chapter-02-third-party-custom-agents/README.md).
+- Complete [Chapter 3 – Agent Identity and Ownership](../chapter-03-identity-ownership/README.md). Sponsors must be assigned (3.5), and you need the sign-in log filters (3.8) and the Risky agents report (3.9). Sponsor transitions with Lifecycle Workflows are covered in [3.10 Keep sponsorship continuous with Lifecycle Workflows](../chapter-03-identity-ownership/README.md#310-keep-sponsorship-continuous-with-lifecycle-workflows).
+- Prepare a lab agent identity blueprint with a client secret you control, for example with [2.8 Create the agent blueprint with a365 setup](../chapter-02-third-party-custom-agents/README.md#28-create-the-agent-blueprint-with-a365-setup). Then, as an **Agent ID Administrator**, create the three agent identities below from that blueprint: open <https://entra.microsoft.com> > **Entra ID** > **Agents** > **Agent identities** > **New agent identity (Preview)**, select the lab blueprint under **Agent blueprint**, enter the name in **Agent identity name**, and complete the wizard with **Create**. Record each agent identity's ID. For agent identities, the object ID and app ID are always the same value.
 
 | Test object | Purpose | Approved (excluded from default deny) |
 |---|---|---|
 | `PoC-Agent-Approved` | Control agent for all tests; receives the access package | Yes |
 | `PoC-Agent-Risk` | Marked as compromised in the optional risk test (6.9) | Yes |
 | `PoC-Agent-Unapproved` | Not on the allow list | No |
-| `PoC-Agent-Resource-Access` (security group) | Resource granted through the access package | – |
-| PoC approver (test user) | Approves access package requests | – |
+| `PoC-Agent-Resource-Access` (security group from Chapter 0, 0.4.2) | Resource granted through the access package | – |
+| PoC approver (test user from Chapter 0, 0.4.1) | Approves access package requests | – |
 
-- Make sure the standard test user (or a second test user) is set as a sponsor of `PoC-Agent-Approved` (Chapter 3.5.1). The user needs this for the sponsor request in 6.6.3.
+- Set the standard test user as a sponsor of `PoC-Agent-Approved`, as in [3.5.1 Assign owners and sponsors to an agent identity](../chapter-03-identity-ownership/README.md#351-assign-owners-and-sponsors-to-an-agent-identity). The standard test user is the sponsor in 6.6.3 and uses the published agent in 6.8.3.
 - For 6.7, have a member of your organization submit a test agent for admin approval, so that it appears in **Agents** > **All agents** > **Requests** in the Microsoft 365 admin center.
 - Security defaults must be off in the tenant. Conditional Access policies don't apply while security defaults are enabled.
 
@@ -90,7 +94,7 @@ Also keep in mind:
 
 ### 6.2.1 Map each PoC agent to its token subject
 Performed by **Reports Reader**.
-1. Exercise each PoC agent once.
+1. Have the owner of each PoC agent exercise it once. For the three lab agent identities, use the community reference script in 6.9.1.
 2. Open <https://entra.microsoft.com> > **Entra ID** > **Monitoring & health** > **Sign-in logs**.
 3. Add the filter **Is Agent** = **Yes**, and add the filter **Agent type**.
 4. Check the **Service principal sign-ins** tab and the user sign-in tabs. Note for each agent where it appears:
@@ -123,7 +127,7 @@ Use this variant when you have many agents. Every agent that carries the approva
 Performed by **Attribute Definition Administrator** (steps 1–2), **Attribute Assignment Administrator** (step 3), and **Conditional Access Administrator** with **Attribute Definition Reader** (steps 4–8).
 1. Open <https://entra.microsoft.com> > **Entra ID** > **Custom security attributes**, and add an attribute set named `AgentAttributes`.
 2. In `AgentAttributes`, add the attribute `AgentApprovalStatus` with data type **String**. Select **Allow multiple values to be assigned** and **Only allow predefined values to be assigned**, and add the predefined values `New`, `In_Review`, `HR_Approved`, `Finance_Approved`, and `IT_Approved`. Conditional Access supports only attributes of type string.
-3. Assign `IT_Approved` to `PoC-Agent-Approved` and `PoC-Agent-Risk`. Use the Graph method from [3.7.2 Assign attribute values to PoC agent identities](../chapter-03-identity-ownership/README.md#372-assign-attribute-values-to-poc-agent-identities), with this body for a multi-valued attribute:
+3. Assign `IT_Approved` to `PoC-Agent-Approved` and `PoC-Agent-Risk`. Use the Graph method from [3.7.2 Assign attribute values to PoC agent identities](../chapter-03-identity-ownership/README.md#372-assign-attribute-values-to-poc-agent-identities) (`PATCH https://graph.microsoft.com/v1.0/servicePrincipals/{id}/microsoft.graph.agentIdentity`, delegated permissions `CustomSecAttributeAssignment.ReadWrite.All` and `AgentIdentity.ReadWrite.All`), with this body for a multi-valued attribute:
 
    ```json
    {
@@ -146,7 +150,7 @@ Performed by **Attribute Definition Administrator** (steps 1–2), **Attribute A
 Use only one of the two default-deny variants for the tests in 6.8.
 
 **Check result**
-- Both approved agents carry `AgentApprovalStatus` = `IT_Approved`, and the policy is in **Report-only**.
+- Each `PATCH` request returns `204 No Content`. Both approved agents carry `AgentApprovalStatus` = `IT_Approved`, and the policy is in **Report-only**.
 
 ### 6.2.4 Review the report-only results, then switch to On
 Performed by **Reports Reader** (review) and **Conditional Access Administrator** (switch).
@@ -252,7 +256,7 @@ Performed by **Security Reader**.
 ### 6.5.2 Respond to a risky agent
 Performed by **Security Administrator**.
 
-| Action (Risky agents report) | Effect on Conditional Access | Graph (beta) |
+| Action (Risky agents report) | Effect | Graph (beta) |
 |---|---|---|
 | **Confirm compromise** | Sets risk level to **High** and adds a detection. Triggers policies that block on high agent risk (6.3). | `POST /identityProtection/riskyAgents/confirmCompromised` |
 | **Confirm safe** | Sets risk level to **None**. Use it for a false positive. Similar activity isn't flagged again. | `POST /identityProtection/riskyAgents/confirmSafe` |
@@ -265,9 +269,12 @@ All three Graph actions take the body `{"agentIds": ["<object ID>"]}` and return
 - The responder can see the actions on a risky agent. The optional test in 6.9 uses them.
 
 ### 6.5.3 Export agent risk and sign-in data
-Performed by **Security Administrator**.
+Performed by **Security Administrator** (steps 1–2) and a user with permission to access data in the Log Analytics workspace (step 3).
+
+This task is optional. It requires an Azure subscription with a Log Analytics workspace.
+
 1. Open <https://entra.microsoft.com> > **Entra ID** > **Monitoring & health** > **Diagnostic settings**, and select **+ Add diagnostic setting**.
-2. Enter a name. Select the categories **RiskyAgents**, **AgentRiskEvents**, and **ServicePrincipalSignInLogs**, select a Log Analytics workspace (or another destination), and then select **Save**. Data can take about 15 minutes to appear, and only events from after you enable the setting are exported.
+2. Enter a **Diagnostic setting name**, and select the log categories **RiskyAgents**, **AgentRiskEvents**, and **ServicePrincipalSignInLogs**. Under **Destination Details**, select **Send to Log Analytics workspace**, select the **Subscription** and **Log Analytics workspace**, and then select **Save**. Data can take about 15 minutes to appear, and only events from after you enable the setting are exported.
 3. In the workspace, run:
 
    ```kusto
@@ -299,10 +306,12 @@ Conditional Access decides whether an agent gets a token. Access packages decide
 You can't add agent identities and service principals to application roles, SAP roles, or SharePoint Online site roles through access packages. For this reason, you can't reuse an existing access package that contains those roles. Create a new one.
 
 ### 6.6.1 Prepare the catalog and the resource
-Performed by **Groups Administrator** (step 1) and **Identity Governance Administrator** (steps 2–4).
-1. Create a cloud security group `PoC-Agent-Resource-Access`, with assigned membership (not dynamic).
-2. Open <https://entra.microsoft.com> > **ID Governance** > **Catalogs** > **New catalog**. Name: `PoC – Agent access`. Set **Enabled** to **Yes**, and then select **Create**.
-3. Open the catalog, select **Resources** > **Add resources** > **Groups and Teams**, select `PoC-Agent-Resource-Access`, and then select **Add**.
+Performed by **Identity Governance Administrator**.
+
+This task uses the security group `PoC-Agent-Resource-Access` from [0.4.2 Create the PoC groups](../chapter-00-prerequisites/README.md#042-create-the-poc-groups). It has assigned (not dynamic) membership and no members at the start.
+
+1. Open <https://entra.microsoft.com> > **ID Governance** > **Catalogs** > **New catalog**. Enter the name `PoC – Agent access` and a description, set **Enabled** to **Yes**, and then select **Create**.
+2. Open the catalog, select **Resources** > **Add resources** > **Groups and Teams**, select `PoC-Agent-Resource-Access`, and then select **Add**.
 
 **Check result**
 - The catalog lists the group as a resource.
@@ -330,9 +339,9 @@ Agents receive access packages in three ways. After a request is submitted, it g
 |---|---|---|
 | Agent self-request | The agent identity | Programmatically, by creating an [accessPackageAssignmentRequest](https://learn.microsoft.com/graph/api/entitlementmanagement-post-assignmentrequests) (developer scenario, optional in the PoC) |
 | Sponsor or owner request | Sponsor or owner of the agent identity | My Access portal (**Sponsor request** below) |
-| Admin direct assignment | Identity Governance Administrator | Admin center (**Admin direct assignment** below). No approval is needed. |
+| Admin direct assignment | Identity Governance Administrator | Microsoft Entra admin center (**Admin direct assignment** below). No approval is needed. |
 
-**Sponsor request**, performed by the **sponsor of `PoC-Agent-Approved`**:
+**Sponsor request**, performed by the **standard test user** (sponsor of `PoC-Agent-Approved`) and the **PoC approver**:
 1. Sign in to <https://myaccess.microsoft.com>, and select **Access packages**.
 2. Locate `PoC – Agent resource access`, and select **Request**.
 3. Under **Request details**, select **Requesting for Sponsored agent** (or **Requesting for Owned agent**).
@@ -340,7 +349,7 @@ Agents receive access packages in three ways. After a request is submitted, it g
 5. As the **PoC approver**, sign in to <https://myaccess.microsoft.com>, and select **Approvals** > **Pending**.
 6. Open the request, enter a justification, and approve it.
 
-**Admin direct assignment** (use it for a second agent, or if the sponsor pathway isn't available), performed by **Identity Governance Administrator**:
+**Admin direct assignment** (use it for another agent identity, or if the sponsor pathway isn't available), performed by **Identity Governance Administrator**:
 1. Open <https://entra.microsoft.com> > **ID Governance** > **Entitlement management** > **Access packages**, and open `PoC – Agent resource access`.
 2. Select **Assignments** > **New assignment**.
 3. In **Select policy**, select the policy from 6.6.2, and add the agent identity.
@@ -352,11 +361,15 @@ Agents receive access packages in three ways. After a request is submitted, it g
 
 ### 6.6.4 Track expiry and sponsor extension
 Performed by **Global Reader** (review).
-- The assignment has a clear start and end date. When the assignment belongs to an agent identity with a sponsor, the sponsor is notified as the expiry date approaches. The sponsor can request an extension, if the policy allows it, which starts a new approval. The sponsor can also take no action.
-- If the sponsor takes no action, the assignment expires automatically on its end date, and the agent identity loses access to the target resources. For a group resource role, the identity is removed from the group when its assignment expires, unless another access package assignment includes the same group.
+
+When an assignment belongs to an agent identity with a sponsor, the sponsor is notified as the expiry date approaches. The sponsor can request an extension, if the policy allows it, which starts a new approval cycle. If the sponsor takes no action, the assignment expires automatically on its end date, and the agent identity loses access to the target resources. For a group resource role, the identity is removed from the group when its assignment expires, unless another access package assignment includes the same group.
+
+1. Open <https://entra.microsoft.com> > **ID Governance** > **Entitlement management** > **Access packages**, and open `PoC – Agent resource access`.
+2. Select **Assignments**, and review the assignment of `PoC-Agent-Approved`.
+3. Select **Policies**, open the policy from 6.6.2, and review its lifecycle (expiration and extension) settings.
 
 **Check result**
-- The assignment details show the expiry time. The policy shows that extension with approval is allowed.
+- The assignment has an end date. The policy expires assignments after 2 hours and allows extension with approval.
 
 ## 6.7 Apply Conditional Access and custom security attributes at publish time (policy templates)
 **Documentation:** [Policy templates](https://learn.microsoft.com/microsoft-agent-365/admin/policy-template) · [Agent requests in the Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/admin/manage/agent-requests) · [Agent actions – Activate agents](https://learn.microsoft.com/microsoft-365/admin/manage/agent-actions) · [Agent settings – Apply a template](https://learn.microsoft.com/microsoft-365/admin/manage/agent-settings) · [Conditional Access for agents – Attribute-driven Conditional Access](https://learn.microsoft.com/entra/identity/conditional-access/agent-id?tabs=custom-security-attributes)
@@ -372,14 +385,14 @@ When templates apply:
 - Policy templates support only new agent activation. You can't apply a template to agents that are already approved.
 - An edited template applies to all new activations. The changes don't affect agents that are already approved.
 - To apply policies to existing agents, use an agent management rule with the **Apply template** action. It's a one-time bulk operation that evaluates agents in the registry that have an agent identity. It doesn't apply to agent blueprints or AI teammates.
-- An Entra policy requires the agent to authenticate with its Entra identity when it accesses resources. If the agent doesn't use Entra-based authentication, you can assign the policy, but it might not be enforced at runtime. Work with the agent developer to verify that Entra-based authentication is enabled.
+- A Microsoft Entra policy requires the agent to authenticate with its Microsoft Entra identity when it accesses resources. If the agent doesn't use Entra-based authentication, you can assign the policy, but it might not be enforced at runtime. Work with the agent developer to verify that Entra-based authentication is enabled.
 
 Prerequisites:
 - Create every policy in Microsoft Entra first. If a policy doesn't exist yet, you can't select it when you create a template.
 - **Conditional access:** only Conditional Access policies that include at least one individual agent identity are visible in the Microsoft 365 admin center when you create a template. A policy scoped to all agent identities is selected automatically in the Microsoft 365 admin center experience and can't be overridden. This applies to the policies from 6.2 and 6.3. Create the selectable policy in 6.7.1.
 - **Custom security attribute:** the attribute set `AgentAttributes` and the attribute `AgentApprovalStatus` from 6.2.3 (steps 1–2) must exist. You can also use the `AgentGovernance` attributes from [3.7 Tag agents with custom security attributes](../chapter-03-identity-ownership/README.md#37-tag-agents-with-custom-security-attributes-optional).
 - **Access packages (optional):** the access package from 6.6.
-- A test agent that a member of your organization submitted for admin approval (for example from Copilot Studio, Microsoft Foundry, or Microsoft 365 Agents Toolkit). It must be listed in **Agents** > **All agents** > **Requests** with the state **Pending review**.
+- A test agent that a member of your organization submitted for admin approval (for example from Copilot Studio, Microsoft Foundry, or Microsoft 365 Agents Toolkit), as prepared in Chapter 0 (0.6.1). It must be listed in **Agents** > **All agents** > **Requests** in the Microsoft 365 admin center with the state **Pending review**.
 - Roles: the Global Administrator and the AI Administrator both need the **Attribute Assignment Administrator** role for custom security attribute policies. The AI Administrator can create and apply access packages, but doesn't have enough privileges for Conditional Access and custom security attributes. Because this section uses both, perform 6.7.2 and 6.7.3 as a **Global Administrator** with **Attribute Assignment Administrator**.
 
 ### 6.7.1 Create a Conditional Access policy that the template can select
@@ -433,7 +446,7 @@ Performed by **Global Administrator** with **Attribute Assignment Administrator*
 For an agent request with the state **Pending activate**, the activation wizard contains the same **Apply a template** step. Choose the custom template there, review the permissions, and select **Finish**.
 
 **Check result**
-- The agent is published with the template `PoC – Agent CA and attributes`. Verify the result in 6.8.3.
+- The publishing wizard completes with the template `PoC – Agent CA and attributes` selected. Verify the applied policies in 6.8.3.
 
 ## 6.8 Test and validation
 **Documentation:** [Microsoft Entra Agent ID logs](https://learn.microsoft.com/entra/agent-id/sign-in-audit-logs-agents) · [Conditional Access report-only mode](https://learn.microsoft.com/entra/identity/conditional-access/concept-conditional-access-report-only) · [View, add, and remove assignments](https://learn.microsoft.com/entra/id-governance/entitlement-management-access-package-assignments) · [Change resource roles for an access package](https://learn.microsoft.com/entra/id-governance/entitlement-management-access-package-resources) · [Policy templates](https://learn.microsoft.com/microsoft-agent-365/admin/policy-template) · [Manage custom security attributes for an application](https://learn.microsoft.com/entra/identity/enterprise-apps/custom-security-attributes-apps)
@@ -464,24 +477,24 @@ Performed by **Identity Governance Administrator** or **Global Reader**.
 - After expiry, the assignment appears in the **Expired** list, and the agent identity is no longer a member of the group. The agent identity loses access to the target resources of the access package.
 
 ### 6.8.3 Test the policy template applied at publish time
-Performed by **Attribute Assignment Reader** (steps 1–2) and **Reports Reader** (steps 3–5).
+Performed by **Agent ID Administrator** together with **Attribute Assignment Reader** (steps 1–2), the **standard test user** (step 3), and **Reports Reader** (steps 4–5).
 1. Find the agent identity of the agent published in 6.7.3 in **Entra ID** > **Agents** > **Agent identities**, as in [3.4.1 Review the agent identities list](../chapter-03-identity-ownership/README.md#341-review-the-agent-identities-list), and record its object ID.
-2. With the delegated permission `CustomSecAttributeAssignment.Read.All`, run the attribute filter from [3.7.3 Filter agents by attribute](../chapter-03-identity-ownership/README.md#373-filter-agents-by-attribute) with the attribute from the template:
+2. With the delegated permissions `AgentIdentity.Read.All` and `CustomSecAttributeAssignment.Read.All`, run the attribute filter from [3.7.3 Filter agents by attribute](../chapter-03-identity-ownership/README.md#373-filter-agents-by-attribute) with the attribute from the template:
 
    ```http
-   GET https://graph.microsoft.com/v1.0/servicePrincipals?$count=true&$select=id,displayName,customSecurityAttributes&$filter=customSecurityAttributes/AgentAttributes/AgentApprovalStatus eq 'IT_Approved'
+   GET https://graph.microsoft.com/v1.0/servicePrincipals/microsoft.graph.agentIdentity?$count=true&$select=id,displayName,customSecurityAttributes&$filter=customSecurityAttributes/AgentAttributes/AgentApprovalStatus eq 'IT_Approved'
    ConsistencyLevel: eventual
    ```
 
-3. Have a test user use the published agent.
+3. Use the published agent.
 4. Open <https://entra.microsoft.com> > **Entra ID** > **Monitoring & health** > **Sign-in logs**, and add the filters **Is Agent** = **Yes** and **Agent type** = **Agent Identity**. Check the **Service principal sign-ins** tab and the user sign-in tabs.
 5. Open a sign-in entry of the published agent's agent identity, and select the **Conditional Access** and **Report-only** tabs.
 
 **Expected result**
-- The query in step 2 returns the published agent's agent identity, with `AgentApprovalStatus` = `IT_Approved`.
+- The query in step 2 returns the object ID recorded in step 1, with `AgentApprovalStatus` = `IT_Approved`.
 - The sign-in details of the published agent's agent identity show the evaluation result for `PoC – Agents – Template – Block high-risk agent identities`.
 - If you use the attribute-based default-deny policy (6.2.3), the published agent is excluded from it by its `IT_Approved` value, and its sign-in shows **Report-only: Not applied** for that policy.
-- Entra policies in a template require the agent to authenticate with its Entra identity. If the agent doesn't use Entra-based authentication, the policies might not be enforced at runtime. Work with the agent developer to verify that Entra-based authentication is enabled (6.7).
+- Microsoft Entra policies in a template require the agent to authenticate with its Microsoft Entra identity. If the agent doesn't use Entra-based authentication, the policies might not be enforced at runtime. Work with the agent developer to verify that Entra-based authentication is enabled (6.7).
 
 ## 6.9 Test the risk-based block with the agent token flow (optional)
 **Documentation:** [Agent autonomous app OAuth flow](https://learn.microsoft.com/entra/agent-id/agent-autonomous-app-oauth-flow) · [Authenticate and acquire tokens for autonomous agents](https://learn.microsoft.com/entra/agent-id/identity-platform/autonomous-agent-request-tokens) · [riskyAgent: confirmCompromised](https://learn.microsoft.com/graph/api/riskyagent-confirmcompromised?view=graph-rest-beta) · [Microsoft Entra Agent ID logs](https://learn.microsoft.com/entra/agent-id/sign-in-audit-logs-agents) · [Microsoft Entra authentication and authorization error codes](https://learn.microsoft.com/entra/identity-platform/reference-error-codes)
@@ -588,17 +601,16 @@ Performed by **Security Administrator**.
 - `riskLevel` is `none`.
 
 ## 6.10 Evidence
-- Screenshots of each policy, or its JSON from Microsoft Graph (`GET https://graph.microsoft.com/beta/identity/conditionalAccess/policies/{id}`, permission `Policy.Read.All`), showing the name, assignments, conditions, grant control, and state. Include the default-deny policy (Report-only, and On if enabled), the high-risk policy (On), and the agent-user policies if in scope.
-- Sign-in log details (the **Conditional Access** and **Report-only** tabs) for the allow-list test in 6.8.1.
-- Access package: policy summary (scope **All agents**, approval, 2-hour expiry, extension), the approval record from My Access, the assignment list exported as **Delivered** and then **Expired**, and the group membership before and after.
-- Optional, if you ran 6.9:
+- **Policies (6.2–6.4, 6.7.1):** screenshots of each Conditional Access policy, or its JSON from Microsoft Graph (`GET https://graph.microsoft.com/beta/identity/conditionalAccess/policies/{id}`, permission `Policy.Read.All`), showing the name, assignments, conditions, grant control, and state. Include the default-deny policy with its final state (6.2.4), the high-risk policy (**On**), the template policy, and the agent-user policies if in scope.
+- **Allow list (6.8.1):** sign-in log details (the **Conditional Access** and **Report-only** tabs) for `PoC-Agent-Unapproved` and `PoC-Agent-Approved`.
+- **Access package (6.6, 6.8.2):** the policy summary (scope **All agents**, one approval stage, 2-hour expiration, extension with approval), the approval record from My Access, the assignment list exported as **Delivered** and then **Expired**, and the group members of `PoC-Agent-Resource-Access` before and after expiry.
+- **Policy template (6.7, 6.8.3):** a screenshot of the template under **Agents** > **Settings** > **Templates** with its custom policies, a screenshot of the template step in the publishing wizard, the output of the attribute query, and the sign-in log details of the published agent showing the template's Conditional Access policy.
+- **Optional risk test (6.9):**
   - the `confirmCompromised` request with its `204` response, and the `riskyAgents/<id>` response showing `riskLevel` = `high`;
   - the console output of the community script for `PoC-Agent-Risk` and `PoC-Agent-Approved`;
   - the sign-in log details showing the risk policy with result **Failure**;
   - the **Risky agents** report before and after the reset.
-- Optional: results of the KQL queries in 6.5.3.
-- Policy template (6.7): screenshot of the template under **Agents** > **Settings** > **Templates** with its custom policies, a screenshot of the template step in the publishing wizard, the output of the attribute query in 6.8.3, and the sign-in log details of the published agent showing the template's Conditional Access policy.
-
+- **Optional export (6.5.3):** the results of the KQL queries.
 ## 6.11 Troubleshooting
 | Symptom | Likely cause | Fix |
 |---|---|---|
@@ -608,7 +620,7 @@ Performed by **Security Administrator**.
 | Delegated (on-behalf-of) agent isn't affected by agent policies | In delegated access, the token subject is the user | Use user-targeted policies for that access pattern. |
 | Unapproved agent shows **Report-only: Not applied** | Agent is excluded directly, through its blueprint, or through a custom security attribute | Review the exclusions and the agent's attribute values. |
 | No agent entries in the sign-in log | Wrong tab or missing filters | Use **Service principal sign-ins** with **Is Agent** = **Yes** and **Agent type** = **Agent Identity**. |
-| Community script: T1 fails | Wrong blueprint app ID or secret, or `fmi_path` isn't a child agent identity of this blueprint (a blueprint can only impersonate its own child agent identities) | Check the IDs in **Entra ID** > **Agents** (Chapter 3.4) and the blueprint credential. |
+| Community script: T1 fails | Wrong blueprint app ID or secret, or `fmi_path` isn't a child agent identity of this blueprint (a blueprint can only impersonate its own child agent identities) | Check the IDs in **Entra ID** > **Agents** > **Agent identities** ([3.4.1](../chapter-03-identity-ownership/README.md#341-review-the-agent-identities-list)) and the blueprint credential. |
 | Community script: `[WARN]` for `PoC-Agent-Risk` after confirm compromise | Risk policy in **Report-only**; agent excluded from the risk policy; or the policy targets agent users instead of agent identities | Check the policy state and assignments, and check that `riskyAgents/<id>` shows `riskLevel` = `high`. |
 | A blueprint token-exchange sign-in succeeds while the agent identity is blocked | Conditional Access doesn't apply to the intermediate token exchange | Evaluate the agent identity's sign-in entry. |
 | Attribute isn't selectable in the policy | Missing **Attribute Definition Reader** role, or the attribute isn't of type string | Assign the role, and use a string attribute. |
@@ -624,15 +636,38 @@ Performed by **Security Administrator**.
 | Template's Entra policies have no effect on the published agent | The agent doesn't authenticate with its Entra identity | Work with the agent developer to enable Entra-based authentication. |
 
 ## 6.12 Cleanup
-- If you ran 6.9, confirm that 6.9.5 is complete and `PoC-Agent-Risk` no longer shows as at risk.
-- Delete the policy template. In the Microsoft 365 admin center, expand **Agents**, go to **Settings** > **Templates**, select the template, select a policy to delete, and select **Delete**.
-- If the agent from 6.7.3 was published only for the PoC, block or delete it ([Chapter 5 – Agent Lifecycle and Audit](../chapter-05-lifecycle-audit/README.md)), and remove its `AgentApprovalStatus` value.
-- Set the PoC Conditional Access policies to **Off**, or delete them, including `PoC – Agents – Template – Block high-risk agent identities`. Before you delete a policy you want to keep for production, save its JSON (6.10). Delete the default-deny policy, or return it to **Report-only**, unless the customer adopts it.
-- Remove the access package assignments (**Assignments**, select the agent, then **Remove**). Then delete the access package, the catalog, and `PoC-Agent-Resource-Access`.
-- Remove the attribute values from the test agents, and deactivate `AgentApprovalStatus` if you created it. Attribute sets and definitions can't be deleted.
-- Remove the lab client secret from the blueprint, delete your local copy of the community script (it contains the secret), and revoke the Graph Explorer consent if it isn't needed.
-- Delete the diagnostic setting from 6.5.3 if you created it only for the PoC.
-- Delete the lab agent identities, or keep them for later chapters ([Chapter 5 – Agent Lifecycle and Audit](../chapter-05-lifecycle-audit/README.md) covers deletion).
+Perform the cleanup in this order, because the policy template references the Conditional Access policy, the attribute, and the access package.
 
+1. If you ran 6.9, confirm that 6.9.5 is complete and `PoC-Agent-Risk` no longer shows as at risk (**Security Administrator**).
+2. Delete the policy template (**Global Administrator**). In the Microsoft 365 admin center, expand **Agents**, go to **Settings** > **Templates**, select the template, select a policy to delete, and select **Delete**.
+3. If the agent from 6.7.3 was published only for the PoC, block it as in [5.3.1 Block or unblock an agent](../chapter-05-lifecycle-audit/README.md#531-block-or-unblock-an-agent) or delete it as in [5.8.1 Delete an agent (soft delete)](../chapter-05-lifecycle-audit/README.md#581-delete-an-agent-soft-delete).
+4. Remove the `AgentApprovalStatus` value from the published agent and from the lab agent identities (**Attribute Assignment Administrator**). Use the `PATCH` method from 6.2.3 with an empty value list:
+
+   ```json
+   {
+     "customSecurityAttributes": {
+       "AgentAttributes": {
+         "@odata.type": "#Microsoft.DirectoryServices.CustomSecurityAttributeValue",
+         "AgentApprovalStatus": []
+       }
+     }
+   }
+   ```
+
+5. Deactivate the attribute `AgentApprovalStatus` if you created it (**Attribute Definition Administrator**). Attribute sets and attribute definitions can't be deleted.
+6. Set the PoC Conditional Access policies to **Off**, or delete them (**Conditional Access Administrator**). This includes the default-deny policies, the high-risk policy, the agent-user policies, and `PoC – Agents – Template – Block high-risk agent identities`. Save the JSON of any policy the customer wants to reuse first (6.10). Keep the default-deny policy in **Report-only** only if the customer adopts it.
+7. Remove the access package assignments: open the access package, select **Assignments**, select the agent identity, and select **Remove**. Then delete the access package and the catalog `PoC – Agent access` (**Identity Governance Administrator**). Delete the group `PoC-Agent-Resource-Access` (**Groups Administrator**) if no other test uses it.
+8. Delete the diagnostic setting from 6.5.3 if you created it only for the PoC (**Security Administrator**).
+9. Remove the lab client secret from the blueprint, delete your local copy of the community script (it contains the secret), and revoke the Graph Explorer consent if it isn't needed (**owner of the lab agent identity blueprint**).
+10. Delete the lab agent identity blueprint, or keep it for later chapters (**Cloud Application Administrator** or the owner of the blueprint). Deleting the agent identities isn't supported in the Microsoft Entra admin center. Use Microsoft Graph with `Application.ReadWrite.All`:
+
+    ```http
+    DELETE https://graph.microsoft.com/v1.0/applications/{blueprint-app-object-id}
+    ```
+
+    Deleting the blueprint soft-deletes its child agent identities automatically. Soft-deleted objects are permanently deleted after 30 days.
+
+**Check result**
+- No PoC Conditional Access policy is **On** unless the customer adopted it. The template, the access package, and the catalog no longer exist, and no PoC agent identity carries `AgentApprovalStatus`.
 ---
 Previous: [Chapter 5 – Agent Lifecycle and Audit](../chapter-05-lifecycle-audit/README.md) · Next: [Chapter 7 – Sensitive Data Protection (Purview)](../chapter-07-sensitive-data-protection/README.md)
