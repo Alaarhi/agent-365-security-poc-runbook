@@ -9,6 +9,7 @@
 - The **Agents** area of the Microsoft 365 admin center opens for the test admin and the reviewer (0.3).
 - Microsoft Purview Audit is recording user and admin activity (0.5).
 - The test agents and test devices needed by the in-scope chapters exist (0.6).
+- If Chapter 8 is in scope, Defender Security for AI and the applicable integrations are ready before testing (0.6.2).
 - The documented propagation times are built into the schedule (0.7) and the readiness checklist is complete (0.8).
 
 ## 0.1 Required permissions
@@ -24,7 +25,7 @@ Every chapter starts with its own **Required permissions** table. The table belo
 | 5 – Agent Lifecycle and Audit | AI Administrator; Azure AI Owner (Foundry start/stop); Agent ID Administrator (optional Entra disable) | AI Reader or Global Reader; Audit Reader; Reports Reader; Security Reader |
 | 6 – Conditional Access and Least Privilege | Conditional Access Administrator; Security Administrator; Identity Governance Administrator; Agent ID Administrator (lab agent identities); Groups Administrator; attribute roles (optional); Global Administrator with Attribute Assignment Administrator (policy templates) | Global Reader; Reports Reader; Security Reader |
 | 7 – Sensitive Data Protection (Purview) | Data Security AI Admins or AI Administrator; Information Protection Admins; Communication Compliance Administrators; Insider Risk Management Admins; AI Administrator (agent approval) | Global Reader; Information Protection Analysts; Communication Compliance Investigators or Analysts |
-| 8 – Threat Detection and Runtime Protection (Defender) | Security Administrator; Power Platform Administrator; Security Operator; AI Administrator (block from registry); Azure Bot Service Contributor and Foundry User (publish the Foundry test agent); Owner or Contributor on the Azure subscription (Defender for Cloud AI services plan, optional); Policy and Profile Manager (optional local runtime protection) | Security Reader |
+| 8 – Threat Detection and Runtime Protection (Defender) | Security Administrator; user with permission to create Microsoft Entra app registrations; Power Platform Administrator; Security Operator; AI Administrator (block from registry); Azure Bot Service Contributor (or Contributor or Owner) on the resource group and Foundry User on the Foundry project (publish the Foundry agent); Owner or Contributor on the Azure subscription (optional Defender for Cloud AI services plan); permission to manage endpoint security policies in Defender (optional local runtime protection); Policy and Profile Manager or another Intune role with device-configuration permissions (optional local runtime protection) | Security Reader; Azure Security Reader (Defender for Cloud alerts); Defender for Cloud Unified RBAC role or Global Administrator/Security Administrator (Defender portal alerts) |
 | 9 – Shadow AI and Local Agents | Global Administrator (Frontier); Intune Administrator; Policy and Profile Manager; Help Desk Operator or Endpoint Security Manager (device sync); Global Secure Access Administrator (optional) | Security Reader or Reports Reader |
 
 Two rules that save PoC time:
@@ -158,7 +159,7 @@ Performed by a member of the **Audit Manager** role group.
 
 ## 0.6 Prepare test agents and test devices
 
-**Documentation:** [Microsoft Copilot Studio overview](https://learn.microsoft.com/microsoft-copilot-studio/) · [Agent Registry](https://learn.microsoft.com/microsoft-365/admin/manage/agent-registry)
+**Documentation:** [Microsoft Copilot Studio overview](https://learn.microsoft.com/microsoft-copilot-studio/) · [Agent Registry](https://learn.microsoft.com/microsoft-365/admin/manage/agent-registry) · [Enable security for AI agents using Microsoft Defender](https://learn.microsoft.com/defender-xdr/security-for-ai/get-started-defender-security-for-ai) · [Enable external threat detection and protection for Copilot Studio custom agents](https://learn.microsoft.com/microsoft-copilot-studio/external-security-provider) · [Enable threat protection for AI services](https://learn.microsoft.com/azure/defender-for-cloud/ai-onboarding) · [AI agent runtime protection in Microsoft Defender for Endpoint](https://learn.microsoft.com/defender-endpoint/configure-ai-agent-runtime-protection)
 
 ### 0.6.1 Prepare the test assets for the in-scope chapters
 Performed by the **maker** or the **developer**, as described in the linked section.
@@ -183,6 +184,39 @@ Use only synthetic data and controlled test accounts and recipients throughout t
 **Check result**
 - Every test asset needed by the in-scope chapters exists and is listed in the PoC plan with its owner.
 
+### 0.6.2 Prepare Microsoft Defender Security for AI
+
+Complete this setup after Agent 365 is onboarded and at least one relevant test agent is published. Chapter 8 contains the detailed steps; use this sequence to ensure all Defender components required by the PoC are ready before its tests. Setup roles are listed in 0.1 and detailed in [8.1 Required permissions](../chapter-08-threat-detection/README.md#81-required-permissions).
+
+**Core setup for Chapter 8**
+
+Performed by the **Security Administrator**.
+1. In the Microsoft Defender portal, open **Settings** > **Security for AI** > **Get started**. Turn **Enable** on if it is off (it is on by default) and confirm that **Agent 365** shows **Done**. If Agent 365 is not onboarded, complete 0.3 and Chapter 1 first.
+2. Confirm Microsoft Purview Audit is recording, as described in 0.5.1.
+3. Connect the **Microsoft 365 connector** and select the components required for AI agent monitoring: **Microsoft Entra ID Management events** and **Microsoft 365 activities**. **Microsoft Entra Users and groups** is a prerequisite and is selected by default. Follow [8.3 Connect the Microsoft 365 connector](../chapter-08-threat-detection/README.md#83-connect-the-microsoft-365-connector).
+
+**Copilot Studio real-time protection (when Copilot Studio is in scope)**
+
+Use the published Copilot Studio test agent prepared in 0.6.1. It must be published to Microsoft 365 Copilot and Teams and use generative orchestration. The setup requires a **Security Administrator**, a **Power Platform Administrator**, and a user who can create Microsoft Entra application registrations.
+Complete all four steps in [8.4 Turn on Copilot Studio real-time protection](../chapter-08-threat-detection/README.md#84-turn-on-copilot-studio-real-time-protection):
+1. In Defender, turn on real-time protection and copy the integration URL.
+2. Register a single-tenant Microsoft Entra application and configure its federated identity credential.
+3. In the Power Platform admin center, configure threat detection for the environment containing the test agent, using the integration URL and App ID.
+4. Save the same App ID in Defender.
+
+**Check result**
+- On the Defender **Get started** page, the **Copilot Studio** step shows **Connected**.
+
+**Optional setup**
+- **Microsoft Foundry agents:** if Foundry threat protection is in scope, an Azure subscription **Owner** or **Contributor** enables the **AI services** plan in Defender for Cloud. Follow [8.5 Turn on threat protection for Microsoft Foundry agents](../chapter-08-threat-detection/README.md#85-turn-on-threat-protection-for-microsoft-foundry-agents-defender-for-cloud). Use the **Security Reader** Azure role to review alerts in Defender for Cloud; use the Defender for Cloud Unified RBAC role, Global Administrator, or Security Administrator to review alerts in the Defender portal.
+- **Local agents:** if local runtime protection is in scope, prepare an Intune-enrolled Windows test device onboarded to Microsoft Defender for Endpoint, with Defender for Endpoint in active mode. Then follow [8.6 Turn on local AI agent runtime protection in Defender for Endpoint](../chapter-08-threat-detection/README.md#86-turn-on-local-ai-agent-runtime-protection-in-defender-for-endpoint-optional).
+
+**Check result**
+- For the core setup, **Enable** is on, **Agent 365** shows **Done**, and the **Microsoft 365 connector** shows **Connected**.
+- If Copilot Studio is in scope, its Defender **Get started** step shows **Connected**.
+- If Foundry threat protection is in scope, the **AI services** plan is **On** for the PoC subscription.
+- If local runtime protection is in scope, the Windows test device is onboarded to Defender for Endpoint and the runtime protection policy is configured.
+
 ## 0.7 Plan for propagation times
 
 **Documentation:** [Create and configure sensitivity labels and their policies](https://learn.microsoft.com/purview/create-sensitivity-labels) · [Learn about the Microsoft 365 Copilot and Copilot Chat DLP location](https://learn.microsoft.com/purview/dlp-microsoft365-copilot-location-learn-about) · [Understand Shadow AI in the Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/admin/manage/agent-shadow-ai)
@@ -206,8 +240,10 @@ Confirm before the first joint test session. Skip items for chapters that are ou
 - [ ] PoC accounts and groups exist, and roles are assigned as Active (0.4).
 - [ ] Purview Audit is recording (0.5).
 - [ ] Test agents and test devices exist (0.6).
-- [ ] Defender and Power Platform administrators are available for the Chapter 8 setup.
-- [ ] The Microsoft 365 connector is connected in Microsoft Defender (8.3) if agent activity in `CloudAppEvents` is in scope (2.12.6, 5.9, 8.9).
+- [ ] Defender Security for AI is enabled, Agent 365 shows Done, and the Microsoft 365 connector is connected (0.6.2).
+- [ ] If Copilot Studio protection is in scope, its Defender and Power Platform setup is complete and the Get started step shows Connected (0.6.2).
+- [ ] If Foundry threat protection is in scope, the Defender for Cloud AI services plan is On for the PoC subscription (0.6.2).
+- [ ] If local runtime protection is in scope, the Windows test device is onboarded to Defender for Endpoint and its protection setup is complete (0.6.2).
 - [ ] Propagation times are built into the schedule (0.7).
 
 ---
