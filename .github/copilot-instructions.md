@@ -29,6 +29,8 @@ This runbook helps a PoC coordinator, setup administrators, developers, and read
 
 Keep the existing chapter folders and `README.md` entry points. Do not split chapters into separate step files or introduce a separate build-order page without a request.
 
+Chapter 2 has two independent guides: `README.md` for connected platforms and `agent-365-sdk.md` for the SDK path. Keep their permissions, tests, evidence, and references path-specific, with shared preparation in `prerequisites.md`. Preserve the existing Chapter 2 topic numbers across both guides.
+
 Place new screenshots in the relevant chapter's `screenshots/` folder with descriptive kebab-case filenames. Keep executable assets separate from screenshots and link to them from the task that uses them.
 
 ---
@@ -69,6 +71,8 @@ Preserve the runbook's numbered chapter format and use this order for new or sub
 11. **Navigation:** link back to the root index and to the next chapter. The final chapter returns to the index. Navigation does not replace dependency guidance.
 
 Prerequisite pages should have a goal, a table of contents, chapter-specific preparation steps with checks, consolidated references, and a link back to the chapter. Link to the root's shared scope and role-assignment guidance instead of copying it. List scenario-specific accounts; refer to the shared setup and reviewer accounts. Describe each test asset once and link to its build steps. Do not add a generic checklist that repeats the section checks. State which setup tasks must finish before testing; do not create circular chapter dependencies.
+
+Chapter 8 keeps all enablement, setup permissions, connection steps, rule creation, and test-data preparation in `prerequisites.md`. Its chapter page contains test permissions, investigation, runtime validation, containment, and test evidence. Enabling or disabling a prepared test rule remains part of its audit/block comparison.
 
 For each actionable task, use this pattern:
 

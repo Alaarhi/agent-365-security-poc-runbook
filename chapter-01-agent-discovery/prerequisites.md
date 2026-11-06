@@ -44,7 +44,7 @@ Assign the roles in [1.1 Required permissions](README.md#11-required-permissions
 
 - Prepare at least one Microsoft-native test agent per platform in scope, as described in [1.2](README.md#12-discover-microsoft-native-agents). Use the samples in [`samples/`](samples/README.md).
 - Prepare a test SharePoint site to use as a knowledge source for the Copilot Studio sample.
-- Non-Microsoft platforms (Amazon Bedrock, Google Vertex AI and others) and custom agents built with the Agent 365 SDK are covered in [Chapter 2 – Third-party and custom agents](../chapter-02-third-party-custom-agents/README.md). Local agents and Shadow AI are covered in [Chapter 9 – Shadow AI and local agents](../chapter-09-shadow-ai-local-agents/README.md).
+- Chapter 2 has separate guides for [Connected platforms](../chapter-02-third-party-custom-agents/README.md) (Amazon Bedrock, Google Vertex AI, and others) and [Agent 365 SDK agents](../chapter-02-third-party-custom-agents/agent-365-sdk.md). Local agents and Shadow AI are covered in [Chapter 9 – Shadow AI and local agents](../chapter-09-shadow-ai-local-agents/README.md).
 - If you plan to use Microsoft Graph PowerShell (1.7.3), install PowerShell 7, which is the recommended version for the Microsoft Graph PowerShell SDK.
 
 

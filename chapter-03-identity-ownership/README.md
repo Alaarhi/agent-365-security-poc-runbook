@@ -67,7 +67,7 @@ Notes:
 
 | Object | What it is | PoC relevance |
 |---|---|---|
-| **Agent identity blueprint** | Template and authentication foundation for one or more agent identities. Holds the credentials and acquires tokens on behalf of all agent identities created from it. Policies applied to a blueprint, such as Conditional Access, take effect for all its agent identities. | For example the **Microsoft Copilot Studio agent identity blueprint**, or a blueprint you created in [2.8](../chapter-02-third-party-custom-agents/README.md#28-create-the-agent-blueprint-with-a365-setup). |
+| **Agent identity blueprint** | Template and authentication foundation for one or more agent identities. Holds the credentials and acquires tokens on behalf of all agent identities created from it. Policies applied to a blueprint, such as Conditional Access, take effect for all its agent identities. | For example the **Microsoft Copilot Studio agent identity blueprint**, or a blueprint you created in [2.8](../chapter-02-third-party-custom-agents/agent-365-sdk.md#28-create-the-agent-blueprint-with-a365-setup). |
 | **Agent identity blueprint principal** | The object that records a blueprint's presence in a tenant, enables it to acquire tokens, and appears in audit logs. Listed under **Entra ID** > **Agents** > **Agent blueprints**. | Where you view linked agent identities, granted permissions, owners and sponsors, logs, and the **Disable** action for the blueprint. |
 | **Agent identity** | The primary identity an agent uses to authenticate and access resources. It has no credentials of its own; it authenticates using tokens issued by its blueprint. | This is what you govern in this chapter. |
 | **Agent's user account** (agent user) | Optional account paired 1:1 with an agent identity, used only when the agent must access systems that require a user object (mailbox, calendar, Teams, documents). It doesn't replace the agent identity; both must exist. | Shown in the sign-in logs **Agent type** filter as **Agent ID user**. |
@@ -523,7 +523,7 @@ Performed by **Agent ID Administrator** (or the agent's owner).
 
 ### 3.11.2 Disable a blueprint (only for a blueprint dedicated to the PoC)
 Performed by **Agent ID Administrator**.
-1. Go to **Entra ID** > **Agents** > **Agent blueprints** and select a blueprint that only PoC test agents use and that no other test in progress depends on (for example a blueprint created in [2.8](../chapter-02-third-party-custom-agents/README.md#28-create-the-agent-blueprint-with-a365-setup)).
+1. Go to **Entra ID** > **Agents** > **Agent blueprints** and select a blueprint that only PoC test agents use and that no other test in progress depends on (for example a blueprint created in [2.8](../chapter-02-third-party-custom-agents/agent-365-sdk.md#28-create-the-agent-blueprint-with-a365-setup)).
 2. Select **Disable** in the command bar of the blueprint's overview page. The confirmation dialog warns that existing agent identities created from this blueprint will no longer be able to authenticate. Confirm the action.
 3. Re-enable the blueprint after the test.
 

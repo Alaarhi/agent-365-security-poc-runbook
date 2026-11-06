@@ -2,13 +2,15 @@
 
 > **Goal:** Prepare the accounts, access, and test assets needed for this chapter and its selected optional paths.
 
-Apply the [shared PoC preparation guidance](../README.md#prerequisites-and-reading-order) and agree the [chapter outcomes](README.md#-what-you-proved). Finish dependent build steps before their tests.
+Choose [Connected platforms](README.md) or [Agent 365 SDK](agent-365-sdk.md); the paths are independent. Apply the [shared PoC preparation guidance](../README.md#prerequisites-and-reading-order) and agree the selected guide's outcome checklist before testing.
 
 ## Table of contents
 
 - [Tenant readiness](#tenant-readiness)
 - [Prepare accounts and role assignments](#prepare-accounts-and-role-assignments)
 - [Test assets and dependencies](#test-assets-and-dependencies)
+- [Connected-platform preparation](#connected-platform-preparation)
+- [Agent 365 SDK preparation](#agent-365-sdk-preparation)
 - [References](#references)
 
 ---
@@ -17,7 +19,7 @@ Apply the [shared PoC preparation guidance](../README.md#prerequisites-and-readi
 
 **Documentation:** [Get started with Microsoft Agent 365](https://learn.microsoft.com/microsoft-agent-365/get-started) · [Agent management in the Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/admin/manage/agent-365-overview) · [Frontier program](https://learn.microsoft.com/microsoft-agent-365/frontier)
 
-Use the task-specific roles in [2.1 Required permissions](README.md#21-required-permissions). Confirm availability rather than assuming the tenant is ready.
+Use the task-specific roles for [Connected platforms](README.md#21-required-permissions) or [Agent 365 SDK](agent-365-sdk.md#21-required-permissions). Confirm availability rather than assuming the tenant is ready.
 
 Follow the [shared tenant readiness check](../README.md#tenant-readiness) using the chapter permissions and feature prerequisites linked above.
 
@@ -39,9 +41,10 @@ Alongside the [shared setup and reviewer accounts](../README.md#least-privilege-
 
 | Account | Purpose |
 |---|---|
-| Developer account | Builds and registers custom agents and MCP servers with the Agent 365 CLI. |
+| Platform administrator (connected-platform path only) | Prepares source-platform credentials, permissions, and any selected observability configuration. |
+| Developer account (SDK path only) | Builds and registers custom agents with the Agent 365 CLI. |
 
-Assign the roles in [2.1 Required permissions](README.md#21-required-permissions) using the shared model. Verify each account can access the pages needed for its tasks.
+Assign the roles for the selected guide using the shared model. Verify each account can access the pages needed for its tasks.
 
 ---
 
@@ -50,12 +53,19 @@ Assign the roles in [2.1 Required permissions](README.md#21-required-permissions
 **Documentation:** [Connected platforms in Microsoft Agent 365](https://learn.microsoft.com/microsoft-agent-365/admin/connected-platforms) · [Third-party agent observability (Frontier)](https://learn.microsoft.com/microsoft-agent-365/admin/third-party-agent-observability) · [Choose an Agent 365 integration option](https://learn.microsoft.com/microsoft-agent-365/developer/choose-integration-option) · [Connect Amazon Bedrock](https://learn.microsoft.com/microsoft-agent-365/admin/connected-platforms-amazon-bedrock) · [Connect Google Vertex AI](https://learn.microsoft.com/microsoft-agent-365/admin/connected-platforms-google-vertex-ai) · [Connect Salesforce Agentforce](https://learn.microsoft.com/microsoft-agent-365/admin/connected-platforms-salesforce-agent-force) · [Connect Databricks Genie](https://learn.microsoft.com/microsoft-agent-365/admin/connected-platforms-databricks-genie) · [Connect Anthropic Claude Managed Agents](https://learn.microsoft.com/microsoft-agent-365/admin/connected-platforms-anthropic-claude) · [Connect Oracle Generative AI Agents](https://learn.microsoft.com/microsoft-agent-365/admin/connected-platforms-oracle-generative-ai) · [Connect Snowflake Cortex](https://learn.microsoft.com/microsoft-agent-365/admin/connected-platforms-snowflake-cortex) · [Install and use the Agent 365 CLI](https://learn.microsoft.com/microsoft-agent-365/developer/agent-365-cli) · [Agent 365 Skills for guided agent setup](https://learn.microsoft.com/microsoft-agent-365/developer/agent-365-skills) · [Quickstart: Connect an existing agent to Agent 365](https://learn.microsoft.com/microsoft-agent-365/developer/get-started) · [Custom client app registration for Agent 365 CLI](https://learn.microsoft.com/microsoft-agent-365/developer/custom-client-app-registration) · [Onboard a single agent with the Agent 365 CLI](https://learn.microsoft.com/microsoft-agent-365/admin/agent-365-onboarding-cli)
 
 - Verify the required inventory using [Chapter 1 – Agent discovery and inventory](../chapter-01-agent-discovery/README.md) and export the registry before you start, so you can show what this chapter adds.
-- For sections 2.2 to 2.6: a non-production account on the source platform with at least one test agent, and a platform administrator.
-- For sections 2.7 to 2.11: .NET 8.0 or later, the Azure CLI, an Azure subscription in the same tenant, a test agent project (you can start from the samples in [`samples/sdk/`](samples/sdk/README.md)), and a Global Administrator available to complete consent.
 - Never commit `.env` files or other files with sensitive information to source control.
 
-Build guidance: [2.2 Connect a third-party agent platform](README.md#22-connect-a-third-party-agent-platform) · [2.7 Prepare the custom-agent toolchain](README.md#27-prepare-the-custom-agent-toolchain)
+### Connected-platform preparation
 
+Prepare a non-production account on the selected source platform with at least one test agent, and a platform administrator. Choose one supported platform; you don't need the SDK toolchain for this path.
+
+Continue with [2.2 Connect a third-party agent platform](README.md#22-connect-a-third-party-agent-platform) and its provider-specific instructions.
+
+### Agent 365 SDK preparation
+
+Prepare .NET 8.0 or later, the Azure CLI, an Azure subscription in the same tenant, a test agent project (you can start from [`samples/sdk/`](samples/sdk/README.md)), and a Global Administrator available to complete consent. A connected-platform connection isn't required.
+
+Continue with [2.7 Prepare the custom-agent toolchain](agent-365-sdk.md#27-prepare-the-custom-agent-toolchain).
 
 **Check result**
 - Each asset needed for the selected paths is prepared or has a named build task that will finish before its dependent tests.
@@ -85,4 +95,4 @@ Build guidance: [2.2 Connect a third-party agent platform](README.md#22-connect-
 
 ---
 
-> **Ready?** Continue to the [chapter](README.md). →
+> **Ready?** Continue to [Connected platforms](README.md) or [Agent 365 SDK](agent-365-sdk.md). →

@@ -2,7 +2,7 @@
 
 > **Before you start:** Verify the [chapter prerequisites](../../prerequisites.md) and the sample-specific requirements below.
 
-Minimal custom engine agents used in [Chapter 2 – Third-party and custom agents](../../README.md), sections 2.7 to 2.11. Each file is the agent code only, built on the Microsoft 365 Agents SDK hosting layer. Registering the agent with Agent 365 (agent identity blueprint, agent identity, permissions, registration) is a separate step that you run with the Agent 365 CLI or the Agent 365 Skills.
+Minimal custom engine agents used in [Chapter 2 – Agent 365 SDK](../../agent-365-sdk.md), sections 2.7 to 2.11. Each file is the agent code only, built on the Microsoft 365 Agents SDK hosting layer. Registering the agent with Agent 365 (agent identity blueprint, agent identity, permissions, registration) is a separate step that you run with the Agent 365 CLI or the Agent 365 Skills.
 
 ## Table of contents
 
@@ -36,14 +36,14 @@ The samples use the messaging endpoint `/api/messages`, so you can test them loc
 | 4. Publish | – | `a365 publish`, then upload `manifest.zip` in the Microsoft 365 admin center | Agent listed in **Agents** > **All agents**. |
 | 5. Add observability (optional) | `instrument-observability` | Microsoft OpenTelemetry Distro (`@microsoft/opentelemetry`, `microsoft-opentelemetry`, `Microsoft.OpenTelemetry`) | Spans with a root `invoke_agent` span reach Microsoft Defender, Microsoft Purview, and the Microsoft 365 admin center. |
 | 6. Add Work IQ tools (optional) | `add-workiq-tools` | `a365 develop add-mcp-servers`, then `a365 setup permissions mcp` by a Global Administrator | Governed Microsoft 365 MCP tools. Requires a delegated (OBO) permission model. |
-| 7. Add Purview DLP (optional) | `purview-dlp-integration` | – | Guard that calls Microsoft Graph `processContent` before the model call. See [2.11.2 Add the Purview DLP guard](../../README.md#2112-add-the-purview-dlp-guard). |
+| 7. Add Purview DLP (optional) | `purview-dlp-integration` | – | Guard that calls Microsoft Graph `processContent` before the model call. See [2.11.2 Add the Purview DLP guard](../../agent-365-sdk.md#2112-add-the-purview-dlp-guard). |
 | 8. Validate the integration (optional) | `a365-code-validator` | `a365 query-entra blueprint-scopes`, `a365 query-entra inheritance` | Report of gaps in instrumentation, Entra artifacts, and permissions. |
 
 ---
 
 ## Use the Agent 365 Skills
 
-For the guided workflow, see [2.7.4 Use the Agent 365 Skills](../../README.md#274-optional-use-the-agent-365-skills-in-a-coding-assistant). Use a coding assistant with terminal access; in VS Code, use agent mode.
+For the guided workflow, see [2.7.4 Use the Agent 365 Skills](../../agent-365-sdk.md#274-optional-use-the-agent-365-skills-in-a-coding-assistant). Use a coding assistant with terminal access; in VS Code, use agent mode.
 
 Install the skills with one of the methods documented in the repository README and on Microsoft Learn:
 
@@ -99,4 +99,4 @@ In GitHub Copilot CLI or VS Code, list the installed skills with `/skills list`.
 
 ---
 
-Return to the [chapter](../../README.md) for registration, validation, and evidence.
+Return to the [chapter](../../agent-365-sdk.md) for registration, validation, and evidence.

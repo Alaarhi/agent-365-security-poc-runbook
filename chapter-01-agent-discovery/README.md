@@ -563,7 +563,7 @@ Performed by **Global Reader**.
 | Expected agent missing from the Registry list | A filter is set | Clear the filters. Applying filters doesn't change the **Total agents** count. |
 | Foundry agent missing from the Registry | The agent isn't published | Publish the agent as an Agent Application (1.2.2). Every Foundry agent that you publish appears in the registry. |
 | Agent Builder, Foundry or SharePoint draft agent missing | Draft agents are visible only for Copilot Studio | Publish the agent. |
-| Non-Microsoft or Agent 365 SDK agent missing | Connected platform or SDK onboarding isn't done | See [Chapter 2 – Third-party and custom agents](../chapter-02-third-party-custom-agents/README.md). |
+| Non-Microsoft or Agent 365 SDK agent missing | Connected platform or SDK onboarding isn't done | Follow the [Connected platforms](../chapter-02-third-party-custom-agents/README.md) or [Agent 365 SDK](../chapter-02-third-party-custom-agents/agent-365-sdk.md) guide for the agent's integration path. |
 | **Map** isn't available | Agent Map requires the Global Administrator or AI Administrator role | Use an AI Administrator account. |
 | **Usage** filters missing on the map | Usage and observability filters are available only for tenants with fewer than 4,000 users, and usage is based on agents that report activity through Agent 365 | Use the other map filters. |
 | Risk source deep link doesn't open the source data | Deep links are subject to the user's roles and permissions in the target portal | Use a role listed in 1.3.4. |
