@@ -81,7 +81,6 @@ A **User Administrator** creates missing PoC accounts. A **Privileged Role Admin
 - `chapter-NN-*/prerequisites.md`: detailed preparation for that chapter.
 - [Microsoft-native samples](chapter-01-agent-discovery/samples/README.md): Copilot Studio declarative agent and Microsoft Foundry agent samples.
 - [Custom agent samples](chapter-02-third-party-custom-agents/samples/sdk/README.md): Agent 365 SDK agent samples for Node.js, Python and .NET.
-- [Agent-365-Security-PoC-Runbook.pdf](Agent-365-Security-PoC-Runbook.pdf): combined reading copy with all chapters, prerequisites, and sample guides. Use the Markdown pages to edit the runbook.
 
 Several features covered in this runbook are in preview. Preview features might change before general availability.
 

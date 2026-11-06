@@ -25,7 +25,7 @@ This runbook helps a PoC coordinator, setup administrators, developers, and read
 | `chapter-03-*` through `chapter-05-*` | Govern: identity, ownership, tools, MCP, lifecycle, and audit |
 | `chapter-06-*` through `chapter-09-*` | Secure: access, data protection, threat protection, and Shadow AI |
 | Chapter-local `samples/` folders | Scripts, queries, configuration, and agent examples used by that chapter |
-| `Agent-365-Security-PoC-Runbook.pdf` | Combined reading copy of the runbook |
+| `Agent-365-Security-PoC-Runbook.pdf` | Local-only combined reading copy; excluded from Git |
 
 Keep the existing chapter folders and `README.md` entry points. Do not split chapters into separate step files or introduce a separate build-order page without a request.
 
